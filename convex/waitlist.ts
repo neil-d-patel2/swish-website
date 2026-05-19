@@ -1,4 +1,4 @@
-import { mutation, query } from "./_generated/server";
+import { internalQuery, mutation, query } from "./_generated/server";
 import { internal } from "./_generated/api";
 import { v } from "convex/values";
 
@@ -33,9 +33,16 @@ export const join = mutation({
   },
 });
 
-// Admin-only: list all waitlist entries sorted by join date
+// Public query: list all waitlist entries sorted by join date
 export const list = query({
   handler: async (ctx) => {
     return ctx.db.query("waitlist").order("desc").collect();
+  },
+});
+
+// Internal query used by broadcast action
+export const listAll = internalQuery({
+  handler: async (ctx) => {
+    return ctx.db.query("waitlist").collect();
   },
 });
