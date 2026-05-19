@@ -33,7 +33,7 @@ export function WaitlistForm() {
         setEmail("");
       } catch (err) {
         const msg = err instanceof Error ? err.message : "";
-        setState(msg === "already_registered" ? "duplicate" : "error");
+        setState(msg.includes("already_registered") ? "duplicate" : "error");
         setTimeout(() => setState("idle"), 3500);
       }
     },
@@ -42,7 +42,7 @@ export function WaitlistForm() {
 
   const MESSAGE: Record<Exclude<State, "idle" | "loading">, string> = {
     success: "You're on the list! We'll be in touch soon.",
-    duplicate: "That email is already registered.",
+    duplicate: "You're already on the waitlist! We'll be in touch.",
     error: "Something went wrong. Please try again.",
   };
 

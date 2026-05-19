@@ -29,3 +29,4 @@ export default defineSchema({
     joinedAt: v.number(),
   }).index("by_email", ["email"]),
 });
+  
