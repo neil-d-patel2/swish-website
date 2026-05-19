@@ -1,15 +1,29 @@
 import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { usePaginatedQuery } from "convex/react";
+import { Authenticated, Unauthenticated, usePaginatedQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import ProjectCard from "@/components/project-card";
 import ProjectSearch from "@/components/project-search";
 import CreateProjectDialog from "@/components/create-project-dialog";
 import { Button } from "@/components/ui/button";
+import { LandingPage } from "@/components/landing-page";
 
 export const Route = createFileRoute("/")({
-  component: ProjectListPage,
+  component: IndexPage,
 });
+
+function IndexPage() {
+  return (
+    <>
+      <Authenticated>
+        <ProjectListPage />
+      </Authenticated>
+      <Unauthenticated>
+        <LandingPage />
+      </Unauthenticated>
+    </>
+  );
+}
 
 function ProjectListPage() {
   const [searchQuery, setSearchQuery] = useState("");
