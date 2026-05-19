@@ -24,4 +24,8 @@ export default defineSchema({
       v.literal("done"),
     ),
   }).index("by_project", ["projectId"]),
+  waitlist: defineTable({
+    email: v.string(),
+    joinedAt: v.number(),
+  }).index("by_email", ["email"]),
 });

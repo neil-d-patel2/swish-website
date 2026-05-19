@@ -15,6 +15,8 @@ import type * as http from "../http.js";
 import type * as issues from "../issues.js";
 import type * as projects from "../projects.js";
 import type * as seed from "../seed.js";
+import type * as waitlist from "../waitlist.js";
+import type * as waitlistEmail from "../waitlistEmail.js";
 
 import type {
   ApiFromModules,
@@ -30,6 +32,8 @@ declare const fullApi: ApiFromModules<{
   issues: typeof issues;
   projects: typeof projects;
   seed: typeof seed;
+  waitlist: typeof waitlist;
+  waitlistEmail: typeof waitlistEmail;
 }>;
 
 /**
