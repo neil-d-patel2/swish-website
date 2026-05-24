@@ -106,7 +106,7 @@ export function SiteNav({
           <div className="flex items-center gap-3">
             {viewer?.name && (
               <span className={`text-sm ${light ? "text-gray-500" : "text-white/45"}`}>
-                Hi {viewer.name}
+                {viewer.name}
               </span>
             )}
             <button
