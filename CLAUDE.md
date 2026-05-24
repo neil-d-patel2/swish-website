@@ -71,3 +71,18 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 ---
 
 **These guidelines are working if:** fewer unnecessary changes in diffs, fewer rewrites due to overcomplication, and clarifying questions come before implementation rather than after mistakes.
+
+## 5. Log Every Error
+
+**When an error occurs, document it in `errors-notes.md` before moving on.**
+
+For every error encountered (build failures, runtime errors, CI failures, config issues):
+1. Add a new entry to `errors-notes.md` with:
+   - The exact error message or output
+   - What went wrong and why (root cause, not just symptoms)
+   - The fix applied
+   - Why the fix worked (the underlying reason, not just "it fixed it")
+2. Keep entries in chronological order with a date.
+3. If a first fix attempt fails and a second is needed, document both — the failed attempt and the reason it didn't work are as valuable as the solution.
+
+This log is the project's institutional memory for debugging. Future sessions should check `errors-notes.md` before reaching for a generic solution to a familiar-looking error.

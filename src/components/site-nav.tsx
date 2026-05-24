@@ -3,7 +3,8 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import { motion } from "framer-motion";
 import { Sun, Moon, Github } from "lucide-react";
 import { useAuthActions } from "@convex-dev/auth/react";
-import { useConvexAuth } from "convex/react";
+import { useConvexAuth, useQuery } from "convex/react";
+import { api } from "@/../../convex/_generated/api";
 
 const ALL_NAV = [
   { label: "Platform", to: "/" },
@@ -21,6 +22,7 @@ export function SiteNav({
 }) {
   const { isAuthenticated } = useConvexAuth();
   const { signIn, signOut } = useAuthActions();
+  const viewer = useQuery(api.users.viewer);
   const [hovered, setHovered] = useState<string | null>(null);
   const { location } = useRouterState();
 
@@ -101,16 +103,23 @@ export function SiteNav({
         </button>
 
         {isAuthenticated ? (
-          <button
-            onClick={() => void signOut()}
-            className={`flex items-center gap-2 text-sm font-medium cursor-pointer transition-colors duration-200 ${
-              light
-                ? "text-gray-500 hover:text-gray-900"
-                : "text-white/45 hover:text-white"
-            }`}
-          >
-            Sign out
-          </button>
+          <div className="flex items-center gap-3">
+            {viewer?.name && (
+              <span className={`text-sm ${light ? "text-gray-500" : "text-white/45"}`}>
+                Hi {viewer.name}
+              </span>
+            )}
+            <button
+              onClick={() => void signOut()}
+              className={`text-sm font-medium cursor-pointer transition-colors duration-200 ${
+                light
+                  ? "text-gray-500 hover:text-gray-900"
+                  : "text-white/45 hover:text-white"
+              }`}
+            >
+              Sign out
+            </button>
+          </div>
         ) : (
           <button
             onClick={() => void signIn("github")}
