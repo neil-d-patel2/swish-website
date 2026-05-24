@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { Sun, Moon, Github } from "lucide-react";
 import { useAuthActions } from "@convex-dev/auth/react";
 import { useConvexAuth, useQuery } from "convex/react";
-import { api } from "@/../../convex/_generated/api";
+import { api } from "../../convex/_generated/api";
 
 const ALL_NAV = [
   { label: "Platform", to: "/" },

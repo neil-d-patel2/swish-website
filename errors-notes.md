@@ -59,3 +59,23 @@ Committed `pnpm-workspace.yaml`. Also reverted the incorrect `package.json` chan
 `pnpm-workspace.yaml` is the authoritative config file for pnpm 10+ workspace settings. The `allowBuilds` field is the v10+ equivalent of the old `onlyBuiltDependencies` field. With this committed to the repo, CI reads it during `pnpm install` and permits the post-install scripts for `esbuild` and `msw` to run.
 
 ---
+
+## Error 3: Vite could not resolve Convex API import path
+
+**Date:** 2026-05-24
+
+**Error:**
+```
+Error: Could not load /home/runner/work/swish-website/swish-website/src/../../convex/_generated/api
+```
+
+**What went wrong:**
+`src/components/site-nav.tsx` imported the Convex API using `@/../../convex/_generated/api`. The `@/` alias is configured to resolve to `src/`, so the full resolved path became `src/../../convex/_generated/api` — which navigates two levels up from `src/`, landing outside the project root entirely. Vite could not find the file at that path.
+
+**Fix:**
+Changed the import to `../../convex/_generated/api`, matching the relative import pattern used by every other component in `src/components/`.
+
+**Why it worked:**
+`src/components/` is one level deep inside `src/`, so `../../` from that directory correctly resolves to the project root, where `convex/_generated/api` lives. The `@/` alias should only be used for paths *within* `src/`, not for reaching outside it.
+
+---
