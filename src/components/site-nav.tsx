@@ -1,0 +1,129 @@
+import { useState } from "react";
+import { Link, useRouterState } from "@tanstack/react-router";
+import { motion } from "framer-motion";
+import { Sun, Moon, Github } from "lucide-react";
+import { useAuthActions } from "@convex-dev/auth/react";
+import { useConvexAuth } from "convex/react";
+
+const ALL_NAV = [
+  { label: "Platform", to: "/" },
+  { label: "Agents", to: "/agents" },
+  { label: "Analytics", to: "/analytics" },
+  { label: "Pricing", to: "/pricing" },
+] as const;
+
+export function SiteNav({
+  light,
+  onToggle,
+}: {
+  light: boolean;
+  onToggle: () => void;
+}) {
+  const { isAuthenticated } = useConvexAuth();
+  const { signIn, signOut } = useAuthActions();
+  const [hovered, setHovered] = useState<string | null>(null);
+  const { location } = useRouterState();
+
+  const navItems = isAuthenticated ? ALL_NAV : ALL_NAV.slice(0, 1);
+
+  return (
+    <motion.nav
+      initial={{ opacity: 0, y: -10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="relative flex items-center justify-between max-w-5xl mx-auto px-6 py-6"
+      style={{ zIndex: 20 }}
+    >
+      <Link to="/" className="text-lg font-bold tracking-tight">
+        Swish
+      </Link>
+
+      <div
+        className={`hidden md:flex items-center gap-0.5 rounded-full px-1.5 py-1.5 ${
+          light
+            ? "border border-black/[0.08] bg-black/[0.03]"
+            : "border border-white/[0.07] bg-white/[0.025]"
+        }`}
+      >
+        {navItems.map((item) => {
+          const isActive =
+            item.to === "/"
+              ? location.pathname === "/" || location.pathname === "/swish-website/"
+              : location.pathname.startsWith(item.to);
+          const showPill = hovered === item.label || (!hovered && isActive);
+
+          return (
+            <Link
+              key={item.label}
+              to={item.to}
+              className="relative px-4 py-1.5 text-sm rounded-full cursor-pointer"
+              onMouseEnter={() => setHovered(item.label)}
+              onMouseLeave={() => setHovered(null)}
+            >
+              {showPill && (
+                <motion.div
+                  layoutId="site-nav-pill"
+                  className={`absolute inset-0 rounded-full ${
+                    light ? "bg-black/[0.06]" : "bg-white/[0.08]"
+                  }`}
+                  transition={{ type: "spring", bounce: 0.18, duration: 0.32 }}
+                />
+              )}
+              <span
+                className={`relative z-10 transition-colors duration-150 ${
+                  isActive && !hovered
+                    ? light
+                      ? "text-gray-800"
+                      : "text-white/80"
+                    : light
+                      ? "text-gray-400"
+                      : "text-white/38"
+                }`}
+              >
+                {item.label}
+              </span>
+            </Link>
+          );
+        })}
+      </div>
+
+      <div className="flex items-center gap-3">
+        <button
+          onClick={onToggle}
+          className={`w-8 h-8 flex items-center justify-center rounded-full transition-colors duration-200 cursor-pointer ${
+            light
+              ? "text-gray-500 hover:text-gray-900 hover:bg-black/[0.06]"
+              : "text-white/45 hover:text-white hover:bg-white/[0.08]"
+          }`}
+          aria-label="Toggle light mode"
+        >
+          {light ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
+        </button>
+
+        {isAuthenticated ? (
+          <button
+            onClick={() => void signOut()}
+            className={`flex items-center gap-2 text-sm font-medium cursor-pointer transition-colors duration-200 ${
+              light
+                ? "text-gray-500 hover:text-gray-900"
+                : "text-white/45 hover:text-white"
+            }`}
+          >
+            Sign out
+          </button>
+        ) : (
+          <button
+            onClick={() => void signIn("github")}
+            className={`flex items-center gap-2 text-sm font-medium cursor-pointer transition-colors duration-200 ${
+              light
+                ? "text-gray-500 hover:text-gray-900"
+                : "text-white/45 hover:text-white"
+            }`}
+          >
+            <Github className="w-4 h-4" /> Sign in
+          </button>
+        )}
+      </div>
+    </motion.nav>
+  );
+}

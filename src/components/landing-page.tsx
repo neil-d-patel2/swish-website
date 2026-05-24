@@ -1,4 +1,4 @@
-import { useRef, useState, useCallback, useEffect, useMemo } from "react";
+import { useRef, useState, useCallback, useEffect, useMemo, createContext, useContext } from "react";
 import { createPortal } from "react-dom";
 import {
   motion,
@@ -9,6 +9,8 @@ import {
 } from "framer-motion";
 import { useSpring, useSprings, animated, to } from "@react-spring/web";
 import { useAuthActions } from "@convex-dev/auth/react";
+import { useConvexAuth } from "convex/react";
+import { useNavigate } from "@tanstack/react-router";
 import {
   Github,
   ArrowRight,
@@ -17,8 +19,11 @@ import {
   Bot,
   Sparkles,
   TrendingUp,
+  Sun,
+  Moon,
 } from "lucide-react";
 import { WaitlistForm } from "@/components/waitlist-form";
+import { useTheme } from "@/hooks/use-theme";
 
 // ─── Tokens ───────────────────────────────────────────────────────────────────
 
@@ -26,6 +31,11 @@ const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
 const VIOLET = "139,92,246";
 const BLUE = "59,130,246";
 const SCRAMBLE_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@#$&";
+
+// ─── Theme ────────────────────────────────────────────────────────────────────
+
+const ThemeCtx = createContext(false); // false = dark, true = light
+const useLightMode = () => useContext(ThemeCtx);
 
 // ─── Data ─────────────────────────────────────────────────────────────────────
 
@@ -342,6 +352,7 @@ function MagneticButton({
   onClick?: () => void;
   variant?: "primary" | "ghost";
 }) {
+  const light = useLightMode();
   const ref = useRef<HTMLButtonElement>(null);
   const [ripples, setRipples] = useState<RippleDot[]>([]);
   const [bursts, setBursts] = useState<RippleDot[]>([]);
@@ -385,7 +396,7 @@ function MagneticButton({
     [onClick],
   );
 
-  const rippleColor = variant === "primary" ? "rgba(0,0,0,0.1)" : "rgba(255,255,255,0.08)";
+  const rippleColor = variant === "primary" ? "rgba(0,0,0,0.1)" : light ? "rgba(0,0,0,0.06)" : "rgba(255,255,255,0.08)";
 
   const sharedStyle = {
     x: s.x, y: s.y, scale: s.scale,
@@ -417,7 +428,7 @@ function MagneticButton({
         <animated.button
           ref={ref}
           style={sharedStyle}
-          className="flex items-center gap-2 text-sm text-white/45 hover:text-white font-medium cursor-pointer transition-colors duration-200"
+          className={`flex items-center gap-2 text-sm font-medium cursor-pointer transition-colors duration-200 ${light ? "text-gray-500 hover:text-gray-900" : "text-white/45 hover:text-white"}`}
           onMouseMove={onMove}
           onMouseLeave={onLeave}
           onClick={handleClick}
@@ -542,6 +553,7 @@ function TiltCard({
   children: React.ReactNode;
   accentRgb: string;
 }) {
+  const light = useLightMode();
   const [s, api] = useSpring(() => ({
     rx: 0, ry: 0, scale: 1, glow: 0,
     config: { mass: 1, tension: 300, friction: 36 },
@@ -573,12 +585,14 @@ function TiltCard({
         ),
         boxShadow: s.glow.to(
           (g) =>
-            `0 0 0 1px rgba(255,255,255,${g * 0.09}), 0 24px 60px rgba(${accentRgb},${g * 0.11})`,
+            light
+              ? `0 0 0 1px rgba(0,0,0,${g * 0.08}), 0 24px 60px rgba(${accentRgb},${g * 0.11})`
+              : `0 0 0 1px rgba(255,255,255,${g * 0.09}), 0 24px 60px rgba(${accentRgb},${g * 0.11})`,
         ),
-        background: "rgba(255,255,255,0.02)",
+        background: light ? "rgba(0,0,0,0.025)" : "rgba(255,255,255,0.02)",
         transformStyle: "preserve-3d" as "preserve-3d",
       }}
-      className="rounded-2xl border border-white/[0.06] p-6 cursor-default h-full"
+      className={`rounded-2xl p-6 cursor-default h-full ${light ? "border border-black/[0.08]" : "border border-white/[0.06]"}`}
       onMouseMove={onMove}
       onMouseLeave={onLeave}
     >
@@ -742,6 +756,7 @@ function ProductMockup() {
 // ─── 13. HowItWorksSection ────────────────────────────────────────────────────
 
 function HowItWorksSection() {
+  const light = useLightMode();
   const [active, setActive] = useState("build");
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-80px" });
@@ -755,7 +770,7 @@ function HowItWorksSection() {
         transition={{ type: "spring", bounce: 0.35, duration: 0.75 }}
       >
         <div className="flex justify-center mb-12">
-          <div className="flex items-center gap-1 rounded-full border border-white/[0.07] bg-white/[0.03] p-1.5">
+          <div className={`flex items-center gap-1 rounded-full p-1.5 ${light ? "border border-black/[0.08] bg-black/[0.03]" : "border border-white/[0.07] bg-white/[0.03]"}`}>
             {HOW_IT_WORKS.map((item) => (
               <button
                 key={item.id}
@@ -773,7 +788,7 @@ function HowItWorksSection() {
                     transition={{ type: "spring", bounce: 0.18, duration: 0.4 }}
                   />
                 )}
-                <span className={`relative z-10 transition-colors duration-200 ${active === item.id ? "text-white" : "text-white/35"}`}>
+                <span className={`relative z-10 transition-colors duration-200 ${active === item.id ? (light ? "text-gray-900" : "text-white") : (light ? "text-gray-400" : "text-white/35")}`}>
                   {item.label}
                 </span>
               </button>
@@ -790,8 +805,8 @@ function HowItWorksSection() {
             transition={{ duration: 0.3, ease: EASE }}
             className="text-center max-w-xl mx-auto"
           >
-            <h3 className="text-3xl font-bold tracking-tight mb-3">{current.heading}</h3>
-            <p className="text-white/40 leading-relaxed">{current.body}</p>
+            <h3 className={`text-3xl font-bold tracking-tight mb-3 ${light ? "text-gray-900" : ""}`}>{current.heading}</h3>
+            <p className={`leading-relaxed ${light ? "text-gray-500" : "text-white/40"}`}>{current.body}</p>
           </motion.div>
         </AnimatePresence>
       </motion.div>
@@ -801,10 +816,24 @@ function HowItWorksSection() {
 
 // ─── 14. LandingPage ─────────────────────────────────────────────────────────
 
+const NAV_ROUTES: Record<string, string> = {
+  Platform: "/",
+  Agents: "/agents",
+  Analytics: "/analytics",
+  Pricing: "/pricing",
+};
+
 export function LandingPage() {
-  const { signIn } = useAuthActions();
+  const { signIn, signOut } = useAuthActions();
+  const { isAuthenticated } = useConvexAuth();
+  const navigate = useNavigate();
+  const { light: lightMode, toggle: toggleTheme } = useTheme();
   const [navHovered, setNavHovered] = useState<string | null>(null);
   const navActive = "Platform";
+
+  const visibleNavItems = isAuthenticated
+    ? (NAV_ITEMS as readonly string[])
+    : ["Platform"];
 
   const heroRef = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] });
@@ -818,7 +847,11 @@ export function LandingPage() {
   const statsInView = useInView(statsRef, { once: true, margin: "-80px" });
 
   return (
-    <div className="min-h-screen text-white overflow-x-hidden" style={{ background: "#050508" }}>
+    <ThemeCtx.Provider value={lightMode}>
+    <div
+      className={`min-h-screen overflow-x-hidden transition-colors duration-500 ${lightMode ? "text-gray-900" : "text-white"}`}
+      style={{ background: lightMode ? "#f8f9fc" : "#050508" }}
+    >
 
       {/* Physics layers (fixed/global) */}
       <ScrollProgress />
@@ -831,10 +864,11 @@ export function LandingPage() {
         className="fixed inset-0 pointer-events-none"
         style={{
           zIndex: 0,
-          backgroundImage: `
-            linear-gradient(rgba(255,255,255,0.018) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(255,255,255,0.018) 1px, transparent 1px)
-          `,
+          backgroundImage: lightMode
+            ? `linear-gradient(rgba(0,0,0,0.05) 1px, transparent 1px),
+               linear-gradient(90deg, rgba(0,0,0,0.05) 1px, transparent 1px)`
+            : `linear-gradient(rgba(255,255,255,0.018) 1px, transparent 1px),
+               linear-gradient(90deg, rgba(255,255,255,0.018) 1px, transparent 1px)`,
           backgroundSize: "72px 72px",
         }}
       />
@@ -871,31 +905,47 @@ export function LandingPage() {
       >
         <span className="text-lg font-bold tracking-tight">Swish</span>
 
-        <div className="hidden md:flex items-center gap-0.5 rounded-full border border-white/[0.07] bg-white/[0.025] px-1.5 py-1.5">
-          {NAV_ITEMS.map((item) => (
+        <div className={`hidden md:flex items-center gap-0.5 rounded-full px-1.5 py-1.5 ${lightMode ? "border border-black/[0.08] bg-black/[0.03]" : "border border-white/[0.07] bg-white/[0.025]"}`}>
+          {visibleNavItems.map((item) => (
             <button
               key={item}
               className="relative px-4 py-1.5 text-sm rounded-full cursor-pointer"
               onMouseEnter={() => setNavHovered(item)}
               onMouseLeave={() => setNavHovered(null)}
+              onClick={() => isAuthenticated && void navigate({ to: NAV_ROUTES[item] as "/" })}
             >
               {(navHovered === item || (!navHovered && navActive === item)) && (
                 <motion.div
                   layoutId="nav-pill"
-                  className="absolute inset-0 rounded-full bg-white/[0.08]"
+                  className={`absolute inset-0 rounded-full ${lightMode ? "bg-black/[0.06]" : "bg-white/[0.08]"}`}
                   transition={{ type: "spring", bounce: 0.18, duration: 0.32 }}
                 />
               )}
-              <span className={`relative z-10 transition-colors duration-150 ${navActive === item && !navHovered ? "text-white/80" : "text-white/38"}`}>
+              <span className={`relative z-10 transition-colors duration-150 ${navActive === item && !navHovered ? (lightMode ? "text-gray-800" : "text-white/80") : (lightMode ? "text-gray-400" : "text-white/38")}`}>
                 {item}
               </span>
             </button>
           ))}
         </div>
 
-        <MagneticButton variant="ghost" onClick={() => void signIn("github")}>
-          <Github className="w-4 h-4" /> Sign in
-        </MagneticButton>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={toggleTheme}
+            className={`w-8 h-8 flex items-center justify-center rounded-full transition-colors duration-200 cursor-pointer ${lightMode ? "text-gray-500 hover:text-gray-900 hover:bg-black/[0.06]" : "text-white/45 hover:text-white hover:bg-white/[0.08]"}`}
+            aria-label="Toggle light mode"
+          >
+            {lightMode ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
+          </button>
+          {isAuthenticated ? (
+            <MagneticButton variant="ghost" onClick={() => void signOut()}>
+              Sign out
+            </MagneticButton>
+          ) : (
+            <MagneticButton variant="ghost" onClick={() => void signIn("github")}>
+              <Github className="w-4 h-4" /> Sign in
+            </MagneticButton>
+          )}
+        </div>
       </motion.nav>
 
       {/* Hero — scroll parallax + morphing blob */}
@@ -918,7 +968,7 @@ export function LandingPage() {
             transition={{ duration: 0.5, delay: 0.1 }}
             className="mb-7"
           >
-            <span className="inline-flex items-center gap-2 text-[11px] font-medium tracking-widest uppercase text-white/30 border border-white/[0.07] rounded-full px-4 py-1.5">
+            <span className={`inline-flex items-center gap-2 text-[11px] font-medium tracking-widest uppercase rounded-full px-4 py-1.5 ${lightMode ? "text-gray-400 border border-black/[0.08]" : "text-white/30 border border-white/[0.07]"}`}>
               <motion.span
                 className="w-1.5 h-1.5 rounded-full bg-violet-400 shrink-0"
                 animate={{ opacity: [1, 0.2, 1] }}
@@ -946,7 +996,7 @@ export function LandingPage() {
             initial={{ opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.88, ease: EASE }}
-            className="text-base text-white/40 max-w-sm leading-relaxed mb-8"
+            className={`text-base max-w-sm leading-relaxed mb-8 ${lightMode ? "text-gray-500" : "text-white/40"}`}
           >
             Swish deploys AI agents that build your store, analyze your data, and surface
             actions that drive real growth.
@@ -1009,8 +1059,8 @@ export function LandingPage() {
       {/* Stats — spring-counted numbers */}
       <section ref={statsRef} className="relative max-w-5xl mx-auto px-6 pb-24" style={{ zIndex: 10 }}>
         <motion.div
-          className="grid grid-cols-3 divide-x divide-white/[0.05] border border-white/[0.05] rounded-2xl"
-          style={{ background: "rgba(255,255,255,0.015)" }}
+          className={`grid grid-cols-3 rounded-2xl ${lightMode ? "divide-x divide-black/[0.08] border border-black/[0.08]" : "divide-x divide-white/[0.05] border border-white/[0.05]"}`}
+          style={{ background: lightMode ? "rgba(0,0,0,0.025)" : "rgba(255,255,255,0.015)" }}
           initial="hidden"
           animate={statsInView ? "visible" : "hidden"}
           variants={{
@@ -1033,7 +1083,7 @@ export function LandingPage() {
               <p className="text-3xl font-bold tracking-tight mb-1.5">
                 <SpringStat stat={stat} inView={statsInView} />
               </p>
-              <p className="text-[11px] text-white/28 uppercase tracking-widest">{stat.label}</p>
+              <p className={`text-[11px] uppercase tracking-widest ${lightMode ? "text-gray-400" : "text-white/28"}`}>{stat.label}</p>
             </motion.div>
           ))}
         </motion.div>
@@ -1047,8 +1097,8 @@ export function LandingPage() {
           transition={{ type: "spring", bounce: 0.3, duration: 0.7 }}
           className="text-center mb-10"
         >
-          <p className="text-[10px] uppercase tracking-widest text-white/22 mb-3">What Swish does</p>
-          <h2 className="text-3xl font-bold tracking-tight">Everything your business needs.</h2>
+          <p className={`text-[10px] uppercase tracking-widest mb-3 ${lightMode ? "text-gray-400" : "text-white/22"}`}>What Swish does</p>
+          <h2 className={`text-3xl font-bold tracking-tight ${lightMode ? "text-gray-900" : ""}`}>Everything your business needs.</h2>
         </motion.div>
 
         <motion.div
@@ -1078,8 +1128,8 @@ export function LandingPage() {
                 >
                   <f.Icon className="w-4 h-4" style={{ color: f.accentHex }} />
                 </div>
-                <h3 className="font-semibold text-white/88 mb-2 tracking-tight">{f.title}</h3>
-                <p className="text-sm text-white/35 leading-relaxed">{f.desc}</p>
+                <h3 className={`font-semibold mb-2 tracking-tight ${lightMode ? "text-gray-900" : "text-white/88"}`}>{f.title}</h3>
+                <p className={`text-sm leading-relaxed ${lightMode ? "text-gray-500" : "text-white/35"}`}>{f.desc}</p>
               </TiltCard>
             </motion.div>
           ))}
@@ -1096,22 +1146,23 @@ export function LandingPage() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-80px" }}
           transition={{ type: "spring", bounce: 0.35, duration: 0.75 }}
-          className="rounded-3xl border border-white/[0.06] p-12"
-          style={{ background: "rgba(255,255,255,0.018)" }}
+          className={`rounded-3xl p-12 ${lightMode ? "border border-black/[0.08]" : "border border-white/[0.06]"}`}
+          style={{ background: lightMode ? "rgba(0,0,0,0.025)" : "rgba(255,255,255,0.018)" }}
         >
-          <p className="text-3xl font-bold tracking-tight mb-3">
+          <p className={`text-3xl font-bold tracking-tight mb-3 ${lightMode ? "text-gray-900" : ""}`}>
             Ready to level the playing field?
           </p>
-          <p className="text-white/38 text-sm mb-8 max-w-xs mx-auto">
+          <p className={`text-sm mb-8 max-w-xs mx-auto ${lightMode ? "text-gray-500" : "text-white/38"}`}>
             Be the first to know when we launch. Join the waitlist and get early access.
           </p>
           <WaitlistForm />
         </motion.div>
       </section>
 
-      <footer className="relative text-center py-8 text-xs text-white/15 border-t border-white/[0.04]" style={{ zIndex: 10 }}>
+      <footer className={`relative text-center py-8 text-xs ${lightMode ? "text-gray-400 border-t border-black/[0.06]" : "text-white/15 border-t border-white/[0.04]"}`} style={{ zIndex: 10 }}>
         © 2025 Swish · Built with AI
       </footer>
     </div>
+    </ThemeCtx.Provider>
   );
 }
