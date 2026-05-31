@@ -6,13 +6,6 @@ import { useAuthActions } from "@convex-dev/auth/react";
 import { useConvexAuth, useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 
-const ALL_NAV = [
-  { label: "Platform", to: "/" },
-  { label: "Agents", to: "/agents" },
-  { label: "Analytics", to: "/analytics" },
-  { label: "Pricing", to: "/pricing" },
-] as const;
-
 export function SiteNav({
   light,
   onToggle,
@@ -25,8 +18,6 @@ export function SiteNav({
   const viewer = useQuery(api.users.viewer);
   const [hovered, setHovered] = useState<string | null>(null);
   const { location } = useRouterState();
-
-  const navItems = isAuthenticated ? ALL_NAV : ALL_NAV.slice(0, 1);
 
   return (
     <>
@@ -46,54 +37,53 @@ export function SiteNav({
       className="relative flex items-center justify-end max-w-5xl mx-auto px-6 py-6"
       style={{ zIndex: 20 }}
     >
-      <div
-        className={`hidden md:flex items-center gap-0.5 rounded-full px-1.5 py-1.5 ${
-          light
-            ? "border border-black/[0.08] bg-black/[0.03]"
-            : "border border-white/[0.07] bg-white/[0.025]"
-        }`}
-      >
-        {navItems.map((item) => {
-          const isActive =
-            item.to === "/"
-              ? location.pathname === "/" || location.pathname === "/swish-website/"
-              : location.pathname.startsWith(item.to);
-          const showPill = hovered === item.label || (!hovered && isActive);
+      {isAuthenticated && (
+        <div
+          className={`hidden md:flex items-center gap-0.5 rounded-full px-1.5 py-1.5 mr-3 ${
+            light
+              ? "border border-black/[0.08] bg-black/[0.03]"
+              : "border border-white/[0.07] bg-white/[0.025]"
+          }`}
+        >
+          {[{ label: "Dashboard", to: "/dashboard" }].map((item) => {
+            const isActive = location.pathname.startsWith(item.to);
+            const showPill = hovered === item.label || (!hovered && isActive);
 
-          return (
-            <Link
-              key={item.label}
-              to={item.to}
-              className="relative px-4 py-1.5 text-sm rounded-full cursor-pointer"
-              onMouseEnter={() => setHovered(item.label)}
-              onMouseLeave={() => setHovered(null)}
-            >
-              {showPill && (
-                <motion.div
-                  layoutId="site-nav-pill"
-                  className={`absolute inset-0 rounded-full ${
-                    light ? "bg-black/[0.06]" : "bg-white/[0.08]"
-                  }`}
-                  transition={{ type: "spring", bounce: 0.18, duration: 0.32 }}
-                />
-              )}
-              <span
-                className={`relative z-10 transition-colors duration-150 ${
-                  isActive && !hovered
-                    ? light
-                      ? "text-gray-800"
-                      : "text-white/80"
-                    : light
-                      ? "text-gray-400"
-                      : "text-white/38"
-                }`}
+            return (
+              <Link
+                key={item.label}
+                to={item.to}
+                className="relative px-4 py-1.5 text-sm rounded-full cursor-pointer"
+                onMouseEnter={() => setHovered(item.label)}
+                onMouseLeave={() => setHovered(null)}
               >
-                {item.label}
-              </span>
-            </Link>
-          );
-        })}
-      </div>
+                {showPill && (
+                  <motion.div
+                    layoutId="site-nav-pill"
+                    className={`absolute inset-0 rounded-full ${
+                      light ? "bg-black/[0.06]" : "bg-white/[0.08]"
+                    }`}
+                    transition={{ type: "spring", bounce: 0.18, duration: 0.32 }}
+                  />
+                )}
+                <span
+                  className={`relative z-10 transition-colors duration-150 ${
+                    isActive && !hovered
+                      ? light
+                        ? "text-gray-800"
+                        : "text-white/80"
+                      : light
+                        ? "text-gray-400"
+                        : "text-white/38"
+                  }`}
+                >
+                  {item.label}
+                </span>
+              </Link>
+            );
+          })}
+        </div>
+      )}
 
       <div className="flex items-center gap-3">
         <button

@@ -10,9 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as VaultshieldRouteImport } from './routes/vaultshield'
-import { Route as PricingRouteImport } from './routes/pricing'
-import { Route as AnalyticsRouteImport } from './routes/analytics'
-import { Route as AgentsRouteImport } from './routes/agents'
+import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ProjectsProjectIdRouteImport } from './routes/projects/$projectId'
@@ -22,19 +20,9 @@ const VaultshieldRoute = VaultshieldRouteImport.update({
   path: '/vaultshield',
   getParentRoute: () => rootRouteImport,
 } as any)
-const PricingRoute = PricingRouteImport.update({
-  id: '/pricing',
-  path: '/pricing',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AnalyticsRoute = AnalyticsRouteImport.update({
-  id: '/analytics',
-  path: '/analytics',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AgentsRoute = AgentsRouteImport.update({
-  id: '/agents',
-  path: '/agents',
+const DashboardRoute = DashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminRoute = AdminRouteImport.update({
@@ -56,18 +44,14 @@ const ProjectsProjectIdRoute = ProjectsProjectIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
-  '/agents': typeof AgentsRoute
-  '/analytics': typeof AnalyticsRoute
-  '/pricing': typeof PricingRoute
+  '/dashboard': typeof DashboardRoute
   '/vaultshield': typeof VaultshieldRoute
   '/projects/$projectId': typeof ProjectsProjectIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
-  '/agents': typeof AgentsRoute
-  '/analytics': typeof AnalyticsRoute
-  '/pricing': typeof PricingRoute
+  '/dashboard': typeof DashboardRoute
   '/vaultshield': typeof VaultshieldRoute
   '/projects/$projectId': typeof ProjectsProjectIdRoute
 }
@@ -75,9 +59,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
-  '/agents': typeof AgentsRoute
-  '/analytics': typeof AnalyticsRoute
-  '/pricing': typeof PricingRoute
+  '/dashboard': typeof DashboardRoute
   '/vaultshield': typeof VaultshieldRoute
   '/projects/$projectId': typeof ProjectsProjectIdRoute
 }
@@ -86,27 +68,16 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/admin'
-    | '/agents'
-    | '/analytics'
-    | '/pricing'
+    | '/dashboard'
     | '/vaultshield'
     | '/projects/$projectId'
   fileRoutesByTo: FileRoutesByTo
-  to:
-    | '/'
-    | '/admin'
-    | '/agents'
-    | '/analytics'
-    | '/pricing'
-    | '/vaultshield'
-    | '/projects/$projectId'
+  to: '/' | '/admin' | '/dashboard' | '/vaultshield' | '/projects/$projectId'
   id:
     | '__root__'
     | '/'
     | '/admin'
-    | '/agents'
-    | '/analytics'
-    | '/pricing'
+    | '/dashboard'
     | '/vaultshield'
     | '/projects/$projectId'
   fileRoutesById: FileRoutesById
@@ -114,9 +85,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRoute
-  AgentsRoute: typeof AgentsRoute
-  AnalyticsRoute: typeof AnalyticsRoute
-  PricingRoute: typeof PricingRoute
+  DashboardRoute: typeof DashboardRoute
   VaultshieldRoute: typeof VaultshieldRoute
   ProjectsProjectIdRoute: typeof ProjectsProjectIdRoute
 }
@@ -130,25 +99,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof VaultshieldRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/pricing': {
-      id: '/pricing'
-      path: '/pricing'
-      fullPath: '/pricing'
-      preLoaderRoute: typeof PricingRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/analytics': {
-      id: '/analytics'
-      path: '/analytics'
-      fullPath: '/analytics'
-      preLoaderRoute: typeof AnalyticsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/agents': {
-      id: '/agents'
-      path: '/agents'
-      fullPath: '/agents'
-      preLoaderRoute: typeof AgentsRouteImport
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin': {
@@ -178,9 +133,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
-  AgentsRoute: AgentsRoute,
-  AnalyticsRoute: AnalyticsRoute,
-  PricingRoute: PricingRoute,
+  DashboardRoute: DashboardRoute,
   VaultshieldRoute: VaultshieldRoute,
   ProjectsProjectIdRoute: ProjectsProjectIdRoute,
 }

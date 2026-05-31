@@ -87,14 +87,6 @@ function AnimatedHeading({
   );
 }
 
-// ── Constants ─────────────────────────────────────────────────────────────────
-
-const NAV_LINKS = [
-  { label: "Platform", to: "/" },
-  { label: "Agents", to: "/agents" },
-  { label: "Analytics", to: "/analytics" },
-  { label: "Pricing", to: "/pricing" },
-] as const;
 
 // ── Main component ────────────────────────────────────────────────────────────
 
@@ -127,15 +119,14 @@ export function VaultShieldHero() {
 
               {/* Center links */}
               <div className="hidden md:flex items-center gap-8">
-                {NAV_LINKS.map((link) => (
-                  <Link
-                    key={link.label}
-                    to={link.to}
-                    className="text-sm text-white transition-colors hover:text-gray-300"
-                  >
-                    {link.label}
+                <Link to="/" className="text-sm text-white transition-colors hover:text-gray-300">
+                  Home
+                </Link>
+                {isAuthenticated && (
+                  <Link to="/dashboard" className="text-sm text-white transition-colors hover:text-gray-300">
+                    Dashboard
                   </Link>
-                ))}
+                )}
               </div>
 
               {/* Right actions */}
