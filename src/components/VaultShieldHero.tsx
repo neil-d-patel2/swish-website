@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useAuthActions } from "@convex-dev/auth/react";
 import { useConvexAuth } from "convex/react";
+import { Link } from "@tanstack/react-router";
 import { WaitlistForm } from "@/components/waitlist-form";
 
 // ── Swish Logo ────────────────────────────────────────────────────────────────
@@ -94,7 +95,12 @@ function AnimatedHeading({
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
-const NAV_LINKS = ["Platform", "Agents", "Analytics", "Pricing"];
+const NAV_LINKS = [
+  { label: "Platform", to: "/" },
+  { label: "Agents", to: "/agents" },
+  { label: "Analytics", to: "/analytics" },
+  { label: "Pricing", to: "/pricing" },
+] as const;
 
 // ── Main component ────────────────────────────────────────────────────────────
 
@@ -131,13 +137,13 @@ export function VaultShieldHero() {
               {/* Center links */}
               <div className="hidden md:flex items-center gap-8">
                 {NAV_LINKS.map((link) => (
-                  <a
-                    key={link}
-                    href="#"
+                  <Link
+                    key={link.label}
+                    to={link.to}
                     className="text-sm text-white transition-colors hover:text-gray-300"
                   >
-                    {link}
-                  </a>
+                    {link.label}
+                  </Link>
                 ))}
               </div>
 
