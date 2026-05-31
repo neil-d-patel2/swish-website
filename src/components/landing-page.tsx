@@ -831,9 +831,7 @@ export function LandingPage() {
   const [navHovered, setNavHovered] = useState<string | null>(null);
   const navActive = "Platform";
 
-  const visibleNavItems = isAuthenticated
-    ? (NAV_ITEMS as readonly string[])
-    : ["Platform"];
+  const visibleNavItems = NAV_ITEMS as readonly string[];
 
   const heroRef = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] });
@@ -912,7 +910,7 @@ export function LandingPage() {
               className="relative px-4 py-1.5 text-sm rounded-full cursor-pointer"
               onMouseEnter={() => setNavHovered(item)}
               onMouseLeave={() => setNavHovered(null)}
-              onClick={() => isAuthenticated && void navigate({ to: NAV_ROUTES[item] as "/" })}
+              onClick={() => isAuthenticated ? void navigate({ to: NAV_ROUTES[item] as "/" }) : void signIn("github")}
             >
               {(navHovered === item || (!navHovered && navActive === item)) && (
                 <motion.div
