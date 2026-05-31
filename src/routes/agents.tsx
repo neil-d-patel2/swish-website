@@ -4,14 +4,22 @@ import { motion } from "framer-motion";
 import { Bot, Search, Megaphone, Mail, Package, HeadphonesIcon, TrendingUp, Lock } from "lucide-react";
 import { SiteNav } from "@/components/site-nav";
 import { useTheme } from "@/hooks/use-theme";
+import {
+  VIOLET,
+  BLUE,
+  EASE,
+  ThemeCtx,
+  CursorSpotlight,
+  CursorTrail,
+  FloatingParticles,
+  ScrollProgress,
+  TiltCard,
+  MorphingBlob,
+} from "@/components/page-effects";
 
 export const Route = createFileRoute("/agents")({
   component: AgentsPage,
 });
-
-const VIOLET = "139,92,246";
-const BLUE = "59,130,246";
-const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
 
 const AGENTS = [
   { Icon: Search, label: "SEO Agent", desc: "Optimizes your store for search engines around the clock, building organic traffic on autopilot.", accent: VIOLET },
@@ -30,27 +38,34 @@ function AgentsContent({ light }: { light: boolean }) {
         initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, ease: EASE }}
-        className="text-center pt-16 pb-16"
+        className="relative text-center pt-16 pb-16 overflow-hidden"
       >
-        <div
-          className="inline-flex w-14 h-14 items-center justify-center rounded-2xl mb-6"
-          style={{ background: `rgba(${VIOLET},0.12)`, border: `1px solid rgba(${VIOLET},0.25)` }}
-        >
-          <Bot className="w-7 h-7" style={{ color: "#8B5CF6" }} />
+        <MorphingBlob />
+        <div className="relative z-10">
+          <div
+            className="inline-flex w-14 h-14 items-center justify-center rounded-2xl mb-6"
+            style={{ background: `rgba(${VIOLET},0.12)`, border: `1px solid rgba(${VIOLET},0.25)` }}
+          >
+            <Bot className="w-7 h-7" style={{ color: "#8B5CF6" }} />
+          </div>
+          <h1 className={`text-5xl font-bold tracking-tighter mb-4 ${light ? "text-gray-900" : "text-white"}`}>
+            AI Agents
+          </h1>
+          <p className={`text-base max-w-md mx-auto leading-relaxed ${light ? "text-gray-500" : "text-white/40"}`}>
+            Six specialized agents running 24/7, handling every growth lever in your business so you can focus on what matters.
+          </p>
+          <span
+            className="inline-flex items-center gap-1.5 mt-5 text-[11px] font-medium tracking-widest uppercase rounded-full px-4 py-1.5"
+            style={{ background: `rgba(${VIOLET},0.1)`, border: `1px solid rgba(${VIOLET},0.2)`, color: "#8B5CF6" }}
+          >
+            <motion.span
+              className="w-1.5 h-1.5 rounded-full bg-violet-400 shrink-0"
+              animate={{ opacity: [1, 0.2, 1] }}
+              transition={{ duration: 2, repeat: Infinity }}
+            />
+            Coming soon
+          </span>
         </div>
-        <h1 className={`text-5xl font-bold tracking-tighter mb-4 ${light ? "text-gray-900" : "text-white"}`}>
-          AI Agents
-        </h1>
-        <p className={`text-base max-w-md mx-auto leading-relaxed ${light ? "text-gray-500" : "text-white/40"}`}>
-          Six specialized agents running 24/7, handling every growth lever in your business so you can focus on what matters.
-        </p>
-        <span
-          className="inline-flex items-center gap-1.5 mt-5 text-[11px] font-medium tracking-widest uppercase rounded-full px-4 py-1.5"
-          style={{ background: `rgba(${VIOLET},0.1)`, border: `1px solid rgba(${VIOLET},0.2)`, color: "#8B5CF6" }}
-        >
-          <span className="w-1.5 h-1.5 rounded-full bg-violet-400 animate-pulse" />
-          Coming soon
-        </span>
       </motion.div>
 
       {/* Agent grid */}
@@ -70,16 +85,17 @@ function AgentsContent({ light }: { light: boolean }) {
               hidden: { opacity: 0, y: 20, scale: 0.97 },
               visible: { opacity: 1, y: 0, scale: 1, transition: { type: "spring", bounce: 0.35, duration: 0.65 } },
             }}
-            className={`rounded-2xl p-6 ${light ? "border border-black/[0.07] bg-black/[0.025]" : "border border-white/[0.06] bg-white/[0.02]"}`}
           >
-            <div
-              className="w-9 h-9 rounded-xl flex items-center justify-center mb-4"
-              style={{ background: `rgba(${agent.accent},0.1)`, border: `1px solid rgba(${agent.accent},0.2)` }}
-            >
-              <agent.Icon className="w-4 h-4" style={{ color: `rgb(${agent.accent})` }} />
-            </div>
-            <h3 className={`font-semibold mb-2 tracking-tight ${light ? "text-gray-900" : "text-white/88"}`}>{agent.label}</h3>
-            <p className={`text-sm leading-relaxed ${light ? "text-gray-500" : "text-white/35"}`}>{agent.desc}</p>
+            <TiltCard accentRgb={agent.accent}>
+              <div
+                className="w-9 h-9 rounded-xl flex items-center justify-center mb-4"
+                style={{ background: `rgba(${agent.accent},0.1)`, border: `1px solid rgba(${agent.accent},0.2)` }}
+              >
+                <agent.Icon className="w-4 h-4" style={{ color: `rgb(${agent.accent})` }} />
+              </div>
+              <h3 className={`font-semibold mb-2 tracking-tight ${light ? "text-gray-900" : "text-white/88"}`}>{agent.label}</h3>
+              <p className={`text-sm leading-relaxed ${light ? "text-gray-500" : "text-white/35"}`}>{agent.desc}</p>
+            </TiltCard>
           </motion.div>
         ))}
       </motion.div>
@@ -89,7 +105,7 @@ function AgentsContent({ light }: { light: boolean }) {
 
 function SignInPrompt({ light }: { light: boolean }) {
   return (
-    <div className="flex flex-col items-center justify-center min-h-[60vh] px-6 text-center">
+    <div className="flex flex-col items-center justify-center min-h-[60vh] px-6 text-center" style={{ zIndex: 10 }}>
       <div
         className="inline-flex w-14 h-14 items-center justify-center rounded-2xl mb-6"
         style={{ background: `rgba(${VIOLET},0.1)`, border: `1px solid rgba(${VIOLET},0.2)` }}
@@ -107,17 +123,51 @@ function AgentsPage() {
   const { isAuthenticated, isLoading } = useConvexAuth();
 
   return (
+    <ThemeCtx.Provider value={light}>
     <div
       className={`min-h-screen overflow-x-hidden transition-colors duration-500 ${light ? "text-gray-900" : "text-white"}`}
       style={{ background: light ? "#f8f9fc" : "#050508" }}
     >
+      {/* Physics layers */}
+      <ScrollProgress />
+      <CursorSpotlight />
+      <CursorTrail />
+      <FloatingParticles />
+
+      {/* Subtle grid */}
       <div
+        className="fixed inset-0 pointer-events-none"
+        style={{
+          zIndex: 0,
+          backgroundImage: light
+            ? `linear-gradient(rgba(0,0,0,0.05) 1px, transparent 1px),
+               linear-gradient(90deg, rgba(0,0,0,0.05) 1px, transparent 1px)`
+            : `linear-gradient(rgba(255,255,255,0.018) 1px, transparent 1px),
+               linear-gradient(90deg, rgba(255,255,255,0.018) 1px, transparent 1px)`,
+          backgroundSize: "72px 72px",
+        }}
+      />
+
+      {/* Ambient orbs */}
+      <motion.div
         className="fixed pointer-events-none rounded-full"
         style={{
-          zIndex: 0, width: 600, height: 600,
-          background: `radial-gradient(circle, rgba(${VIOLET},0.07) 0%, transparent 65%)`,
-          top: -200, left: -150, filter: "blur(40px)",
+          zIndex: 0, width: 720, height: 720,
+          background: `radial-gradient(circle, rgba(${VIOLET},0.09) 0%, transparent 65%)`,
+          top: -280, left: -220, filter: "blur(40px)",
         }}
+        animate={{ x: [0, 50, 0], y: [0, 30, 0] }}
+        transition={{ duration: 16, repeat: Infinity, ease: "easeInOut" }}
+      />
+      <motion.div
+        className="fixed pointer-events-none rounded-full"
+        style={{
+          zIndex: 0, width: 520, height: 520,
+          background: `radial-gradient(circle, rgba(${BLUE},0.07) 0%, transparent 65%)`,
+          bottom: -160, right: -160, filter: "blur(40px)",
+        }}
+        animate={{ x: [0, -30, 0], y: [0, -40, 0] }}
+        transition={{ duration: 12, repeat: Infinity, ease: "easeInOut", delay: 3 }}
       />
 
       <SiteNav light={light} onToggle={toggle} />
@@ -135,5 +185,6 @@ function AgentsPage() {
         © 2025 Swish · Built with AI
       </footer>
     </div>
+    </ThemeCtx.Provider>
   );
 }
