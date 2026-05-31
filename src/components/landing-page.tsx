@@ -893,16 +893,25 @@ export function LandingPage() {
         transition={{ duration: 12, repeat: Infinity, ease: "easeInOut", delay: 3 }}
       />
 
+      {/* Swish wordmark — pinned to top-left corner */}
+      <motion.span
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5 }}
+        className="fixed top-5 left-6 text-lg font-bold tracking-tight"
+        style={{ zIndex: 30 }}
+      >
+        Swish
+      </motion.span>
+
       {/* Nav — layoutId nav-pill */}
       <motion.nav
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="relative flex items-center justify-between max-w-5xl mx-auto px-6 py-6"
+        className="relative flex items-center justify-end max-w-5xl mx-auto px-6 py-6"
         style={{ zIndex: 20 }}
       >
-        <span className="text-lg font-bold tracking-tight">Swish</span>
-
         <div className={`hidden md:flex items-center gap-0.5 rounded-full px-1.5 py-1.5 ${lightMode ? "border border-black/[0.08] bg-black/[0.03]" : "border border-white/[0.07] bg-white/[0.025]"}`}>
           {visibleNavItems.map((item) => (
             <button

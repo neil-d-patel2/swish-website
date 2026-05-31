@@ -29,17 +29,23 @@ export function SiteNav({
   const navItems = isAuthenticated ? ALL_NAV : ALL_NAV.slice(0, 1);
 
   return (
+    <>
+    <motion.span
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+      className="fixed top-5 left-6 text-lg font-bold tracking-tight"
+      style={{ zIndex: 30 }}
+    >
+      Swish
+    </motion.span>
     <motion.nav
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="relative flex items-center justify-between max-w-5xl mx-auto px-6 py-6"
+      className="relative flex items-center justify-end max-w-5xl mx-auto px-6 py-6"
       style={{ zIndex: 20 }}
     >
-      <Link to="/" className="text-lg font-bold tracking-tight">
-        Swish
-      </Link>
-
       <div
         className={`hidden md:flex items-center gap-0.5 rounded-full px-1.5 py-1.5 ${
           light
@@ -134,5 +140,6 @@ export function SiteNav({
         )}
       </div>
     </motion.nav>
+    </>
   );
 }
