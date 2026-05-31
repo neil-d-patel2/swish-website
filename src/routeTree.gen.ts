@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as VaultshieldRouteImport } from './routes/vaultshield'
 import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as AnalyticsRouteImport } from './routes/analytics'
 import { Route as AgentsRouteImport } from './routes/agents'
@@ -16,6 +17,11 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ProjectsProjectIdRouteImport } from './routes/projects/$projectId'
 
+const VaultshieldRoute = VaultshieldRouteImport.update({
+  id: '/vaultshield',
+  path: '/vaultshield',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PricingRoute = PricingRouteImport.update({
   id: '/pricing',
   path: '/pricing',
@@ -53,6 +59,7 @@ export interface FileRoutesByFullPath {
   '/agents': typeof AgentsRoute
   '/analytics': typeof AnalyticsRoute
   '/pricing': typeof PricingRoute
+  '/vaultshield': typeof VaultshieldRoute
   '/projects/$projectId': typeof ProjectsProjectIdRoute
 }
 export interface FileRoutesByTo {
@@ -61,6 +68,7 @@ export interface FileRoutesByTo {
   '/agents': typeof AgentsRoute
   '/analytics': typeof AnalyticsRoute
   '/pricing': typeof PricingRoute
+  '/vaultshield': typeof VaultshieldRoute
   '/projects/$projectId': typeof ProjectsProjectIdRoute
 }
 export interface FileRoutesById {
@@ -70,6 +78,7 @@ export interface FileRoutesById {
   '/agents': typeof AgentsRoute
   '/analytics': typeof AnalyticsRoute
   '/pricing': typeof PricingRoute
+  '/vaultshield': typeof VaultshieldRoute
   '/projects/$projectId': typeof ProjectsProjectIdRoute
 }
 export interface FileRouteTypes {
@@ -80,6 +89,7 @@ export interface FileRouteTypes {
     | '/agents'
     | '/analytics'
     | '/pricing'
+    | '/vaultshield'
     | '/projects/$projectId'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -88,6 +98,7 @@ export interface FileRouteTypes {
     | '/agents'
     | '/analytics'
     | '/pricing'
+    | '/vaultshield'
     | '/projects/$projectId'
   id:
     | '__root__'
@@ -96,6 +107,7 @@ export interface FileRouteTypes {
     | '/agents'
     | '/analytics'
     | '/pricing'
+    | '/vaultshield'
     | '/projects/$projectId'
   fileRoutesById: FileRoutesById
 }
@@ -105,11 +117,19 @@ export interface RootRouteChildren {
   AgentsRoute: typeof AgentsRoute
   AnalyticsRoute: typeof AnalyticsRoute
   PricingRoute: typeof PricingRoute
+  VaultshieldRoute: typeof VaultshieldRoute
   ProjectsProjectIdRoute: typeof ProjectsProjectIdRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/vaultshield': {
+      id: '/vaultshield'
+      path: '/vaultshield'
+      fullPath: '/vaultshield'
+      preLoaderRoute: typeof VaultshieldRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/pricing': {
       id: '/pricing'
       path: '/pricing'
@@ -161,6 +181,7 @@ const rootRouteChildren: RootRouteChildren = {
   AgentsRoute: AgentsRoute,
   AnalyticsRoute: AnalyticsRoute,
   PricingRoute: PricingRoute,
+  VaultshieldRoute: VaultshieldRoute,
   ProjectsProjectIdRoute: ProjectsProjectIdRoute,
 }
 export const routeTree = rootRouteImport
