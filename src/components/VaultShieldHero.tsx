@@ -4,12 +4,6 @@ import { useConvexAuth } from "convex/react";
 import { Link } from "@tanstack/react-router";
 import { WaitlistForm } from "@/components/waitlist-form";
 
-// ── Swish Logo ────────────────────────────────────────────────────────────────
-
-const SwishLogo = () => (
-  <img src="/swish.svg" width="28" height="28" alt="Swish" />
-);
-
 // ── FadeIn ────────────────────────────────────────────────────────────────────
 
 function FadeIn({
@@ -127,12 +121,9 @@ export function VaultShieldHero() {
           <div className="pt-6">
             <nav className="liquid-glass rounded-xl px-4 py-2 flex items-center justify-between">
               {/* Logo */}
-              <div className="flex items-center gap-2">
-                <SwishLogo />
-                <span className="text-2xl font-semibold tracking-tight text-white">
-                  Swish
-                </span>
-              </div>
+              <span className="text-2xl font-semibold tracking-tight text-white">
+                Swish
+              </span>
 
               {/* Center links */}
               <div className="hidden md:flex items-center gap-8">
