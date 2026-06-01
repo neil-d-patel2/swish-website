@@ -95,7 +95,7 @@ function AnimatedHeading({
 export function VaultShieldHero() {
   const { signIn, signOut } = useAuthActions();
   const { isAuthenticated } = useConvexAuth();
-  const { session: supabaseSession, user: supabaseUser } = useSupabaseAuth();
+  const { session: supabaseSession } = useSupabaseAuth();
 
   const signInWithGoogle = () =>
     supabase.auth.signInWithOAuth({
