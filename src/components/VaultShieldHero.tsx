@@ -100,7 +100,11 @@ export function VaultShieldHero() {
   const signInWithGoogle = () =>
     supabase.auth.signInWithOAuth({
       provider: "google",
-      options: { redirectTo: window.location.origin },
+      options: {
+        redirectTo: import.meta.env.DEV
+          ? window.location.origin
+          : "https://neil-d-patel2.github.io/swish-website/",
+      },
     });
 
   const signOutGoogle = () => supabase.auth.signOut();
