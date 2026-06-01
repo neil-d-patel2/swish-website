@@ -170,13 +170,13 @@ export function SiteNav({
             )}
             <button
               onClick={() => void signOutGoogle()}
-              className={`text-sm font-medium cursor-pointer transition-colors duration-200 ${
+              className={`flex items-center gap-2 px-3 py-1.5 text-sm font-medium cursor-pointer rounded-full transition-colors duration-200 ${
                 light
-                  ? "text-gray-500 hover:text-gray-900"
-                  : "text-white/45 hover:text-white"
+                  ? "text-gray-500 hover:text-gray-900 border border-black/[0.08] hover:bg-black/[0.06]"
+                  : "text-white/45 hover:text-white border border-white/[0.07] hover:bg-white/[0.08]"
               }`}
             >
-              Sign out
+              <GoogleIcon className="w-4 h-4" /> Sign out
             </button>
           </div>
         ) : (
