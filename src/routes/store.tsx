@@ -203,7 +203,7 @@ function StorePage() {
               )}
             </div>
 
-            <div className="flex gap-6 items-start">
+            <div className="flex flex-col lg:flex-row gap-6 items-start">
               <div className="flex-1 min-w-0">
                 {csvError && (
                   <p className="text-sm text-destructive mb-3">{csvError}</p>
@@ -262,7 +262,7 @@ function StorePage() {
                             <td className="px-4 py-3 text-right">
                               <button
                                 onClick={() => handleDeleteItem(item.id)}
-                                className="text-muted-foreground hover:text-destructive transition-colors cursor-pointer"
+                                className="text-destructive/60 hover:text-destructive transition-colors cursor-pointer"
                               >
                                 <Trash2 className="w-4 h-4" />
                               </button>
@@ -275,7 +275,7 @@ function StorePage() {
                 )}
               </div>
 
-              <Card size="sm" className="w-64 shrink-0">
+              <Card size="sm" className="w-full lg:w-64 shrink-0">
                 <CardHeader>
                   <CardTitle>CSV tips</CardTitle>
                 </CardHeader>
