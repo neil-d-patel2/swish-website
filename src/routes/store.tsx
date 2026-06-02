@@ -262,7 +262,7 @@ function StorePage() {
                             <td className="px-4 py-3 text-right">
                               <button
                                 onClick={() => handleDeleteItem(item.id)}
-                                className="text-destructive/60 hover:text-destructive transition-colors cursor-pointer"
+                                className="inline-flex items-center justify-center text-destructive hover:bg-destructive hover:text-destructive-foreground rounded-md p-1.5 transition-colors cursor-pointer"
                               >
                                 <Trash2 className="w-4 h-4" />
                               </button>
@@ -283,7 +283,10 @@ function StorePage() {
                   <p>Columns must be in this order:</p>
                   <code className="block font-mono text-xs bg-muted px-2 py-1.5 rounded">name, price, stock</code>
                   <p>The first row is treated as a header and skipped.</p>
-                  <p className="text-amber-600 dark:text-amber-400">Prices with a leading <code className="font-mono">$</code> sign will not parse — use numbers only (e.g. <code className="font-mono">9.99</code>).</p>
+                  <div className="flex gap-2 rounded-md border border-amber-400/40 bg-amber-50 dark:bg-amber-950/30 px-2.5 py-2 text-amber-700 dark:text-amber-400">
+                    <span className="shrink-0">⚠️</span>
+                    <p>Omit the <code className="font-mono">$</code> — use plain numbers only (e.g. <code className="font-mono">9.99</code>).</p>
+                  </div>
                 </CardContent>
               </Card>
             </div>
