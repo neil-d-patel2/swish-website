@@ -77,8 +77,9 @@ function StorePage() {
             </div>
             <div className="flex items-center gap-3">
               <p className="text-sm text-muted-foreground hidden sm:block">{store.owner_email}</p>
-              <Button variant="ghost" size="icon-sm" onClick={toggle} aria-label="Toggle theme">
-                {light ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
+              <Button variant="outline" size="sm" onClick={toggle} className="cursor-pointer gap-1.5">
+                {light ? <Moon className="w-3.5 h-3.5" /> : <Sun className="w-3.5 h-3.5" />}
+                {light ? "Dark" : "Light"}
               </Button>
             </div>
           </div>

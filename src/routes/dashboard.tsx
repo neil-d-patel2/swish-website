@@ -87,8 +87,9 @@ function DashboardPage() {
         <div className="border-b border-border">
           <div className="max-w-2xl mx-auto px-6 py-4 flex items-center justify-between">
             <span className="text-sm font-medium">Swish</span>
-            <Button variant="ghost" size="icon-sm" onClick={toggle} aria-label="Toggle theme">
-              {light ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
+            <Button variant="outline" size="sm" onClick={toggle} className="cursor-pointer gap-1.5">
+              {light ? <Moon className="w-3.5 h-3.5" /> : <Sun className="w-3.5 h-3.5" />}
+              {light ? "Dark" : "Light"}
             </Button>
           </div>
         </div>
