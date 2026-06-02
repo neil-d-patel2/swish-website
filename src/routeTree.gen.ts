@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as VaultshieldRouteImport } from './routes/vaultshield'
+import { Route as StoreRouteImport } from './routes/store'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
@@ -18,6 +19,11 @@ import { Route as ProjectsProjectIdRouteImport } from './routes/projects/$projec
 const VaultshieldRoute = VaultshieldRouteImport.update({
   id: '/vaultshield',
   path: '/vaultshield',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StoreRoute = StoreRouteImport.update({
+  id: '/store',
+  path: '/store',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DashboardRoute = DashboardRouteImport.update({
@@ -45,6 +51,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/dashboard': typeof DashboardRoute
+  '/store': typeof StoreRoute
   '/vaultshield': typeof VaultshieldRoute
   '/projects/$projectId': typeof ProjectsProjectIdRoute
 }
@@ -52,6 +59,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/dashboard': typeof DashboardRoute
+  '/store': typeof StoreRoute
   '/vaultshield': typeof VaultshieldRoute
   '/projects/$projectId': typeof ProjectsProjectIdRoute
 }
@@ -60,6 +68,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/dashboard': typeof DashboardRoute
+  '/store': typeof StoreRoute
   '/vaultshield': typeof VaultshieldRoute
   '/projects/$projectId': typeof ProjectsProjectIdRoute
 }
@@ -69,15 +78,23 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/dashboard'
+    | '/store'
     | '/vaultshield'
     | '/projects/$projectId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/admin' | '/dashboard' | '/vaultshield' | '/projects/$projectId'
+  to:
+    | '/'
+    | '/admin'
+    | '/dashboard'
+    | '/store'
+    | '/vaultshield'
+    | '/projects/$projectId'
   id:
     | '__root__'
     | '/'
     | '/admin'
     | '/dashboard'
+    | '/store'
     | '/vaultshield'
     | '/projects/$projectId'
   fileRoutesById: FileRoutesById
@@ -86,6 +103,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRoute
   DashboardRoute: typeof DashboardRoute
+  StoreRoute: typeof StoreRoute
   VaultshieldRoute: typeof VaultshieldRoute
   ProjectsProjectIdRoute: typeof ProjectsProjectIdRoute
 }
@@ -97,6 +115,13 @@ declare module '@tanstack/react-router' {
       path: '/vaultshield'
       fullPath: '/vaultshield'
       preLoaderRoute: typeof VaultshieldRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/store': {
+      id: '/store'
+      path: '/store'
+      fullPath: '/store'
+      preLoaderRoute: typeof StoreRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dashboard': {
@@ -134,6 +159,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
   DashboardRoute: DashboardRoute,
+  StoreRoute: StoreRoute,
   VaultshieldRoute: VaultshieldRoute,
   ProjectsProjectIdRoute: ProjectsProjectIdRoute,
 }

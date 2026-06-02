@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useSupabaseAuth } from "@/hooks/use-supabase-auth";
 import { supabase } from "@/lib/supabase";
 import { useState, useEffect } from "react";
@@ -6,14 +6,6 @@ import { useState, useEffect } from "react";
 export const Route = createFileRoute("/dashboard")({
   component: DashboardPage,
 });
-
-type Store = {
-  id: string;
-  name: string;
-  owner_id: string;
-  owner_email: string;
-  created_at: string;
-};
 
 const GoogleIcon = () => (
   <svg className="w-4 h-4" viewBox="0 0 24 24">
@@ -26,7 +18,7 @@ const GoogleIcon = () => (
 
 function DashboardPage() {
   const { session, isLoading } = useSupabaseAuth();
-  const [store, setStore] = useState<Store | null>(null);
+  const navigate = useNavigate();
   const [storeLoading, setStoreLoading] = useState(false);
   const [storeName, setStoreName] = useState("");
   const [creating, setCreating] = useState(false);
@@ -48,12 +40,11 @@ function DashboardPage() {
     setStoreLoading(true);
     supabase
       .from("stores")
-      .select("*")
+      .select("id")
       .eq("owner_id", session.user.id)
       .maybeSingle()
-      .then(({ data, error }) => {
-        if (error) console.error(error);
-        setStore(data ?? null);
+      .then(({ data }) => {
+        if (data) void navigate({ to: "/store" });
         setStoreLoading(false);
       });
   }, [session]);
@@ -65,22 +56,20 @@ function DashboardPage() {
     setCreating(true);
     setError(null);
 
-    const { data, error } = await supabase
+    const { error } = await supabase
       .from("stores")
       .insert({
         name: storeName.trim(),
         owner_id: session.user.id,
         owner_email: session.user.email,
-      })
-      .select()
-      .single();
+      });
 
     if (error) {
       setError(error.message);
+      setCreating(false);
     } else {
-      setStore(data);
+      void navigate({ to: "/store" });
     }
-    setCreating(false);
   };
 
   if (isLoading) return null;
@@ -113,8 +102,6 @@ function DashboardPage() {
 
         {storeLoading ? (
           <div className="text-white/40 text-sm">Loading...</div>
-        ) : store ? (
-          <StoreCard store={store} />
         ) : (
           <CreateStoreForm
             storeName={storeName}
@@ -125,22 +112,6 @@ function DashboardPage() {
           />
         )}
       </div>
-    </div>
-  );
-}
-
-function StoreCard({ store }: { store: Store }) {
-  return (
-    <div className="liquid-glass border border-white/10 rounded-2xl px-8 py-8">
-      <div className="flex items-center gap-3 mb-1">
-        <div className="w-2 h-2 rounded-full bg-green-400" />
-        <span className="text-xs text-white/40 uppercase tracking-widest">Your store</span>
-      </div>
-      <h2 className="text-2xl font-semibold mt-3">{store.name}</h2>
-      <p className="text-sm text-white/40 mt-1">{store.owner_email}</p>
-      <p className="text-sm text-white/30 mt-4">
-        Created {new Date(store.created_at).toLocaleDateString()} · Live in the Swish app
-      </p>
     </div>
   );
 }
