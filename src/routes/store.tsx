@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState, useRef } from "react";
-import { Upload, Plus, Package, DollarSign, Sun, Moon, ImageIcon } from "lucide-react";
+import { Upload, Plus, Package, DollarSign, Sun, Moon, ImageIcon, Trash2 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { useSupabaseAuth } from "@/hooks/use-supabase-auth";
 import { useTheme } from "@/hooks/use-theme";
@@ -74,6 +74,11 @@ function StorePage() {
   const handleItemAdded = (item: Item) => {
     setItems((prev) => [item, ...prev]);
     setDialogOpen(false);
+  };
+
+  const handleDeleteItem = async (id: string) => {
+    await supabase.from("items").delete().eq("id", id);
+    setItems((prev) => prev.filter((item) => item.id !== id));
   };
 
   const handleCsvImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -248,6 +253,7 @@ function StorePage() {
                       <th className="text-left px-4 py-3 font-medium text-muted-foreground">Item</th>
                       <th className="text-right px-4 py-3 font-medium text-muted-foreground">Price</th>
                       <th className="text-right px-4 py-3 font-medium text-muted-foreground">Stock</th>
+                      <th className="px-4 py-3" />
                     </tr>
                   </thead>
                   <tbody>
@@ -269,6 +275,14 @@ function StorePage() {
                           {item.price != null ? `$${item.price.toFixed(2)}` : "—"}
                         </td>
                         <td className="px-4 py-3 text-right text-muted-foreground">{item.stock}</td>
+                        <td className="px-4 py-3 text-right">
+                          <button
+                            onClick={() => handleDeleteItem(item.id)}
+                            className="text-muted-foreground hover:text-destructive transition-colors cursor-pointer"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </td>
                       </tr>
                     ))}
                   </tbody>
