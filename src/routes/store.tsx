@@ -44,6 +44,9 @@ function StorePage() {
   const [storeLoading, setStoreLoading] = useState(true);
   const [items, setItems] = useState<Item[]>([]);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [csvImporting, setCsvImporting] = useState(false);
+  const [csvError, setCsvError] = useState<string | null>(null);
+  const csvRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (isLoading) return;
@@ -71,6 +74,50 @@ function StorePage() {
   const handleItemAdded = (item: Item) => {
     setItems((prev) => [item, ...prev]);
     setDialogOpen(false);
+  };
+
+  const handleCsvImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file || !store) return;
+
+    setCsvError(null);
+    setCsvImporting(true);
+
+    const text = await file.text();
+    const lines = text.split(/\r?\n/).filter((l) => l.trim());
+    // Skip header row
+    const rows = lines.slice(1);
+
+    if (rows.length === 0) {
+      setCsvError("CSV has no data rows.");
+      setCsvImporting(false);
+      return;
+    }
+
+    const inserts = rows.map((row) => {
+      const cols = row.split(",");
+      const name = cols[0]?.trim() ?? "";
+      const price = cols[1] ? parseFloat(cols[1].trim()) : null;
+      const stock = cols[2] ? parseInt(cols[2].trim(), 10) : 0;
+      return { store_id: store.id, name, price: isNaN(price as number) ? null : price, stock: isNaN(stock) ? 0 : stock, image_url: null };
+    }).filter((r) => r.name);
+
+    if (inserts.length === 0) {
+      setCsvError("No valid rows found. Make sure columns are: name, price, stock.");
+      setCsvImporting(false);
+      return;
+    }
+
+    const { data, error } = await supabase.from("items").insert(inserts).select();
+
+    if (error) {
+      setCsvError(error.message);
+    } else if (data) {
+      setItems((prev) => [...(data as Item[]), ...prev]);
+    }
+
+    setCsvImporting(false);
   };
 
   const totalValue = items.reduce((sum, i) => sum + (i.price ?? 0) * i.stock, 0);
@@ -139,9 +186,9 @@ function StorePage() {
               <h2 className="text-xs font-medium text-muted-foreground uppercase tracking-widest">Inventory</h2>
               {items.length > 0 && (
                 <div className="flex gap-2">
-                  <Button variant="outline" size="sm" className="cursor-pointer gap-1.5">
+                  <Button variant="outline" size="sm" className="cursor-pointer gap-1.5" onClick={() => csvRef.current?.click()} disabled={csvImporting}>
                     <Upload className="w-3.5 h-3.5" />
-                    Import CSV
+                    {csvImporting ? "Importing..." : "Import CSV"}
                   </Button>
                   <Button size="sm" className="cursor-pointer gap-1.5" onClick={() => setDialogOpen(true)}>
                     <Plus className="w-3.5 h-3.5" />
@@ -150,6 +197,10 @@ function StorePage() {
                 </div>
               )}
             </div>
+
+            {csvError && (
+              <p className="text-sm text-destructive mb-3">{csvError}</p>
+            )}
 
             {items.length === 0 ? (
               <div className="border border-dashed border-border rounded-2xl px-8 py-16 flex flex-col items-center text-center">
@@ -161,9 +212,9 @@ function StorePage() {
                   Add items individually or import a CSV with your full inventory at once.
                 </p>
                 <div className="flex flex-col sm:flex-row items-center gap-3">
-                  <Button variant="outline" className="cursor-pointer gap-1.5">
+                  <Button variant="outline" className="cursor-pointer gap-1.5" onClick={() => csvRef.current?.click()} disabled={csvImporting}>
                     <Upload className="w-4 h-4" />
-                    Import CSV
+                    {csvImporting ? "Importing..." : "Import CSV"}
                   </Button>
                   <Button className="cursor-pointer gap-1.5" onClick={() => setDialogOpen(true)}>
                     <Plus className="w-4 h-4" />
@@ -208,6 +259,8 @@ function StorePage() {
             )}
           </div>
         </div>
+
+        <input ref={csvRef} type="file" accept=".csv" className="hidden" onChange={handleCsvImport} />
 
         <AddItemDialog
           open={dialogOpen}
