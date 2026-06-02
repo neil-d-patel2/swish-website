@@ -199,9 +199,13 @@ function StorePage() {
             </div>
 
             {items.length > 0 && (
-              <p className="text-xs text-muted-foreground mb-3">
-                CSV format: <code className="font-mono bg-muted px-1 py-0.5 rounded">name, price, stock</code> — first row is treated as a header and skipped.
-              </p>
+              <div className="flex items-start gap-2 bg-muted border border-border rounded-lg px-4 py-3 text-xs mb-3">
+                <span className="text-muted-foreground mt-0.5">ℹ</span>
+                <div>
+                  <p className="font-medium text-foreground mb-0.5">CSV format</p>
+                  <p className="text-muted-foreground">Columns in order: <code className="font-mono bg-background border border-border px-1 py-0.5 rounded">name, price, stock</code> — first row is skipped.</p>
+                </div>
+              </div>
             )}
 
             {csvError && (
@@ -227,9 +231,14 @@ function StorePage() {
                     Add item
                   </Button>
                 </div>
-                <p className="text-xs text-muted-foreground mt-4">
-                  CSV format: <code className="font-mono bg-muted px-1 py-0.5 rounded">name, price, stock</code> — first row is treated as a header and skipped.
-                </p>
+                <div className="mt-5 flex items-start gap-2 bg-muted border border-border rounded-lg px-4 py-3 text-xs text-left max-w-sm">
+                  <span className="text-muted-foreground mt-0.5">ℹ</span>
+                  <div>
+                    <p className="font-medium text-foreground mb-0.5">CSV format</p>
+                    <p className="text-muted-foreground">Columns in order: <code className="font-mono bg-background border border-border px-1 py-0.5 rounded">name, price, stock</code></p>
+                    <p className="text-muted-foreground mt-0.5">The first row (header) is skipped automatically.</p>
+                  </div>
+                </div>
               </div>
             ) : (
               <div className="rounded-xl border border-border overflow-hidden">
