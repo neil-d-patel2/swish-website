@@ -170,7 +170,7 @@ export function SiteNav({
             )}
             <button
               onClick={() => void signOutGoogle()}
-              className={`flex items-center gap-2 px-4 py-1.5 text-sm font-medium cursor-pointer rounded-full whitespace-nowrap transition-colors duration-200 ${
+              className={`flex items-center gap-2 px-8 py-1.5 text-sm font-medium cursor-pointer rounded-full whitespace-nowrap transition-colors duration-200 ${
                 light
                   ? "text-gray-500 hover:text-gray-900 border border-black/[0.08] hover:bg-black/[0.06]"
                   : "text-white/45 hover:text-white border border-white/[0.07] hover:bg-white/[0.08]"
