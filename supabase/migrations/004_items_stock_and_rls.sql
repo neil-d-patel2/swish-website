@@ -2,6 +2,11 @@
 alter table public.items
   add column if not exists stock integer not null default 0;
 
+-- Drop policies if they already exist, then recreate
+drop policy if exists "Store owners can insert items" on public.items;
+drop policy if exists "Store owners can update items" on public.items;
+drop policy if exists "Store owners can delete items" on public.items;
+
 -- Store owners can insert items into their own store
 create policy "Store owners can insert items"
   on public.items for insert
