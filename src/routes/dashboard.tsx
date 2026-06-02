@@ -1,7 +1,12 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useSupabaseAuth } from "@/hooks/use-supabase-auth";
+import { useTheme } from "@/hooks/use-theme";
 import { supabase } from "@/lib/supabase";
 import { useState, useEffect } from "react";
+import { Sun, Moon } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 
 export const Route = createFileRoute("/dashboard")({
   component: DashboardPage,
@@ -19,6 +24,7 @@ const GoogleIcon = () => (
 function DashboardPage() {
   const { session, isLoading } = useSupabaseAuth();
   const navigate = useNavigate();
+  const { light, toggle } = useTheme();
   const [storeLoading, setStoreLoading] = useState(false);
   const [storeName, setStoreName] = useState("");
   const [creating, setCreating] = useState(false);
@@ -74,85 +80,72 @@ function DashboardPage() {
 
   if (isLoading) return null;
 
-  if (!session) {
-    return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="liquid-glass border border-white/10 rounded-2xl px-8 py-10 w-full max-w-sm text-center">
-          <h2 className="text-xl font-semibold text-white mb-2">Sign in required</h2>
-          <p className="text-sm text-white/50 mb-6">
-            You need a Google account to access your dashboard.
-          </p>
-          <button
-            onClick={() => void signInWithGoogle()}
-            className="w-full flex items-center justify-center gap-2.5 bg-white text-black px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-gray-100 transition-colors cursor-pointer"
-          >
-            <GoogleIcon />
-            Sign in with Google
-          </button>
+  return (
+    <div className={light ? "" : "dark"}>
+      <div className="min-h-dvh bg-background text-foreground transition-colors duration-200">
+        {/* Header */}
+        <div className="border-b border-border">
+          <div className="max-w-2xl mx-auto px-6 py-4 flex items-center justify-between">
+            <span className="text-sm font-medium">Swish</span>
+            <Button variant="ghost" size="icon-sm" onClick={toggle} aria-label="Toggle theme">
+              {light ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
+            </Button>
+          </div>
+        </div>
+
+        <div className="max-w-2xl mx-auto px-6 py-20">
+          {!session ? (
+            <div className="flex flex-col items-center text-center">
+              <h2 className="text-2xl font-semibold mb-2">Sign in required</h2>
+              <p className="text-sm text-muted-foreground mb-8">
+                You need a Google account to access your dashboard.
+              </p>
+              <Button
+                onClick={() => void signInWithGoogle()}
+                variant="outline"
+                className="gap-2.5 cursor-pointer"
+              >
+                <GoogleIcon />
+                Sign in with Google
+              </Button>
+            </div>
+          ) : storeLoading ? (
+            <div className="text-sm text-muted-foreground">Loading...</div>
+          ) : (
+            <>
+              <p className="text-sm text-muted-foreground mb-1">{session.user.email}</p>
+              <h1 className="text-2xl font-semibold mb-10">Dashboard</h1>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Create your store</CardTitle>
+                  <CardDescription>
+                    Give your store a name. It will appear in the Swish app immediately.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <form onSubmit={handleCreateStore} className="flex flex-col gap-4">
+                    <Input
+                      type="text"
+                      placeholder="Store name"
+                      value={storeName}
+                      onChange={(e) => setStoreName(e.target.value)}
+                      disabled={creating}
+                    />
+                    {error && <p className="text-sm text-destructive">{error}</p>}
+                    <Button
+                      type="submit"
+                      disabled={creating || !storeName.trim()}
+                      className="cursor-pointer"
+                    >
+                      {creating ? "Creating..." : "Create store"}
+                    </Button>
+                  </form>
+                </CardContent>
+              </Card>
+            </>
+          )}
         </div>
       </div>
-    );
-  }
-
-  return (
-    <div className="min-h-screen bg-black text-white">
-      <div className="max-w-2xl mx-auto px-6 py-20">
-        <p className="text-sm text-white/40 mb-1">{session.user.email}</p>
-        <h1 className="text-2xl font-semibold mb-10">Dashboard</h1>
-
-        {storeLoading ? (
-          <div className="text-white/40 text-sm">Loading...</div>
-        ) : (
-          <CreateStoreForm
-            storeName={storeName}
-            onChange={setStoreName}
-            onSubmit={handleCreateStore}
-            creating={creating}
-            error={error}
-          />
-        )}
-      </div>
-    </div>
-  );
-}
-
-function CreateStoreForm({
-  storeName,
-  onChange,
-  onSubmit,
-  creating,
-  error,
-}: {
-  storeName: string;
-  onChange: (v: string) => void;
-  onSubmit: (e: React.FormEvent) => void;
-  creating: boolean;
-  error: string | null;
-}) {
-  return (
-    <div className="liquid-glass border border-white/10 rounded-2xl px-8 py-8">
-      <h2 className="text-lg font-semibold mb-1">Create your store</h2>
-      <p className="text-sm text-white/40 mb-6">
-        Give your store a name. It will appear in the Swish app immediately.
-      </p>
-      <form onSubmit={onSubmit} className="flex flex-col gap-4">
-        <input
-          type="text"
-          placeholder="Store name"
-          value={storeName}
-          onChange={(e) => onChange(e.target.value)}
-          disabled={creating}
-          className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-white/30 disabled:opacity-50"
-        />
-        {error && <p className="text-sm text-red-400">{error}</p>}
-        <button
-          type="submit"
-          disabled={creating || !storeName.trim()}
-          className="w-full bg-white text-black px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-gray-100 transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
-        >
-          {creating ? "Creating..." : "Create store"}
-        </button>
-      </form>
     </div>
   );
 }
