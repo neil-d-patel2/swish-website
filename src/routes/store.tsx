@@ -198,6 +198,12 @@ function StorePage() {
               )}
             </div>
 
+            {items.length > 0 && (
+              <p className="text-xs text-muted-foreground mb-3">
+                CSV format: <code className="font-mono bg-muted px-1 py-0.5 rounded">name, price, stock</code> — first row is treated as a header and skipped.
+              </p>
+            )}
+
             {csvError && (
               <p className="text-sm text-destructive mb-3">{csvError}</p>
             )}
@@ -221,6 +227,9 @@ function StorePage() {
                     Add item
                   </Button>
                 </div>
+                <p className="text-xs text-muted-foreground mt-4">
+                  CSV format: <code className="font-mono bg-muted px-1 py-0.5 rounded">name, price, stock</code> — first row is treated as a header and skipped.
+                </p>
               </div>
             ) : (
               <div className="rounded-xl border border-border overflow-hidden">
