@@ -6,7 +6,7 @@ import { useSupabaseAuth } from "@/hooks/use-supabase-auth";
 import { useTheme } from "@/hooks/use-theme";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -203,92 +203,90 @@ function StorePage() {
               )}
             </div>
 
-            {items.length > 0 && (
-              <div className="flex items-start gap-2 bg-muted border border-border rounded-lg px-4 py-3 text-xs mb-3">
-                <span className="text-muted-foreground mt-0.5">ℹ</span>
-                <div>
-                  <p className="font-medium text-foreground mb-0.5">CSV format</p>
-                  <p className="text-muted-foreground">Columns in order: <code className="font-mono bg-background border border-border px-1 py-0.5 rounded">name, price, stock</code> — first row is skipped.</p>
-                </div>
-              </div>
-            )}
+            <div className="flex gap-6 items-start">
+              <div className="flex-1 min-w-0">
+                {csvError && (
+                  <p className="text-sm text-destructive mb-3">{csvError}</p>
+                )}
 
-            {csvError && (
-              <p className="text-sm text-destructive mb-3">{csvError}</p>
-            )}
-
-            {items.length === 0 ? (
-              <div className="border border-dashed border-border rounded-2xl px-8 py-16 flex flex-col items-center text-center">
-                <div className="w-14 h-14 rounded-2xl bg-muted border border-border flex items-center justify-center mb-5">
-                  <Package className="w-6 h-6 text-muted-foreground" />
-                </div>
-                <h3 className="text-base font-medium mb-1">No items yet</h3>
-                <p className="text-sm text-muted-foreground mb-8 max-w-xs">
-                  Add items individually or import a CSV with your full inventory at once.
-                </p>
-                <div className="flex flex-col sm:flex-row items-center gap-3">
-                  <Button variant="outline" className="cursor-pointer gap-1.5" onClick={() => csvRef.current?.click()} disabled={csvImporting}>
-                    <Upload className="w-4 h-4" />
-                    {csvImporting ? "Importing..." : "Import CSV"}
-                  </Button>
-                  <Button className="cursor-pointer gap-1.5" onClick={() => setDialogOpen(true)}>
-                    <Plus className="w-4 h-4" />
-                    Add item
-                  </Button>
-                </div>
-                <div className="mt-5 flex items-start gap-2 bg-muted border border-border rounded-lg px-4 py-3 text-xs text-left max-w-sm">
-                  <span className="text-muted-foreground mt-0.5">ℹ</span>
-                  <div>
-                    <p className="font-medium text-foreground mb-0.5">CSV format</p>
-                    <p className="text-muted-foreground">Columns in order: <code className="font-mono bg-background border border-border px-1 py-0.5 rounded">name, price, stock</code></p>
-                    <p className="text-muted-foreground mt-0.5">The first row (header) is skipped automatically.</p>
+                {items.length === 0 ? (
+                  <div className="border border-dashed border-border rounded-2xl px-8 py-16 flex flex-col items-center text-center">
+                    <div className="w-14 h-14 rounded-2xl bg-muted border border-border flex items-center justify-center mb-5">
+                      <Package className="w-6 h-6 text-muted-foreground" />
+                    </div>
+                    <h3 className="text-base font-medium mb-1">No items yet</h3>
+                    <p className="text-sm text-muted-foreground mb-8 max-w-xs">
+                      Add items individually or import a CSV with your full inventory at once.
+                    </p>
+                    <div className="flex flex-col sm:flex-row items-center gap-3">
+                      <Button variant="outline" className="cursor-pointer gap-1.5" onClick={() => csvRef.current?.click()} disabled={csvImporting}>
+                        <Upload className="w-4 h-4" />
+                        {csvImporting ? "Importing..." : "Import CSV"}
+                      </Button>
+                      <Button className="cursor-pointer gap-1.5" onClick={() => setDialogOpen(true)}>
+                        <Plus className="w-4 h-4" />
+                        Add item
+                      </Button>
+                    </div>
                   </div>
-                </div>
-              </div>
-            ) : (
-              <div className="rounded-xl border border-border overflow-hidden">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-border bg-muted/40">
-                      <th className="text-left px-4 py-3 font-medium text-muted-foreground">Item</th>
-                      <th className="text-right px-4 py-3 font-medium text-muted-foreground">Price</th>
-                      <th className="text-right px-4 py-3 font-medium text-muted-foreground">Stock</th>
-                      <th className="px-4 py-3" />
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {items.map((item, i) => (
-                      <tr key={item.id} className={i < items.length - 1 ? "border-b border-border" : ""}>
-                        <td className="px-4 py-3">
-                          <div className="flex items-center gap-3">
-                            {item.image_url ? (
-                              <img src={item.image_url} alt={item.name} className="w-9 h-9 rounded-lg object-cover border border-border" />
-                            ) : (
-                              <div className="w-9 h-9 rounded-lg bg-muted border border-border flex items-center justify-center">
-                                <ImageIcon className="w-4 h-4 text-muted-foreground" />
+                ) : (
+                  <div className="rounded-xl border border-border overflow-hidden">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="border-b border-border bg-muted/40">
+                          <th className="text-left px-4 py-3 font-medium text-muted-foreground">Item</th>
+                          <th className="text-right px-4 py-3 font-medium text-muted-foreground">Price</th>
+                          <th className="text-right px-4 py-3 font-medium text-muted-foreground">Stock</th>
+                          <th className="px-4 py-3" />
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {items.map((item, i) => (
+                          <tr key={item.id} className={i < items.length - 1 ? "border-b border-border" : ""}>
+                            <td className="px-4 py-3">
+                              <div className="flex items-center gap-3">
+                                {item.image_url ? (
+                                  <img src={item.image_url} alt={item.name} className="w-9 h-9 rounded-lg object-cover border border-border" />
+                                ) : (
+                                  <div className="w-9 h-9 rounded-lg bg-muted border border-border flex items-center justify-center">
+                                    <ImageIcon className="w-4 h-4 text-muted-foreground" />
+                                  </div>
+                                )}
+                                <span className="font-medium">{item.name}</span>
                               </div>
-                            )}
-                            <span className="font-medium">{item.name}</span>
-                          </div>
-                        </td>
-                        <td className="px-4 py-3 text-right">
-                          {item.price != null ? `$${item.price.toFixed(2)}` : "—"}
-                        </td>
-                        <td className="px-4 py-3 text-right text-muted-foreground">{item.stock}</td>
-                        <td className="px-4 py-3 text-right">
-                          <button
-                            onClick={() => handleDeleteItem(item.id)}
-                            className="text-muted-foreground hover:text-destructive transition-colors cursor-pointer"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                            </td>
+                            <td className="px-4 py-3 text-right">
+                              {item.price != null ? `$${item.price.toFixed(2)}` : "—"}
+                            </td>
+                            <td className="px-4 py-3 text-right text-muted-foreground">{item.stock}</td>
+                            <td className="px-4 py-3 text-right">
+                              <button
+                                onClick={() => handleDeleteItem(item.id)}
+                                className="text-muted-foreground hover:text-destructive transition-colors cursor-pointer"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
               </div>
-            )}
+
+              <Card size="sm" className="w-64 shrink-0">
+                <CardHeader>
+                  <CardTitle>CSV tips</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2 text-sm text-muted-foreground">
+                  <p>Columns must be in this order:</p>
+                  <code className="block font-mono text-xs bg-muted px-2 py-1.5 rounded">name, price, stock</code>
+                  <p>The first row is treated as a header and skipped.</p>
+                  <p className="text-amber-600 dark:text-amber-400">Prices with a leading <code className="font-mono">$</code> sign will not parse — use numbers only (e.g. <code className="font-mono">9.99</code>).</p>
+                </CardContent>
+              </Card>
+            </div>
           </div>
         </div>
 
