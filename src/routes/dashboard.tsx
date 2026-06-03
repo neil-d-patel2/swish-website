@@ -86,7 +86,7 @@ function DashboardPage() {
         {/* Header */}
         <div className="border-b border-border">
           <div className="max-w-2xl mx-auto px-6 py-4 flex items-center justify-between">
-            <span className="text-sm font-medium">Swish</span>
+            <button onClick={() => void navigate({ to: "/" })} className="text-sm font-medium cursor-pointer hover:opacity-70 transition-opacity">Swish</button>
             <Button variant="outline" size="sm" onClick={toggle} className="cursor-pointer gap-1.5">
               {light ? <Moon className="w-3.5 h-3.5" /> : <Sun className="w-3.5 h-3.5" />}
               {light ? "Dark" : "Light"}
