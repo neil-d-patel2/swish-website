@@ -30,6 +30,7 @@ type Item = {
   id: string;
   store_id: string;
   store_email: string | null;
+  store_name: string | null;
   name: string;
   price: number | null;
   stock: number;
@@ -106,7 +107,7 @@ function StorePage() {
       const name = cols[0]?.trim() ?? "";
       const price = cols[1] ? parseFloat(cols[1].trim()) : null;
       const stock = cols[2] ? parseInt(cols[2].trim(), 10) : 0;
-      return { store_id: store.id, store_email: store.owner_email, name, price: isNaN(price as number) ? null : price, stock: isNaN(stock) ? 0 : stock, image_url: null };
+      return { store_id: store.id, store_email: store.owner_email, store_name: store.name, name, price: isNaN(price as number) ? null : price, stock: isNaN(stock) ? 0 : stock, image_url: null };
     }).filter((r) => r.name);
 
     if (inserts.length === 0) {
@@ -301,6 +302,7 @@ function StorePage() {
           onOpenChange={setDialogOpen}
           storeId={store.id}
           storeEmail={store.owner_email}
+          storeName={store.name}
           onAdded={handleItemAdded}
         />
       </div>
@@ -313,12 +315,14 @@ function AddItemDialog({
   onOpenChange,
   storeId,
   storeEmail,
+  storeName,
   onAdded,
 }: {
   open: boolean;
   onOpenChange: (v: boolean) => void;
   storeId: string;
   storeEmail: string;
+  storeName: string;
   onAdded: (item: Item) => void;
 }) {
   const [name, setName] = useState("");
@@ -372,6 +376,7 @@ function AddItemDialog({
       .insert({
         store_id: storeId,
         store_email: storeEmail,
+        store_name: storeName,
         name: name.trim(),
         price: price ? parseFloat(price) : null,
         stock: stock ? parseInt(stock, 10) : 0,
