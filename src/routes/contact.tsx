@@ -51,53 +51,59 @@ function ContactPage() {
   };
 
   return (
-    <div className="bg-black text-white min-h-screen">
+    <div className="text-white min-h-screen" style={{ background: "#07060f" }}>
       <div className="relative w-full min-h-screen overflow-hidden flex flex-col">
 
-        {/* Video background */}
-        <video
-          className="absolute inset-0 w-full h-full object-cover"
-          autoPlay
-          loop
-          muted
-          playsInline
-          src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260403_050628_c4e32401-fab4-4a27-b7a8-6e9291cd5959.mp4"
-        />
-
-        {/* Dark gradient overlay for readability */}
-        <div
-          className="absolute inset-0"
-          style={{
-            background:
-              "linear-gradient(135deg, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.45) 50%, rgba(0,0,0,0.72) 100%)",
-          }}
-        />
-
-        {/* Ambient glow blobs */}
+        {/* Animated ambient blobs */}
         <div
           className="absolute pointer-events-none"
           style={{
-            width: 600,
-            height: 600,
+            width: 700,
+            height: 700,
             borderRadius: "50%",
-            background: "radial-gradient(circle, rgba(115,66,226,0.12) 0%, transparent 70%)",
-            top: "-10%",
-            left: "-8%",
-            filter: "blur(40px)",
+            background: "radial-gradient(circle, rgba(115,66,226,0.18) 0%, transparent 65%)",
+            top: "-15%",
+            left: "-10%",
+            filter: "blur(60px)",
+            animation: "drift1 18s ease-in-out infinite alternate",
           }}
         />
         <div
           className="absolute pointer-events-none"
           style={{
-            width: 500,
-            height: 500,
+            width: 550,
+            height: 550,
             borderRadius: "50%",
-            background: "radial-gradient(circle, rgba(37,99,235,0.10) 0%, transparent 70%)",
-            bottom: "0%",
-            right: "-5%",
-            filter: "blur(40px)",
+            background: "radial-gradient(circle, rgba(37,99,235,0.14) 0%, transparent 65%)",
+            bottom: "-10%",
+            right: "-8%",
+            filter: "blur(60px)",
+            animation: "drift2 22s ease-in-out infinite alternate",
           }}
         />
+        <div
+          className="absolute pointer-events-none"
+          style={{
+            width: 350,
+            height: 350,
+            borderRadius: "50%",
+            background: "radial-gradient(circle, rgba(115,66,226,0.08) 0%, transparent 70%)",
+            top: "50%",
+            left: "60%",
+            filter: "blur(50px)",
+            animation: "drift1 26s ease-in-out infinite alternate-reverse",
+          }}
+        />
+        <style>{`
+          @keyframes drift1 {
+            from { transform: translate(0, 0); }
+            to   { transform: translate(40px, 30px); }
+          }
+          @keyframes drift2 {
+            from { transform: translate(0, 0); }
+            to   { transform: translate(-35px, -25px); }
+          }
+        `}</style>
 
         {/* Content layer */}
         <div className="relative z-10 flex flex-col min-h-screen px-6 md:px-12 lg:px-16">
