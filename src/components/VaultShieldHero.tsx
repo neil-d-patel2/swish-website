@@ -140,6 +140,9 @@ export function VaultShieldHero() {
                 <Link to="/dashboard" className="text-sm text-white transition-colors hover:text-gray-300">
                   Dashboard
                 </Link>
+                <Link to="/stores" className="text-sm text-white transition-colors hover:text-gray-300">
+                  Stores
+                </Link>
               </div>
 
               {/* Right actions */}
