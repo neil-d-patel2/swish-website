@@ -140,7 +140,7 @@ function PricingPage() {
   return (
     <div
       className="min-h-screen flex flex-col"
-      style={{ background: cream, color: ink, fontFamily: body }}
+      style={{ background: "#E5E7E9", color: ink, fontFamily: body }}
     >
       <div className="px-6 md:px-12 lg:px-16">
         <Navbar variant="light" />

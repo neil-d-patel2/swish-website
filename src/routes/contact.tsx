@@ -70,7 +70,7 @@ function ContactPage() {
   return (
     <div
       className="min-h-screen flex flex-col"
-      style={{ background: cream, color: ink, fontFamily: body }}
+      style={{ background: "#E5E7E9", color: ink, fontFamily: body }}
     >
       <div className="px-6 md:px-12 lg:px-16">
         <Navbar variant="light" />
@@ -306,7 +306,7 @@ function ContactPage() {
                   </div>
                   <div>
                     <p className="leading-relaxed" style={{ color: ink }}>
-                      Wyman Park Building, Suite 100
+                      Johns Hopkins University
                       <br />
                       3400 N. Charles St
                       <br />
