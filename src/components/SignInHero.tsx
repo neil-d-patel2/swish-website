@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react";
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
+import { ArrowRight } from "lucide-react";
 import { supabase } from "@/lib/supabase";
+import { useSupabaseAuth } from "@/hooks/use-supabase-auth";
 
 const VIDEO_SRC =
   "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260530_042513_df96a13b-6155-4f6e-8b93-c9dee66fba08.mp4";
@@ -154,22 +156,22 @@ const GoogleIcon = () => (
   </svg>
 );
 
-export function SignInHero({ onSignIn }: { onSignIn?: () => void }) {
+export function SignInHero() {
   const videoRef = useRef<HTMLVideoElement>(null);
   useVideoScrub(videoRef);
 
-  // Falls back to Google OAuth when no handler is provided (e.g. on the homepage).
-  const triggerSignIn =
-    onSignIn ??
-    (() =>
-      void supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: {
-          redirectTo: import.meta.env.DEV
-            ? window.location.origin
-            : "https://neil-d-patel2.github.io/swish-website/",
-        },
-      }));
+  const { session } = useSupabaseAuth();
+  const navigate = useNavigate();
+
+  const signInWithGoogle = () =>
+    void supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: import.meta.env.DEV
+          ? window.location.origin
+          : "https://neil-d-patel2.github.io/swish-website/",
+      },
+    });
 
   const { displayed, done } = useTypewriter(
     "Glad you stopped by. The big players have had the edge long enough — let's even the odds.",
@@ -193,7 +195,7 @@ export function SignInHero({ onSignIn }: { onSignIn?: () => void }) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    triggerSignIn();
+    signInWithGoogle();
   };
 
   // Force the first frame to paint without autoplaying.
@@ -365,19 +367,34 @@ export function SignInHero({ onSignIn }: { onSignIn?: () => void }) {
             )}
           </p>
 
-          {/* Sign-in form */}
-          <form onSubmit={handleSubmit} style={revealStyle}>
-            <button
-              type="submit"
-              className="inline-flex items-center gap-2.5 rounded-full border border-black/10 bg-white px-6 py-3 text-[15px] text-black shadow-sm transition-colors duration-200 hover:bg-black hover:text-white sm:text-[17px]"
-            >
-              <GoogleIcon />
-              Continue with Google
-            </button>
-            <p className="mt-2 text-[13px] text-black/60">
-              Free to start · No credit card required
-            </p>
-          </form>
+          {/* CTA: sign in when signed out, go to dashboard when signed in */}
+          {session ? (
+            <div style={revealStyle}>
+              <button
+                onClick={() => void navigate({ to: "/dashboard" })}
+                className="inline-flex items-center gap-2.5 rounded-full bg-black px-6 py-3 text-[15px] text-white shadow-sm transition-colors duration-200 hover:bg-black/85 sm:text-[17px]"
+              >
+                Go to dashboard
+                <ArrowRight className="w-4 h-4 opacity-70" />
+              </button>
+              <p className="mt-2 text-[13px] text-black/60">
+                Welcome back — pick up where you left off.
+              </p>
+            </div>
+          ) : (
+            <form onSubmit={handleSubmit} style={revealStyle}>
+              <button
+                type="submit"
+                className="inline-flex items-center gap-2.5 rounded-full border border-black/10 bg-white px-6 py-3 text-[15px] text-black shadow-sm transition-colors duration-200 hover:bg-black hover:text-white sm:text-[17px]"
+              >
+                <GoogleIcon />
+                Continue with Google
+              </button>
+              <p className="mt-2 text-[13px] text-black/60">
+                Free to start · No credit card required
+              </p>
+            </form>
+          )}
 
           {/* Value props + copy-email pill */}
           <div className="mt-5 flex flex-wrap gap-y-1" style={revealStyle}>

@@ -5,7 +5,6 @@ import { supabase } from "@/lib/supabase";
 import { useState, useEffect } from "react";
 import { Sun, Moon, ArrowRight, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
-import { SignInHero } from "@/components/SignInHero";
 
 export const Route = createFileRoute("/dashboard")({
   component: DashboardPage,
@@ -20,15 +19,10 @@ function DashboardPage() {
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const signInWithGoogle = () =>
-    supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: {
-        redirectTo: import.meta.env.DEV
-          ? window.location.origin
-          : "https://neil-d-patel2.github.io/swish-website/",
-      },
-    });
+  // The dashboard is gated: signed-out visitors go back to the home hero.
+  useEffect(() => {
+    if (!isLoading && !session) void navigate({ to: "/" });
+  }, [isLoading, session, navigate]);
 
   useEffect(() => {
     if (!session) return;
@@ -62,9 +56,7 @@ function DashboardPage() {
     }
   };
 
-  if (isLoading) return null;
-
-  if (!session) return <SignInHero onSignIn={signInWithGoogle} />;
+  if (isLoading || !session) return null;
 
   const emailPrefix = session.user.email?.split("@")[0] ?? "";
 
