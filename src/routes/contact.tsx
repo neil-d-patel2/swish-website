@@ -70,7 +70,7 @@ function ContactPage() {
       style={{ background: "#faf9fa", color: "#1b1c1d", fontFamily: body }}
     >
       <div className="px-6 md:px-12 lg:px-16">
-        <Navbar />
+        <Navbar variant="light" />
       </div>
 
       <main className="flex-grow w-full max-w-6xl mx-auto px-6 md:px-12 lg:px-16 py-16">
