@@ -17,6 +17,9 @@ export function Navbar() {
           <Link to="/stores" className="text-sm text-white transition-colors hover:text-gray-300">
             Stores
           </Link>
+          <Link to="/contact" className="text-sm text-white transition-colors hover:text-gray-300">
+            Contact
+          </Link>
         </div>
         <Link
           to="/"
