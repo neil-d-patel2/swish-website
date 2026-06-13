@@ -53,7 +53,7 @@ const tiers = [
 
 function PricingPage() {
   return (
-    <div className="text-white min-h-screen" style={{ background: "#07060f" }}>
+    <div className="text-white min-h-screen" style={{ background: "#021525" }}>
       <div className="relative w-full min-h-screen overflow-hidden flex flex-col">
 
         {/* Animated ambient blobs */}
@@ -114,48 +114,55 @@ function PricingPage() {
           <Navbar />
 
           {/* Header */}
-          <div className="text-center pt-16 pb-12 max-w-3xl mx-auto">
+          <div
+            className="text-center pt-16 pb-12 max-w-3xl mx-auto"
+            style={{ fontFamily: "'Hanken Grotesk', sans-serif" }}
+          >
             <h1
-              className="text-4xl md:text-5xl lg:text-6xl font-normal mb-4 text-white"
-              style={{ letterSpacing: "-0.04em" }}
+              className="text-4xl md:text-5xl lg:text-6xl font-semibold mb-4 text-[#d1e4fb]"
+              style={{ letterSpacing: "-0.01em" }}
             >
               Transparent Pricing for Infinite Growth.
             </h1>
-            <p className="text-base md:text-lg text-gray-300">
+            <p className="text-base md:text-lg text-[#c4c7c8]">
               Deploy AI-driven automation that scales with your ambition.
               Choose a plan that fuels your store's velocity.
             </p>
           </div>
 
           {/* Pricing Tiers */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pb-20 max-w-5xl mx-auto w-full">
+          <div
+            className="grid grid-cols-1 md:grid-cols-3 gap-6 pb-20 max-w-5xl mx-auto w-full"
+            style={{ fontFamily: "'Hanken Grotesk', sans-serif" }}
+          >
             {tiers.map((tier) => (
               <div
                 key={tier.name}
-                className={`liquid-glass rounded-2xl p-8 flex flex-col relative transition-all duration-300 ${
+                className={`liquid-glass rounded-2xl p-8 flex flex-col relative transition-all duration-300 border ${
                   tier.highlighted
-                    ? "border border-white/30 md:-translate-y-2"
-                    : "border border-white/10"
+                    ? "border-white/30 md:-translate-y-2"
+                    : "border-[#444748]"
                 }`}
+                style={{ background: tier.highlighted ? "#192b3d" : "#091d2e" }}
               >
                 {tier.highlighted && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-white text-black px-4 py-1 rounded-full text-xs font-semibold uppercase tracking-wide">
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#ffffff] text-[#2f3131] px-4 py-1 rounded-full text-xs font-semibold uppercase tracking-wide">
                     Most Popular
                   </div>
                 )}
 
-                <span className="text-xs uppercase tracking-widest text-gray-400 mb-3">
+                <span className="text-xs uppercase tracking-widest text-[#c4c7c8] mb-3">
                   {tier.tag}
                 </span>
-                <h3 className="text-2xl font-medium text-white mb-2">
+                <h3 className="text-2xl font-medium text-[#d1e4fb] mb-2">
                   {tier.name}
                 </h3>
                 <div className="flex items-baseline gap-1 mb-8">
-                  <span className="text-4xl font-semibold text-white">
+                  <span className="text-4xl font-semibold text-[#d1e4fb]">
                     {tier.price}
                   </span>
                   {tier.period && (
-                    <span className="text-gray-400">{tier.period}</span>
+                    <span className="text-[#c4c7c8]">{tier.period}</span>
                   )}
                 </div>
 
@@ -164,13 +171,13 @@ function PricingPage() {
                     <li
                       key={feature.text}
                       className={`flex items-center gap-3 text-sm ${
-                        feature.included ? "text-gray-200" : "text-gray-500"
+                        feature.included ? "text-[#d1e4fb]" : "text-[#c4c7c8]/40"
                       }`}
                     >
                       {feature.included ? (
-                        <Check className="w-4 h-4 text-white shrink-0" />
+                        <Check className="w-4 h-4 text-[#ffffff] shrink-0" />
                       ) : (
-                        <X className="w-4 h-4 text-gray-500 shrink-0" />
+                        <X className="w-4 h-4 text-[#c4c7c8]/40 shrink-0" />
                       )}
                       <span>{feature.text}</span>
                     </li>
@@ -180,8 +187,8 @@ function PricingPage() {
                 <button
                   className={`w-full py-3 rounded-lg font-medium transition-colors cursor-pointer ${
                     tier.highlighted
-                      ? "bg-white text-black hover:bg-gray-200"
-                      : "liquid-glass border border-white/20 text-white hover:bg-white hover:text-black"
+                      ? "bg-[#ffffff] text-[#2f3131] hover:opacity-90"
+                      : "bg-white/5 border border-white/10 text-[#d1e4fb] hover:bg-white/10"
                   }`}
                 >
                   {tier.cta}

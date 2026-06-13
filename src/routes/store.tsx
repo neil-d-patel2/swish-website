@@ -150,13 +150,13 @@ function StorePage() {
                 onClick={() => void navigate({ to: "/" })}
                 className="text-base font-bold tracking-tight cursor-pointer hover:opacity-70 transition-opacity duration-150"
               >
-                Swish
+                Home 
               </button>
               <span className="text-border">|</span>
               <h1 className="text-base font-semibold">{store.name}</h1>
               <span className="flex items-center gap-1.5 bg-green-500/10 border border-green-500/20 text-green-600 dark:text-green-400 text-xs font-medium px-2.5 py-1 rounded-full">
                 <span className="w-1.5 h-1.5 rounded-full bg-green-500 dark:bg-green-400 animate-pulse" />
-                Live
+                Online
               </span>
             </div>
             <div className="flex items-center gap-3">
