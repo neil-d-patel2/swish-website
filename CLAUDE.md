@@ -86,3 +86,5 @@ For every error encountered (build failures, runtime errors, CI failures, config
 3. If a first fix attempt fails and a second is needed, document both — the failed attempt and the reason it didn't work are as valuable as the solution.
 
 This log is the project's institutional memory for debugging. Future sessions should check `errors-notes.md` before reaching for a generic solution to a familiar-looking error.
+
+Before making ANY change in the codebase, create a short summary of the change, then prompt the user to allow the write. 
