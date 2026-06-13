@@ -68,6 +68,9 @@ export function Navbar({ variant = "dark" }: { variant?: "light" | "dark" }) {
           <Link to="/pricing" className={linkClass}>
             Pricing
           </Link>
+          <Link to="/waitlist" className={linkClass}>
+            Waitlist
+          </Link>
           <Link to="/contact" className={linkClass}>
             Contact
           </Link>

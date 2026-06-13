@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { VaultShieldHero } from "@/components/VaultShieldHero";
+import { SignInHero } from "@/components/SignInHero";
 
 export const Route = createFileRoute("/")({
-  component: VaultShieldHero,
+  component: SignInHero,
 });

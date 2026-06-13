@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
+import { supabase } from "@/lib/supabase";
 
 const VIDEO_SRC =
   "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260530_042513_df96a13b-6155-4f6e-8b93-c9dee66fba08.mp4";
@@ -13,6 +14,7 @@ const navLinks: { label: string; to: string }[] = [
   { label: "Home", to: "/" },
   { label: "Pricing", to: "/pricing" },
   { label: "Stores", to: "/stores" },
+  { label: "Waitlist", to: "/waitlist" },
   { label: "Contact", to: "/contact" },
 ];
 
@@ -152,9 +154,22 @@ const GoogleIcon = () => (
   </svg>
 );
 
-export function SignInHero({ onSignIn }: { onSignIn: () => void }) {
+export function SignInHero({ onSignIn }: { onSignIn?: () => void }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   useVideoScrub(videoRef);
+
+  // Falls back to Google OAuth when no handler is provided (e.g. on the homepage).
+  const triggerSignIn =
+    onSignIn ??
+    (() =>
+      void supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: import.meta.env.DEV
+            ? window.location.origin
+            : "https://neil-d-patel2.github.io/swish-website/",
+        },
+      }));
 
   const { displayed, done } = useTypewriter(
     "Glad you stopped by. The big players have had the edge long enough — let's even the odds.",
@@ -178,7 +193,7 @@ export function SignInHero({ onSignIn }: { onSignIn: () => void }) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSignIn();
+    triggerSignIn();
   };
 
   // Force the first frame to paint without autoplaying.

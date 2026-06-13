@@ -9,7 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as VaultshieldRouteImport } from './routes/vaultshield'
+import { Route as WaitlistRouteImport } from './routes/waitlist'
 import { Route as StoresRouteImport } from './routes/stores'
 import { Route as StoreRouteImport } from './routes/store'
 import { Route as PricingRouteImport } from './routes/pricing'
@@ -19,9 +19,9 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ProjectsProjectIdRouteImport } from './routes/projects/$projectId'
 
-const VaultshieldRoute = VaultshieldRouteImport.update({
-  id: '/vaultshield',
-  path: '/vaultshield',
+const WaitlistRoute = WaitlistRouteImport.update({
+  id: '/waitlist',
+  path: '/waitlist',
   getParentRoute: () => rootRouteImport,
 } as any)
 const StoresRoute = StoresRouteImport.update({
@@ -73,7 +73,7 @@ export interface FileRoutesByFullPath {
   '/pricing': typeof PricingRoute
   '/store': typeof StoreRoute
   '/stores': typeof StoresRoute
-  '/vaultshield': typeof VaultshieldRoute
+  '/waitlist': typeof WaitlistRoute
   '/projects/$projectId': typeof ProjectsProjectIdRoute
 }
 export interface FileRoutesByTo {
@@ -84,7 +84,7 @@ export interface FileRoutesByTo {
   '/pricing': typeof PricingRoute
   '/store': typeof StoreRoute
   '/stores': typeof StoresRoute
-  '/vaultshield': typeof VaultshieldRoute
+  '/waitlist': typeof WaitlistRoute
   '/projects/$projectId': typeof ProjectsProjectIdRoute
 }
 export interface FileRoutesById {
@@ -96,7 +96,7 @@ export interface FileRoutesById {
   '/pricing': typeof PricingRoute
   '/store': typeof StoreRoute
   '/stores': typeof StoresRoute
-  '/vaultshield': typeof VaultshieldRoute
+  '/waitlist': typeof WaitlistRoute
   '/projects/$projectId': typeof ProjectsProjectIdRoute
 }
 export interface FileRouteTypes {
@@ -109,7 +109,7 @@ export interface FileRouteTypes {
     | '/pricing'
     | '/store'
     | '/stores'
-    | '/vaultshield'
+    | '/waitlist'
     | '/projects/$projectId'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -120,7 +120,7 @@ export interface FileRouteTypes {
     | '/pricing'
     | '/store'
     | '/stores'
-    | '/vaultshield'
+    | '/waitlist'
     | '/projects/$projectId'
   id:
     | '__root__'
@@ -131,7 +131,7 @@ export interface FileRouteTypes {
     | '/pricing'
     | '/store'
     | '/stores'
-    | '/vaultshield'
+    | '/waitlist'
     | '/projects/$projectId'
   fileRoutesById: FileRoutesById
 }
@@ -143,17 +143,17 @@ export interface RootRouteChildren {
   PricingRoute: typeof PricingRoute
   StoreRoute: typeof StoreRoute
   StoresRoute: typeof StoresRoute
-  VaultshieldRoute: typeof VaultshieldRoute
+  WaitlistRoute: typeof WaitlistRoute
   ProjectsProjectIdRoute: typeof ProjectsProjectIdRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/vaultshield': {
-      id: '/vaultshield'
-      path: '/vaultshield'
-      fullPath: '/vaultshield'
-      preLoaderRoute: typeof VaultshieldRouteImport
+    '/waitlist': {
+      id: '/waitlist'
+      path: '/waitlist'
+      fullPath: '/waitlist'
+      preLoaderRoute: typeof WaitlistRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/stores': {
@@ -223,7 +223,7 @@ const rootRouteChildren: RootRouteChildren = {
   PricingRoute: PricingRoute,
   StoreRoute: StoreRoute,
   StoresRoute: StoresRoute,
-  VaultshieldRoute: VaultshieldRoute,
+  WaitlistRoute: WaitlistRoute,
   ProjectsProjectIdRoute: ProjectsProjectIdRoute,
 }
 export const routeTree = rootRouteImport
