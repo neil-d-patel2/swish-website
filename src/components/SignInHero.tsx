@@ -167,9 +167,7 @@ export function SignInHero() {
     void supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: import.meta.env.DEV
-          ? window.location.origin
-          : "https://neil-d-patel2.github.io/swish-website/",
+        redirectTo: window.location.origin,
       },
     });
 

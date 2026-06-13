@@ -30,9 +30,7 @@ export function Navbar({ variant = "dark" }: { variant?: "light" | "dark" }) {
     supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: import.meta.env.DEV
-          ? window.location.origin
-          : "https://neil-d-patel2.github.io/swish-website/",
+        redirectTo: window.location.origin,
       },
     });
 
