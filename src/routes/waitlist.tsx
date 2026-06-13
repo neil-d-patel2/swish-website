@@ -10,7 +10,6 @@ export const Route = createFileRoute("/waitlist")({
 });
 
 // Cream + black design system (shared with pricing/contact)
-const cream = "#F6F1E7";
 const creamCard = "#FBF8F1";
 const ink = "#000000";
 const muted = "rgba(0,0,0,0.6)";
