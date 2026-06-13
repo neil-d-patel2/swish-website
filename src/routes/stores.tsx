@@ -4,6 +4,7 @@ export const Route = createFileRoute("/stores")({
   component: StoresPage,
 });
 
+
 function StoresPage() {
   return (
     <div className="text-white min-h-screen flex items-center justify-center" style={{ background: "#07060f" }}>
