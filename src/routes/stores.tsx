@@ -14,7 +14,6 @@ const creamCard = "#FBF8F1";
 const creamDeep = "#EFE7D6";
 const ink = "#000000";
 const muted = "rgba(0,0,0,0.6)";
-const faint = "rgba(0,0,0,0.45)";
 const heading = "var(--font-heading)";
 const body = "var(--font-body)";
 const hairline = "inset 0 0 0 1px rgba(0,0,0,0.1)";
@@ -22,7 +21,6 @@ const hairline = "inset 0 0 0 1px rgba(0,0,0,0.1)";
 type Store = {
   id: string;
   name: string;
-  owner_email: string | null;
   created_at: string;
 };
 
@@ -43,7 +41,7 @@ function StoresPage() {
   useEffect(() => {
     supabase
       .from("stores")
-      .select("id, name, owner_email, created_at")
+      .select("id, name, created_at")
       .order("created_at", { ascending: false })
       .then(async ({ data }) => {
         const list = data ?? [];
@@ -121,16 +119,11 @@ function StoresPage() {
                       <StoreIcon className="w-5 h-5" style={{ color: ink }} />
                     </div>
                     <h3
-                      className="text-2xl font-bold tracking-tight mb-1 truncate"
+                      className="text-2xl font-bold tracking-tight mb-6 truncate"
                       style={{ fontFamily: heading, color: ink }}
                     >
                       {store.name}
                     </h3>
-                    {store.owner_email && (
-                      <p className="text-sm truncate mb-6" style={{ color: faint }}>
-                        {store.owner_email}
-                      </p>
-                    )}
                     <div className="mt-auto flex items-center justify-between">
                       <span
                         className="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-full"
@@ -234,11 +227,6 @@ function StoreDetail({ store, onBack }: { store: Store; onBack: () => void }) {
           >
             {store.name}
           </h1>
-          {store.owner_email && (
-            <p className="text-base mt-1 truncate" style={{ color: faint }}>
-              {store.owner_email}
-            </p>
-          )}
         </div>
       </section>
 
