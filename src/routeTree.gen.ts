@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as VaultshieldRouteImport } from './routes/vaultshield'
+import { Route as StoresRouteImport } from './routes/stores'
 import { Route as StoreRouteImport } from './routes/store'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as ContactRouteImport } from './routes/contact'
@@ -20,6 +21,11 @@ import { Route as ProjectsProjectIdRouteImport } from './routes/projects/$projec
 const VaultshieldRoute = VaultshieldRouteImport.update({
   id: '/vaultshield',
   path: '/vaultshield',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StoresRoute = StoresRouteImport.update({
+  id: '/stores',
+  path: '/stores',
   getParentRoute: () => rootRouteImport,
 } as any)
 const StoreRoute = StoreRouteImport.update({
@@ -59,6 +65,7 @@ export interface FileRoutesByFullPath {
   '/contact': typeof ContactRoute
   '/dashboard': typeof DashboardRoute
   '/store': typeof StoreRoute
+  '/stores': typeof StoresRoute
   '/vaultshield': typeof VaultshieldRoute
   '/projects/$projectId': typeof ProjectsProjectIdRoute
 }
@@ -68,6 +75,7 @@ export interface FileRoutesByTo {
   '/contact': typeof ContactRoute
   '/dashboard': typeof DashboardRoute
   '/store': typeof StoreRoute
+  '/stores': typeof StoresRoute
   '/vaultshield': typeof VaultshieldRoute
   '/projects/$projectId': typeof ProjectsProjectIdRoute
 }
@@ -78,6 +86,7 @@ export interface FileRoutesById {
   '/contact': typeof ContactRoute
   '/dashboard': typeof DashboardRoute
   '/store': typeof StoreRoute
+  '/stores': typeof StoresRoute
   '/vaultshield': typeof VaultshieldRoute
   '/projects/$projectId': typeof ProjectsProjectIdRoute
 }
@@ -89,6 +98,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/dashboard'
     | '/store'
+    | '/stores'
     | '/vaultshield'
     | '/projects/$projectId'
   fileRoutesByTo: FileRoutesByTo
@@ -98,6 +108,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/dashboard'
     | '/store'
+    | '/stores'
     | '/vaultshield'
     | '/projects/$projectId'
   id:
@@ -107,6 +118,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/dashboard'
     | '/store'
+    | '/stores'
     | '/vaultshield'
     | '/projects/$projectId'
   fileRoutesById: FileRoutesById
@@ -117,6 +129,7 @@ export interface RootRouteChildren {
   ContactRoute: typeof ContactRoute
   DashboardRoute: typeof DashboardRoute
   StoreRoute: typeof StoreRoute
+  StoresRoute: typeof StoresRoute
   VaultshieldRoute: typeof VaultshieldRoute
   ProjectsProjectIdRoute: typeof ProjectsProjectIdRoute
 }
@@ -128,6 +141,13 @@ declare module '@tanstack/react-router' {
       path: '/vaultshield'
       fullPath: '/vaultshield'
       preLoaderRoute: typeof VaultshieldRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/stores': {
+      id: '/stores'
+      path: '/stores'
+      fullPath: '/stores'
+      preLoaderRoute: typeof StoresRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/store': {
@@ -181,6 +201,7 @@ const rootRouteChildren: RootRouteChildren = {
   ContactRoute: ContactRoute,
   DashboardRoute: DashboardRoute,
   StoreRoute: StoreRoute,
+  StoresRoute: StoresRoute,
   VaultshieldRoute: VaultshieldRoute,
   ProjectsProjectIdRoute: ProjectsProjectIdRoute,
 }
