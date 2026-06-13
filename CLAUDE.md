@@ -87,4 +87,12 @@ For every error encountered (build failures, runtime errors, CI failures, config
 
 This log is the project's institutional memory for debugging. Future sessions should check `errors-notes.md` before reaching for a generic solution to a familiar-looking error.
 
-Before making ANY change in the codebase, create a short summary of the change, then prompt the user to allow the write. 
+Before making ANY change in the codebase, create a short summary of the change, then prompt the user to allow the write.
+
+## Theming / Dark mode
+
+Dark mode is session-only (resets on reload) and covers every page **except the home/hero** (`index.tsx` → `SignInHero`, which is fixed-light via hardcoded Tailwind colors).
+
+- **State:** `src/components/theme-provider.tsx` holds `"light" | "dark"` in React state (no persistence) and toggles the `.dark` class on `<html>`. `ThemeProvider` wraps `<Outlet/>` in `__root.tsx`. Toggle button (sun/moon) lives in `Navbar`, which is what the 6 themeable pages share.
+- **App pages** (`admin`, `projects`, kanban components) are shadcn-based and flip automatically via the existing `.dark { --background … }` block in `index.css`. They have no Navbar/toggle — reached after toggling on `dashboard`/`store`.
+- **Marketing pages** (`pricing`, `stores`, `store`, `waitlist`, `contact`, `dashboard`) used hardcoded cream/black constants. These now point at a `--mk-*` CSS-variable palette defined in `index.css` (`:root` = light, `.dark` = dark overrides). Key vars: `--mk-bg` (page canvas), `--mk-surface` (cards, was `#ffffff`), `--mk-cream`/`-card`/`-deep`, `--mk-ink` (text), `--mk-muted`/`-faint`, `--mk-hairline`, `--mk-border`, `--mk-accent` + `--mk-on-accent` (inverted blocks: primary buttons, CTA bands — accent goes light/on-accent goes dark in dark mode), `--mk-tint`/`-tint-strong`. Inline semantic status colors (red `#ba1a1a`, green, amber) were intentionally left as literals. 
