@@ -16,7 +16,7 @@ export function Navbar({ variant = "dark" }: { variant?: "light" | "dark" }) {
     : "liquid-glass rounded-xl px-4 py-2 flex items-center justify-between";
 
   const linkClass = isLight
-    ? "text-sm transition-colors text-[#434653] hover:text-[#094cb2]"
+    ? "text-sm transition-opacity text-black/70 hover:opacity-100 hover:text-black"
     : "text-sm text-white transition-colors hover:text-gray-300";
 
   const whiteBtn = isLight
@@ -47,7 +47,7 @@ export function Navbar({ variant = "dark" }: { variant?: "light" | "dark" }) {
           }
           style={
             isLight
-              ? { color: "#094cb2", fontFamily: "'Noto Serif', serif" }
+              ? { color: "#000000", fontFamily: "var(--font-heading)" }
               : undefined
           }
         >

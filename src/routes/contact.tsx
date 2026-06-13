@@ -9,12 +9,15 @@ export const Route = createFileRoute("/contact")({
   component: ContactPage,
 });
 
-const serif = "'Noto Serif', serif";
-const body = "'Inter', sans-serif";
-const label = "'Public Sans', sans-serif";
-
-// inset 1px ring used across the theme's cards/inputs
-const ghostBorder = "inset 0 0 0 1px rgba(195,198,213,0.15)";
+// Cream + black design system (shared with pricing/stores)
+const cream = "#F6F1E7";
+const creamCard = "#FBF8F1";
+const creamDeep = "#EFE7D6";
+const ink = "#000000";
+const muted = "rgba(0,0,0,0.6)";
+const heading = "var(--font-heading)";
+const body = "var(--font-body)";
+const hairline = "inset 0 0 0 1px rgba(0,0,0,0.1)";
 
 const SUBJECTS = [
   "Platform Inquiry",
@@ -56,18 +59,18 @@ function ContactPage() {
   );
 
   const inputClass =
-    "w-full rounded-lg px-4 py-3 outline-none transition-shadow focus:ring-1 focus:ring-[#094cb2]";
+    "w-full rounded-lg px-4 py-3 outline-none transition-shadow focus:ring-1 focus:ring-black";
   const inputStyle = {
-    background: "#faf9fa",
-    color: "#1b1c1d",
+    background: creamCard,
+    color: ink,
     fontFamily: body,
-    boxShadow: ghostBorder,
+    boxShadow: hairline,
   } as const;
 
   return (
     <div
       className="min-h-screen flex flex-col"
-      style={{ background: "#faf9fa", color: "#1b1c1d", fontFamily: body }}
+      style={{ background: cream, color: ink, fontFamily: body }}
     >
       <div className="px-6 md:px-12 lg:px-16">
         <Navbar variant="light" />
@@ -78,13 +81,13 @@ function ContactPage() {
         <section className="mb-16 max-w-3xl">
           <h1
             className="text-5xl md:text-7xl font-bold leading-tight mb-6 tracking-tight"
-            style={{ fontFamily: serif, color: "#1b1c1d" }}
+            style={{ fontFamily: heading, color: ink }}
           >
             Get in Touch
           </h1>
           <p
             className="text-xl leading-relaxed max-w-2xl"
-            style={{ color: "#434653" }}
+            style={{ color: muted }}
           >
             We're here to curate your digital growth. Reach out to discuss how
             Swish can elevate your business operations with our bespoke platform
@@ -99,12 +102,12 @@ function ContactPage() {
             className="lg:col-span-7 rounded-xl p-8 md:p-12 relative overflow-hidden"
             style={{
               background: "#ffffff",
-              boxShadow: `${ghostBorder}, 0 8px 30px rgb(0 0 0 / 0.04)`,
+              boxShadow: `${hairline}, 0 8px 30px rgb(0 0 0 / 0.04)`,
             }}
           >
             <h2
               className="text-2xl font-bold mb-8"
-              style={{ fontFamily: serif, color: "#1b1c1d" }}
+              style={{ fontFamily: heading, color: ink }}
             >
               Send a Message
             </h2>
@@ -114,7 +117,7 @@ function ContactPage() {
                   <label
                     htmlFor="name"
                     className="text-sm font-medium"
-                    style={{ fontFamily: label, color: "#434653" }}
+                    style={{ fontFamily: body, color: muted }}
                   >
                     Full Name
                   </label>
@@ -133,7 +136,7 @@ function ContactPage() {
                   <label
                     htmlFor="email"
                     className="text-sm font-medium"
-                    style={{ fontFamily: label, color: "#434653" }}
+                    style={{ fontFamily: body, color: muted }}
                   >
                     Email Address
                   </label>
@@ -154,7 +157,7 @@ function ContactPage() {
                 <label
                   htmlFor="subject"
                   className="text-sm font-medium"
-                  style={{ fontFamily: label, color: "#434653" }}
+                  style={{ fontFamily: body, color: muted }}
                 >
                   Subject
                 </label>
@@ -175,7 +178,7 @@ function ContactPage() {
                 <label
                   htmlFor="message"
                   className="text-sm font-medium"
-                  style={{ fontFamily: label, color: "#434653" }}
+                  style={{ fontFamily: body, color: muted }}
                 >
                   Message
                 </label>
@@ -195,19 +198,12 @@ function ContactPage() {
                 type="submit"
                 disabled={state === "loading"}
                 className="w-full md:w-auto px-8 py-3 rounded-full font-medium shadow-sm hover:shadow-md transition-shadow active:scale-95 duration-200 mt-4 disabled:opacity-80 cursor-pointer"
-                style={{
-                  fontFamily: body,
-                  color: "#ffffff",
-                  background:
-                    state === "success"
-                      ? "#6d5e00"
-                      : "linear-gradient(90deg, #094cb2, #3366cc)",
-                }}
+                style={{ fontFamily: body, color: "#ffffff", background: ink }}
               >
                 {state === "loading"
                   ? "Sending..."
                   : state === "success"
-                    ? "Inquiry Sent"
+                    ? "Inquiry Sent ✓"
                     : "Send Inquiry"}
               </button>
 
@@ -224,11 +220,11 @@ function ContactPage() {
             {/* Direct Lines */}
             <div
               className="rounded-xl p-8"
-              style={{ background: "#f5f3f4", boxShadow: ghostBorder }}
+              style={{ background: "#ffffff", boxShadow: hairline }}
             >
               <h3
                 className="text-xl font-bold mb-6"
-                style={{ fontFamily: serif, color: "#1b1c1d" }}
+                style={{ fontFamily: heading, color: ink }}
               >
                 Direct Lines
               </h3>
@@ -236,21 +232,21 @@ function ContactPage() {
                 <li className="flex items-start gap-4">
                   <div
                     className="w-10 h-10 rounded-full flex items-center justify-center shrink-0"
-                    style={{ background: "#efedee" }}
+                    style={{ background: cream }}
                   >
-                    <Mail className="w-5 h-5" style={{ color: "#094cb2" }} />
+                    <Mail className="w-5 h-5" style={{ color: ink }} />
                   </div>
                   <div>
                     <p
                       className="text-sm mb-1"
-                      style={{ fontFamily: label, color: "#434653" }}
+                      style={{ fontFamily: body, color: muted }}
                     >
                       Email
                     </p>
                     <a
                       href="mailto:swishappdev@gmail.com"
-                      className="transition-colors hover:text-[#094cb2]"
-                      style={{ color: "#1b1c1d" }}
+                      className="transition-opacity hover:opacity-60"
+                      style={{ color: ink }}
                     >
                       swishappdev@gmail.com
                     </a>
@@ -259,21 +255,21 @@ function ContactPage() {
                 <li className="flex items-start gap-4">
                   <div
                     className="w-10 h-10 rounded-full flex items-center justify-center shrink-0"
-                    style={{ background: "#efedee" }}
+                    style={{ background: cream }}
                   >
-                    <Phone className="w-5 h-5" style={{ color: "#094cb2" }} />
+                    <Phone className="w-5 h-5" style={{ color: ink }} />
                   </div>
                   <div>
                     <p
                       className="text-sm mb-1"
-                      style={{ fontFamily: label, color: "#434653" }}
+                      style={{ fontFamily: body, color: muted }}
                     >
                       Phone
                     </p>
                     <a
                       href="tel:+13023101963"
-                      className="transition-colors hover:text-[#094cb2]"
-                      style={{ color: "#1b1c1d" }}
+                      className="transition-opacity hover:opacity-60"
+                      style={{ color: ink }}
                     >
                       +1 (302) 310 - 1963
                     </a>
@@ -285,7 +281,7 @@ function ContactPage() {
             {/* Headquarters */}
             <div
               className="rounded-xl p-8 flex-grow relative overflow-hidden group"
-              style={{ background: "#dbdadb", boxShadow: ghostBorder }}
+              style={{ background: creamDeep, boxShadow: hairline }}
             >
               <div
                 className="absolute inset-0 opacity-10 mix-blend-multiply bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
@@ -297,7 +293,7 @@ function ContactPage() {
               <div className="relative z-10">
                 <h3
                   className="text-xl font-bold mb-6"
-                  style={{ fontFamily: serif, color: "#1b1c1d" }}
+                  style={{ fontFamily: heading, color: ink }}
                 >
                   Headquarters
                 </h3>
@@ -306,10 +302,10 @@ function ContactPage() {
                     className="w-10 h-10 rounded-full flex items-center justify-center shrink-0 shadow-sm"
                     style={{ background: "#ffffff" }}
                   >
-                    <MapPin className="w-5 h-5" style={{ color: "#094cb2" }} />
+                    <MapPin className="w-5 h-5" style={{ color: ink }} />
                   </div>
                   <div>
-                    <p className="leading-relaxed" style={{ color: "#1b1c1d" }}>
+                    <p className="leading-relaxed" style={{ color: ink }}>
                       Wyman Park Building, Suite 100
                       <br />
                       3400 N. Charles St
@@ -318,8 +314,8 @@ function ContactPage() {
                     </p>
                     <a
                       href="#"
-                      className="inline-flex items-center gap-1 mt-4 text-sm transition-colors group/link"
-                      style={{ fontFamily: label, color: "#094cb2" }}
+                      className="inline-flex items-center gap-1 mt-4 text-sm transition-opacity hover:opacity-60 group/link"
+                      style={{ fontFamily: body, color: ink }}
                     >
                       Get Directions
                       <ArrowRight className="w-4 h-4 transition-transform group-hover/link:translate-x-1" />
@@ -335,12 +331,12 @@ function ContactPage() {
       {/* Footer */}
       <footer
         className="w-full py-16 border-t mt-auto"
-        style={{ background: "#ffffff", borderColor: "#e3e2e3" }}
+        style={{ background: "#ffffff", borderColor: "rgba(0,0,0,0.1)" }}
       >
         <div className="flex flex-col md:flex-row justify-between items-center px-6 md:px-12 lg:px-16 max-w-6xl mx-auto gap-8">
           <div
             className="text-2xl font-bold tracking-tight"
-            style={{ fontFamily: serif, color: "#1b1c1d" }}
+            style={{ fontFamily: heading, color: ink }}
           >
             Swish
           </div>
@@ -350,18 +346,15 @@ function ContactPage() {
                 <a
                   key={l}
                   href="#"
-                  className="text-sm transition-colors hover:text-[#094cb2]"
-                  style={{ fontFamily: label, color: "#434653" }}
+                  className="text-sm transition-opacity hover:opacity-60"
+                  style={{ fontFamily: body, color: muted }}
                 >
                   {l}
                 </a>
               ),
             )}
           </div>
-          <div
-            className="text-sm"
-            style={{ fontFamily: label, color: "#434653" }}
-          >
+          <div className="text-sm" style={{ fontFamily: body, color: muted }}>
             © 2026 Swish Inc. All rights reserved.
           </div>
         </div>

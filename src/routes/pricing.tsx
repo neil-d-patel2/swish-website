@@ -7,13 +7,17 @@ export const Route = createFileRoute("/pricing")({
   component: PricingPage,
 });
 
-const serif = "'Noto Serif', serif";
-const body = "'Inter', sans-serif";
-const label = "'Public Sans', sans-serif";
-
-// inset 1px ring used across the design system's cards
-const ghostBorder = "inset 0 0 0 1px rgba(195,198,213,0.15)";
-const primaryGradient = "linear-gradient(90deg, #094cb2, #3366cc)";
+// Cream + black design system (shared with contact/stores)
+const cream = "#F6F1E7";
+const creamCard = "#FBF8F1";
+const creamDeep = "#EFE7D6";
+const toggleBg = "#EAE3D4";
+const ink = "#000000";
+const muted = "rgba(0,0,0,0.6)";
+const faint = "rgba(0,0,0,0.45)";
+const heading = "var(--font-heading)";
+const body = "var(--font-body)";
+const hairline = "inset 0 0 0 1px rgba(0,0,0,0.1)";
 
 type Billing = "monthly" | "annual";
 
@@ -136,7 +140,7 @@ function PricingPage() {
   return (
     <div
       className="min-h-screen flex flex-col"
-      style={{ background: "#faf9fa", color: "#1b1c1d", fontFamily: body }}
+      style={{ background: cream, color: ink, fontFamily: body }}
     >
       <div className="px-6 md:px-12 lg:px-16">
         <Navbar variant="light" />
@@ -147,17 +151,17 @@ function PricingPage() {
         <section className="text-center max-w-3xl mx-auto mb-12">
           <span
             className="inline-block text-xs font-medium uppercase tracking-[0.18em] mb-5"
-            style={{ fontFamily: label, color: "#094cb2" }}
+            style={{ fontFamily: body, color: faint }}
           >
             Pricing
           </span>
           <h1
             className="text-4xl md:text-6xl font-bold leading-tight tracking-tight mb-5"
-            style={{ fontFamily: serif, color: "#1b1c1d" }}
+            style={{ fontFamily: heading, color: ink }}
           >
             Transparent pricing for infinite growth.
           </h1>
-          <p className="text-lg leading-relaxed" style={{ color: "#434653" }}>
+          <p className="text-lg leading-relaxed" style={{ color: muted }}>
             Deploy AI-driven automation that scales with your ambition. Choose a
             plan that fuels your store's velocity — switch or cancel anytime.
           </p>
@@ -169,7 +173,7 @@ function PricingPage() {
             className="inline-flex p-1 rounded-full"
             role="tablist"
             aria-label="Billing period"
-            style={{ background: "#efedee", boxShadow: ghostBorder }}
+            style={{ background: toggleBg, boxShadow: hairline }}
           >
             {(["monthly", "annual"] as const).map((period) => {
               const active = billing === period;
@@ -179,12 +183,12 @@ function PricingPage() {
                   role="tab"
                   aria-selected={active}
                   onClick={() => setBilling(period)}
-                  className="px-5 py-2 rounded-full text-sm font-medium capitalize transition-all duration-200 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#094cb2]"
+                  className="px-5 py-2 rounded-full text-sm font-medium capitalize transition-all duration-200 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-black"
                   style={{
-                    fontFamily: label,
-                    color: active ? "#ffffff" : "#434653",
-                    background: active ? primaryGradient : "transparent",
-                    boxShadow: active ? "0 1px 3px rgb(0 0 0 / 0.12)" : "none",
+                    fontFamily: body,
+                    color: active ? "#ffffff" : muted,
+                    background: active ? ink : "transparent",
+                    boxShadow: active ? "0 1px 3px rgb(0 0 0 / 0.2)" : "none",
                   }}
                 >
                   {period}
@@ -195,9 +199,9 @@ function PricingPage() {
           <span
             className="text-xs font-semibold px-3 py-1.5 rounded-full"
             style={{
-              fontFamily: label,
-              color: "#4a3f00",
-              background: "rgba(191,171,73,0.22)",
+              fontFamily: body,
+              color: ink,
+              background: "rgba(0,0,0,0.06)",
             }}
           >
             Save 20%
@@ -220,17 +224,17 @@ function PricingPage() {
                 style={{
                   background: "#ffffff",
                   boxShadow: isPro
-                    ? "0 0 0 2px #094cb2, 0 20px 40px -12px rgb(9 76 178 / 0.28)"
-                    : `${ghostBorder}, 0 8px 30px rgb(0 0 0 / 0.05)`,
+                    ? "0 0 0 2px #000000, 0 20px 40px -12px rgb(0 0 0 / 0.25)"
+                    : `${hairline}, 0 8px 30px rgb(0 0 0 / 0.05)`,
                 }}
               >
                 {isPro && (
                   <span
                     className="absolute -top-3 left-1/2 -translate-x-1/2 inline-flex items-center gap-1.5 text-xs font-semibold px-3.5 py-1.5 rounded-full whitespace-nowrap"
                     style={{
-                      fontFamily: label,
+                      fontFamily: body,
                       color: "#ffffff",
-                      background: primaryGradient,
+                      background: ink,
                     }}
                   >
                     <Sparkles className="w-3.5 h-3.5" />
@@ -240,19 +244,19 @@ function PricingPage() {
 
                 <span
                   className="text-xs font-medium uppercase tracking-[0.16em] mb-3"
-                  style={{ fontFamily: label, color: "#737784" }}
+                  style={{ fontFamily: body, color: faint }}
                 >
                   {tier.tag}
                 </span>
                 <h3
                   className="text-2xl font-bold mb-2"
-                  style={{ fontFamily: serif, color: "#1b1c1d" }}
+                  style={{ fontFamily: heading, color: ink }}
                 >
                   {tier.name}
                 </h3>
                 <p
                   className="text-sm leading-relaxed mb-6"
-                  style={{ color: "#434653" }}
+                  style={{ color: muted }}
                 >
                   {tier.blurb}
                 </p>
@@ -261,19 +265,19 @@ function PricingPage() {
                   {price.strike && (
                     <span
                       className="text-lg line-through tabular-nums"
-                      style={{ color: "#a8aab4" }}
+                      style={{ color: "rgba(0,0,0,0.35)" }}
                     >
                       {price.strike}
                     </span>
                   )}
                   <span
                     className="text-5xl font-bold tabular-nums leading-none"
-                    style={{ color: "#1b1c1d" }}
+                    style={{ color: ink }}
                   >
                     {price.amount}
                   </span>
                 </div>
-                <span className="text-sm mb-7" style={{ color: "#737784" }}>
+                <span className="text-sm mb-7" style={{ color: faint }}>
                   {price.sub}
                 </span>
 
@@ -282,23 +286,23 @@ function PricingPage() {
                     <li
                       key={f.text}
                       className="flex items-start gap-3 text-sm"
-                      style={{ color: f.included ? "#1b1c1d" : "#a8aab4" }}
+                      style={{ color: f.included ? ink : "rgba(0,0,0,0.35)" }}
                     >
                       {f.included ? (
                         <span
                           className="mt-0.5 w-5 h-5 rounded-full flex items-center justify-center shrink-0"
-                          style={{ background: "rgba(9,76,178,0.1)" }}
+                          style={{ background: "rgba(0,0,0,0.08)" }}
                         >
                           <Check
                             className="w-3.5 h-3.5"
-                            style={{ color: "#094cb2" }}
+                            style={{ color: ink }}
                           />
                         </span>
                       ) : (
                         <span className="mt-0.5 w-5 h-5 flex items-center justify-center shrink-0">
                           <Minus
                             className="w-3.5 h-3.5"
-                            style={{ color: "#c3c6d5" }}
+                            style={{ color: "rgba(0,0,0,0.25)" }}
                           />
                         </span>
                       )}
@@ -308,19 +312,15 @@ function PricingPage() {
                 </ul>
 
                 <button
-                  className="w-full py-3.5 rounded-full font-semibold transition-all duration-200 cursor-pointer active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#094cb2] focus-visible:ring-offset-2"
+                  className="w-full py-3.5 rounded-full font-semibold transition-all duration-200 cursor-pointer active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2"
                   style={
                     isPro
-                      ? {
-                          fontFamily: body,
-                          color: "#ffffff",
-                          background: primaryGradient,
-                        }
+                      ? { fontFamily: body, color: "#ffffff", background: ink }
                       : {
                           fontFamily: body,
-                          color: "#094cb2",
+                          color: ink,
                           background: "#ffffff",
-                          boxShadow: "inset 0 0 0 1.5px #094cb2",
+                          boxShadow: "inset 0 0 0 1.5px #000000",
                         }
                   }
                 >
@@ -335,14 +335,11 @@ function PricingPage() {
         <section className="mb-28">
           <h2
             className="text-3xl font-bold text-center mb-3 tracking-tight"
-            style={{ fontFamily: serif, color: "#1b1c1d" }}
+            style={{ fontFamily: heading, color: ink }}
           >
             Compare every feature
           </h2>
-          <p
-            className="text-center text-base mb-10"
-            style={{ color: "#434653" }}
-          >
+          <p className="text-center text-base mb-10" style={{ color: muted }}>
             A side-by-side look at what each plan unlocks.
           </p>
 
@@ -350,16 +347,16 @@ function PricingPage() {
             className="rounded-2xl overflow-hidden"
             style={{
               background: "#ffffff",
-              boxShadow: `${ghostBorder}, 0 8px 30px rgb(0 0 0 / 0.04)`,
+              boxShadow: `${hairline}, 0 8px 30px rgb(0 0 0 / 0.04)`,
             }}
           >
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse min-w-[640px]">
                 <thead>
-                  <tr style={{ background: "#f5f3f4" }}>
+                  <tr style={{ background: creamDeep }}>
                     <th
                       className="py-4 px-6 text-xs font-semibold uppercase tracking-[0.12em]"
-                      style={{ fontFamily: label, color: "#434653" }}
+                      style={{ fontFamily: body, color: muted }}
                     >
                       Feature
                     </th>
@@ -368,8 +365,8 @@ function PricingPage() {
                         key={t.name}
                         className="py-4 px-6 text-center text-sm font-bold"
                         style={{
-                          fontFamily: serif,
-                          color: t.highlighted ? "#094cb2" : "#1b1c1d",
+                          fontFamily: heading,
+                          color: t.highlighted ? ink : "rgba(0,0,0,0.7)",
                         }}
                       >
                         {t.name}
@@ -382,13 +379,13 @@ function PricingPage() {
                     <tr
                       key={row.feature}
                       style={{
-                        borderTop: "1px solid #efedee",
-                        background: i % 2 ? "#faf9fa" : "#ffffff",
+                        borderTop: "1px solid rgba(0,0,0,0.08)",
+                        background: i % 2 ? creamCard : "#ffffff",
                       }}
                     >
                       <td
                         className="py-4 px-6 font-medium"
-                        style={{ color: "#1b1c1d" }}
+                        style={{ color: ink }}
                       >
                         {row.feature}
                       </td>
@@ -398,16 +395,16 @@ function PricingPage() {
                             val ? (
                               <Check
                                 className="w-5 h-5 mx-auto"
-                                style={{ color: "#094cb2" }}
+                                style={{ color: ink }}
                               />
                             ) : (
                               <Minus
                                 className="w-5 h-5 mx-auto"
-                                style={{ color: "#c3c6d5" }}
+                                style={{ color: "rgba(0,0,0,0.25)" }}
                               />
                             )
                           ) : (
-                            <span style={{ color: "#434653" }}>{val}</span>
+                            <span style={{ color: muted }}>{val}</span>
                           )}
                         </td>
                       ))}
@@ -423,7 +420,7 @@ function PricingPage() {
         <section className="max-w-3xl mx-auto mb-24">
           <h2
             className="text-3xl font-bold text-center mb-10 tracking-tight"
-            style={{ fontFamily: serif, color: "#1b1c1d" }}
+            style={{ fontFamily: heading, color: ink }}
           >
             Frequently asked questions
           </h2>
@@ -437,27 +434,23 @@ function PricingPage() {
         {/* Final CTA band */}
         <section
           className="rounded-2xl px-8 py-14 text-center relative overflow-hidden"
-          style={{ background: primaryGradient }}
+          style={{ background: ink }}
         >
           <h2
             className="text-3xl md:text-4xl font-bold mb-4"
-            style={{ fontFamily: serif, color: "#ffffff" }}
+            style={{ fontFamily: heading, color: "#ffffff" }}
           >
             Ready to put your growth on autopilot?
           </h2>
           <p
             className="text-base mb-8 max-w-xl mx-auto"
-            style={{ color: "rgba(255,255,255,0.85)" }}
+            style={{ color: "rgba(255,255,255,0.8)" }}
           >
             Start your 14-day free trial today. No credit card required.
           </p>
           <button
             className="px-8 py-3.5 rounded-full font-semibold transition-transform duration-200 cursor-pointer active:scale-[0.98] hover:shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
-            style={{
-              fontFamily: body,
-              color: "#094cb2",
-              background: "#ffffff",
-            }}
+            style={{ fontFamily: body, color: ink, background: cream }}
           >
             Get Started Free
           </button>
@@ -467,12 +460,12 @@ function PricingPage() {
       {/* Footer */}
       <footer
         className="w-full py-16 border-t mt-16"
-        style={{ background: "#ffffff", borderColor: "#e3e2e3" }}
+        style={{ background: "#ffffff", borderColor: "rgba(0,0,0,0.1)" }}
       >
         <div className="flex flex-col md:flex-row justify-between items-center px-6 md:px-12 lg:px-16 max-w-6xl mx-auto gap-8">
           <div
             className="text-2xl font-bold tracking-tight"
-            style={{ fontFamily: serif, color: "#1b1c1d" }}
+            style={{ fontFamily: heading, color: ink }}
           >
             Swish
           </div>
@@ -482,18 +475,15 @@ function PricingPage() {
                 <a
                   key={l}
                   href="#"
-                  className="text-sm transition-colors hover:text-[#094cb2]"
-                  style={{ fontFamily: label, color: "#434653" }}
+                  className="text-sm transition-opacity hover:opacity-60"
+                  style={{ fontFamily: body, color: muted }}
                 >
                   {l}
                 </a>
               ),
             )}
           </div>
-          <div
-            className="text-sm"
-            style={{ fontFamily: label, color: "#434653" }}
-          >
+          <div className="text-sm" style={{ fontFamily: body, color: muted }}>
             © 2026 Swish Inc. All rights reserved.
           </div>
         </div>
@@ -507,22 +497,19 @@ function FaqItem({ question, answer }: { question: string; answer: string }) {
   return (
     <div
       className="rounded-xl overflow-hidden"
-      style={{ background: "#ffffff", boxShadow: ghostBorder }}
+      style={{ background: "#ffffff", boxShadow: hairline }}
     >
       <button
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
-        className="w-full flex items-center justify-between gap-4 px-6 py-5 text-left cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#094cb2]"
+        className="w-full flex items-center justify-between gap-4 px-6 py-5 text-left cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-black"
       >
-        <span className="text-base font-medium" style={{ color: "#1b1c1d" }}>
+        <span className="text-base font-medium" style={{ color: ink }}>
           {question}
         </span>
         <ChevronDown
           className="w-5 h-5 shrink-0 transition-transform duration-300"
-          style={{
-            color: "#737784",
-            transform: open ? "rotate(180deg)" : "none",
-          }}
+          style={{ color: faint, transform: open ? "rotate(180deg)" : "none" }}
         />
       </button>
       <div
@@ -532,7 +519,7 @@ function FaqItem({ question, answer }: { question: string; answer: string }) {
         <div className="overflow-hidden">
           <p
             className="px-6 pb-5 text-sm leading-relaxed"
-            style={{ color: "#434653" }}
+            style={{ color: muted }}
           >
             {answer}
           </p>
