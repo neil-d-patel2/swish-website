@@ -1,19 +1,29 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useSupabaseAuth } from "@/hooks/use-supabase-auth";
-import { useTheme } from "@/hooks/use-theme";
 import { supabase } from "@/lib/supabase";
 import { useState, useEffect } from "react";
-import { Sun, Moon, ArrowRight, Loader2 } from "lucide-react";
+import { ArrowRight, Store as StoreIcon, Package, Rocket } from "lucide-react";
 import { motion } from "framer-motion";
+import { Navbar } from "@/components/Navbar";
 
 export const Route = createFileRoute("/dashboard")({
   component: DashboardPage,
 });
 
+// Cream + black design system (shared with pricing/contact/stores)
+const cream = "#F6F1E7";
+const creamCard = "#FBF8F1";
+const ink = "#000000";
+const muted = "rgba(0,0,0,0.6)";
+const heading = "var(--font-heading)";
+const body = "var(--font-body)";
+const hairline = "inset 0 0 0 1px rgba(0,0,0,0.1)";
+
+const ease = [0.16, 1, 0.3, 1] as const;
+
 function DashboardPage() {
   const { session, isLoading } = useSupabaseAuth();
   const navigate = useNavigate();
-  const { light, toggle } = useTheme();
   const [storeLoading, setStoreLoading] = useState(false);
   const [storeName, setStoreName] = useState("");
   const [creating, setCreating] = useState(false);
@@ -62,137 +72,123 @@ function DashboardPage() {
 
   return (
     <div
-      className={light ? "" : "dark"}
-      style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+      className="min-h-screen flex flex-col"
+      style={{ background: cream, color: ink, fontFamily: body }}
     >
-      <div className="relative min-h-dvh bg-background text-foreground transition-colors duration-200 overflow-hidden">
-        {/* Decorative background gradients */}
-        <div className="pointer-events-none absolute inset-0" aria-hidden>
-          <div
-            className={`absolute -top-32 -left-32 w-[600px] h-[600px] rounded-full opacity-[0.12] blur-3xl transition-colors duration-500 ${
-              light ? "bg-green-400" : "bg-green-600"
-            }`}
-          />
-          <div
-            className={`absolute -bottom-40 -right-40 w-[500px] h-[500px] rounded-full opacity-[0.08] blur-3xl transition-colors duration-500 ${
-              light ? "bg-emerald-300" : "bg-emerald-800"
-            }`}
-          />
-        </div>
+      <div className="px-6 md:px-12 lg:px-16">
+        <Navbar variant="light" />
+      </div>
 
-        {/* Header */}
-        <header className="relative z-10 border-b border-border/60 bg-background/70 backdrop-blur-md">
-          <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
-            <button
-              onClick={() => void navigate({ to: "/" })}
-              className="text-base font-bold tracking-tight cursor-pointer hover:opacity-70 transition-opacity duration-150"
-            >
-              Swish
-            </button>
-            <div className="flex items-center gap-3">
-              {session?.user.email && (
-                <span className="hidden sm:block text-sm text-muted-foreground">
-                  {session.user.email}
-                </span>
-              )}
-              <button
-                onClick={toggle}
-                aria-label="Toggle theme"
-                className={`w-8 h-8 flex items-center justify-center rounded-full cursor-pointer transition-colors duration-150 ${
-                  light
-                    ? "text-gray-500 hover:text-gray-900 hover:bg-black/[0.06]"
-                    : "text-white/45 hover:text-white hover:bg-white/[0.08]"
-                }`}
-              >
-                {light ? (
-                  <Moon className="w-4 h-4" />
-                ) : (
-                  <Sun className="w-4 h-4" />
-                )}
-              </button>
-              {session && (
-                <button
-                  onClick={() => void supabase.auth.signOut()}
-                  className={`text-sm font-medium cursor-pointer transition-colors duration-150 ${
-                    light
-                      ? "text-gray-400 hover:text-gray-900"
-                      : "text-white/40 hover:text-white"
-                  }`}
-                >
-                  Sign out
-                </button>
-              )}
-            </div>
-          </div>
-        </header>
-
-        {/* Main */}
-        <main className="relative z-10 flex flex-col items-center justify-center min-h-[calc(100dvh-65px)] px-6 py-16">
-          {storeLoading ? (
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Loader2 className="w-4 h-4 animate-spin" />
+      <main className="flex-grow w-full max-w-6xl mx-auto px-6 md:px-12 lg:px-16 py-16">
+        {storeLoading ? (
+          <div className="flex flex-col items-center justify-center py-32 gap-4">
+            <div
+              className="w-5 h-5 rounded-full border-2 animate-spin"
+              style={{ borderColor: "rgba(0,0,0,0.15)", borderTopColor: ink }}
+            />
+            <p className="text-sm" style={{ color: muted }}>
               Loading your store…
-            </div>
-          ) : (
-            <motion.div
+            </p>
+          </div>
+        ) : (
+          <>
+            {/* Hero */}
+            <motion.section
               initial={{ opacity: 0, y: 24 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
-              className="w-full max-w-md"
+              transition={{ duration: 0.5, ease }}
+              className="mb-14 max-w-3xl"
             >
-              {/* Welcome text */}
-              <div className="mb-8">
-                <p
-                  className={`text-sm font-medium mb-1 ${light ? "text-green-700" : "text-green-400"}`}
-                >
-                  Welcome{emailPrefix ? `, ${emailPrefix}` : ""}
-                </p>
-                <h1 className="text-3xl font-bold tracking-tight">
-                  Set up your store
-                </h1>
-                <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
-                  Your store name appears in the Swish app and is visible to
-                  customers when they search.
-                </p>
-              </div>
-
-              {/* Glass card */}
-              <div
-                className={`rounded-2xl border p-6 shadow-sm transition-colors duration-200 ${
-                  light
-                    ? "bg-white/80 backdrop-blur-xl border-black/[0.07]"
-                    : "bg-white/[0.04] backdrop-blur-xl border-white/[0.07]"
-                }`}
+              <p
+                className="text-sm font-medium mb-4"
+                style={{ fontFamily: body, color: muted }}
               >
-                <form
-                  onSubmit={handleCreateStore}
-                  className="flex flex-col gap-5"
+                Welcome{emailPrefix ? `, ${emailPrefix}` : ""}
+              </p>
+              <h1
+                className="text-5xl md:text-7xl font-bold leading-tight mb-6 tracking-tight"
+                style={{ fontFamily: heading, color: ink }}
+              >
+                Set up your store
+              </h1>
+              <p
+                className="text-xl leading-relaxed max-w-2xl"
+                style={{ color: muted }}
+              >
+                Give your store a name and it goes live on Swish — visible to
+                every customer who searches. You can refine everything later.
+              </p>
+            </motion.section>
+
+            {/* Bento grid */}
+            <section className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+              {/* Form */}
+              <motion.div
+                initial={{ opacity: 0, y: 24 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, ease, delay: 0.08 }}
+                className="lg:col-span-7 rounded-xl p-8 md:p-12 relative overflow-hidden"
+                style={{
+                  background: "#ffffff",
+                  boxShadow: `${hairline}, 0 8px 30px rgb(0 0 0 / 0.04)`,
+                }}
+              >
+                <div
+                  className="w-12 h-12 rounded-xl flex items-center justify-center mb-7"
+                  style={{ background: cream, boxShadow: hairline }}
                 >
-                  <div className="flex flex-col gap-1.5">
-                    <label htmlFor="store-name" className="text-sm font-medium">
-                      Store name <span className="text-destructive">*</span>
+                  <StoreIcon className="w-5 h-5" style={{ color: ink }} />
+                </div>
+                <h2
+                  className="text-2xl font-bold mb-2"
+                  style={{ fontFamily: heading, color: ink }}
+                >
+                  Create your store
+                </h2>
+                <p className="text-sm mb-8" style={{ color: muted }}>
+                  This is the name customers see in the Swish app.
+                </p>
+
+                <form className="space-y-6" onSubmit={handleCreateStore}>
+                  <div className="space-y-2">
+                    <label
+                      htmlFor="store-name"
+                      className="text-sm font-medium"
+                      style={{ fontFamily: body, color: muted }}
+                    >
+                      Store name <span style={{ color: "#ba1a1a" }}>*</span>
                     </label>
                     <input
                       id="store-name"
                       type="text"
-                      placeholder="e.g. Jordan's Kicks"
+                      required
+                      autoFocus
+                      disabled={creating}
                       value={storeName}
                       onChange={(e) => setStoreName(e.target.value)}
-                      disabled={creating}
-                      autoFocus
-                      className={`w-full px-3.5 py-2.5 rounded-xl text-sm border outline-none transition-all duration-150 ${
-                        light
-                          ? "bg-gray-50 border-black/10 text-gray-900 placeholder:text-gray-400 focus:border-green-500 focus:ring-2 focus:ring-green-500/20"
-                          : "bg-white/[0.06] border-white/10 text-white placeholder:text-white/30 focus:border-green-500 focus:ring-2 focus:ring-green-500/20"
-                      } disabled:opacity-50`}
+                      placeholder="e.g. Jordan's Kicks"
+                      className="w-full rounded-lg px-4 py-3 outline-none transition-shadow focus:ring-1 focus:ring-black disabled:opacity-60"
+                      style={{
+                        background: creamCard,
+                        color: ink,
+                        fontFamily: body,
+                        boxShadow: hairline,
+                      }}
                     />
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-xs" style={{ color: muted }}>
                       You can change this later from your store settings.
                     </p>
                   </div>
 
                   {error && (
-                    <p className="text-sm text-destructive bg-destructive/10 border border-destructive/20 rounded-lg px-3 py-2">
+                    <p
+                      className="text-sm rounded-lg px-4 py-3"
+                      style={{
+                        color: "#ba1a1a",
+                        background: "rgba(186,26,26,0.08)",
+                        boxShadow: "inset 0 0 0 1px rgba(186,26,26,0.2)",
+                      }}
+                    >
                       {error}
                     </p>
                   )}
@@ -200,31 +196,179 @@ function DashboardPage() {
                   <button
                     type="submit"
                     disabled={creating || !storeName.trim()}
-                    className="flex items-center justify-center gap-2 w-full py-2.5 px-4 rounded-xl text-sm font-semibold cursor-pointer transition-all duration-150 bg-green-600 text-white hover:bg-green-700 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100 shadow-sm"
+                    className="group inline-flex items-center justify-center gap-2 w-full md:w-auto px-8 py-3 rounded-full font-medium shadow-sm hover:shadow-md transition-all active:scale-95 duration-200 mt-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100 cursor-pointer"
+                    style={{ fontFamily: body, color: "#ffffff", background: ink }}
                   >
                     {creating ? (
-                      <>
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                        Creating your store…
-                      </>
+                      "Creating your store…"
                     ) : (
                       <>
                         Create store
-                        <ArrowRight className="w-4 h-4" />
+                        <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
                       </>
                     )}
                   </button>
                 </form>
-              </div>
+              </motion.div>
 
-              {/* Reassurance text */}
-              <p className="text-center text-xs text-muted-foreground mt-4">
-                Takes less than 30 seconds. No credit card required.
-              </p>
-            </motion.div>
-          )}
-        </main>
-      </div>
+              {/* Sidebar */}
+              <div className="lg:col-span-5 flex flex-col gap-8">
+                {/* What happens next */}
+                <motion.div
+                  initial={{ opacity: 0, y: 24 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, ease, delay: 0.16 }}
+                  className="rounded-xl p-8"
+                  style={{ background: "#ffffff", boxShadow: hairline }}
+                >
+                  <h3
+                    className="text-xl font-bold mb-6"
+                    style={{ fontFamily: heading, color: ink }}
+                  >
+                    What happens next
+                  </h3>
+                  <ul className="space-y-6">
+                    <Step
+                      n={1}
+                      icon={<StoreIcon className="w-4 h-4" style={{ color: ink }} />}
+                      title="Name your store"
+                      blurb="Pick a name customers will recognize. Live the moment you create it."
+                    />
+                    <Step
+                      n={2}
+                      icon={<Package className="w-4 h-4" style={{ color: ink }} />}
+                      title="Add your items"
+                      blurb="Upload products with photos, prices, and live stock counts."
+                    />
+                    <Step
+                      n={3}
+                      icon={<Rocket className="w-4 h-4" style={{ color: ink }} />}
+                      title="Start selling"
+                      blurb="Customers find you in the Swish app and shop your catalog."
+                      last
+                    />
+                  </ul>
+                </motion.div>
+
+                {/* Accent card */}
+                <motion.div
+                  initial={{ opacity: 0, y: 24 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, ease, delay: 0.24 }}
+                  className="rounded-xl p-8 flex-grow relative overflow-hidden"
+                  style={{ background: ink, color: "#ffffff" }}
+                >
+                  <div
+                    className="absolute -top-16 -right-16 w-48 h-48 rounded-full blur-3xl opacity-20"
+                    style={{ background: cream }}
+                    aria-hidden
+                  />
+                  <div className="relative z-10">
+                    <Rocket className="w-6 h-6 mb-6" style={{ color: cream }} />
+                    <h3
+                      className="text-2xl font-bold mb-3 leading-tight"
+                      style={{ fontFamily: heading }}
+                    >
+                      Live in minutes
+                    </h3>
+                    <p
+                      className="text-sm leading-relaxed"
+                      style={{ color: "rgba(255,255,255,0.7)" }}
+                    >
+                      Setup takes less than 30 seconds. No credit card required —
+                      just a name to get your storefront on Swish.
+                    </p>
+                  </div>
+                </motion.div>
+              </div>
+            </section>
+          </>
+        )}
+      </main>
+
+      {/* Footer */}
+      <footer
+        className="w-full py-16 border-t mt-auto"
+        style={{ background: "#ffffff", borderColor: "rgba(0,0,0,0.1)" }}
+      >
+        <div className="flex flex-col md:flex-row justify-between items-center px-6 md:px-12 lg:px-16 max-w-6xl mx-auto gap-8">
+          <div
+            className="text-2xl font-bold tracking-tight"
+            style={{ fontFamily: heading, color: ink }}
+          >
+            Swish
+          </div>
+          <div className="flex flex-wrap justify-center gap-6">
+            {["Privacy Policy", "Terms of Service", "Security", "Status"].map(
+              (l) => (
+                <a
+                  key={l}
+                  href="#"
+                  className="text-sm transition-opacity hover:opacity-60"
+                  style={{ fontFamily: body, color: muted }}
+                >
+                  {l}
+                </a>
+              ),
+            )}
+          </div>
+          <div className="text-sm" style={{ fontFamily: body, color: muted }}>
+            © 2026 Swish Inc. All rights reserved.
+          </div>
+        </div>
+      </footer>
     </div>
+  );
+}
+
+function Step({
+  n,
+  icon,
+  title,
+  blurb,
+  last,
+}: {
+  n: number;
+  icon: React.ReactNode;
+  title: string;
+  blurb: string;
+  last?: boolean;
+}) {
+  return (
+    <li className="flex items-start gap-4 relative">
+      {/* Connector line */}
+      {!last && (
+        <span
+          className="absolute left-5 top-11 bottom-[-1.5rem] w-px"
+          style={{ background: "rgba(0,0,0,0.1)" }}
+          aria-hidden
+        />
+      )}
+      <div
+        className="w-10 h-10 rounded-full flex items-center justify-center shrink-0 relative z-10"
+        style={{ background: cream, boxShadow: hairline }}
+      >
+        {icon}
+      </div>
+      <div className="pt-0.5">
+        <div className="flex items-center gap-2 mb-1">
+          <span
+            className="text-xs font-bold tabular-nums"
+            style={{ color: muted }}
+          >
+            {String(n).padStart(2, "0")}
+          </span>
+          <p
+            className="text-sm font-semibold"
+            style={{ fontFamily: heading, color: ink }}
+          >
+            {title}
+          </p>
+        </div>
+        <p className="text-sm leading-relaxed" style={{ color: muted }}>
+          {blurb}
+        </p>
+      </div>
+    </li>
   );
 }
