@@ -59,9 +59,11 @@ export function Navbar({ variant = "dark" }: { variant?: "light" | "dark" }) {
           <Link to="/" className={linkClass}>
             Home
           </Link>
+         {supabaseSession && (
           <Link to="/dashboard" className={linkClass}>
             Dashboard
           </Link>
+          )}
           <Link to="/stores" className={linkClass}>
             Stores
           </Link>
