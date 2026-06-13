@@ -24,23 +24,26 @@ export const Route = createFileRoute("/store")({
 });
 
 // Cream + black design system (shared with pricing/contact/stores)
-const cream = "#F6F1E7";
-const creamCard = "#FBF8F1";
-const creamDeep = "#EFE7D6";
-const ink = "#000000";
-const muted = "rgba(0,0,0,0.6)";
+const cream = "var(--mk-cream)";
+const creamCard = "var(--mk-cream-card)";
+const creamDeep = "var(--mk-cream-deep)";
+const ink = "var(--mk-ink)";
+const muted = "var(--mk-muted)";
+const surface = "var(--mk-surface)";
+const onAccent = "var(--mk-on-accent)";
+const faint = "var(--mk-faint)";
 const heading = "var(--font-heading)";
 const body = "var(--font-body)";
-const hairline = "inset 0 0 0 1px rgba(0,0,0,0.1)";
+const hairline = "var(--mk-hairline)";
 const danger = "#ba1a1a";
 
 const inkBtnClass =
   "inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-full font-medium shadow-sm hover:shadow-md transition-all active:scale-95 duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100";
-const inkBtnStyle = { background: ink, color: "#ffffff", fontFamily: body } as const;
+const inkBtnStyle = { background: ink, color: onAccent, fontFamily: body } as const;
 const outlineBtnClass =
   "inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-full font-medium transition-all active:scale-95 duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100";
 const outlineBtnStyle = {
-  background: "#ffffff",
+  background: surface,
   color: ink,
   fontFamily: body,
   boxShadow: hairline,
@@ -193,7 +196,7 @@ function StorePage() {
       >
         <div
           className="w-5 h-5 rounded-full border-2 animate-spin"
-          style={{ borderColor: "rgba(0,0,0,0.15)", borderTopColor: ink }}
+          style={{ borderColor: "var(--mk-tint-strong)", borderTopColor: ink }}
         />
       </div>
     );
@@ -254,12 +257,12 @@ function StorePage() {
           <StatCard
             label="Total Items"
             value={String(items.length)}
-            icon={<Package className="w-4 h-4" style={{ color: "rgba(0,0,0,0.3)" }} />}
+            icon={<Package className="w-4 h-4" style={{ color: faint }} />}
           />
           <StatCard
             label="Total Value"
             value={`$${totalValue.toFixed(2)}`}
-            icon={<DollarSign className="w-4 h-4" style={{ color: "rgba(0,0,0,0.3)" }} />}
+            icon={<DollarSign className="w-4 h-4" style={{ color: faint }} />}
           />
         </section>
 
@@ -317,7 +320,7 @@ function StorePage() {
                 >
                   <div
                     className="w-14 h-14 rounded-2xl flex items-center justify-center mb-5"
-                    style={{ background: "#ffffff", boxShadow: hairline }}
+                    style={{ background: surface, boxShadow: hairline }}
                   >
                     <Package className="w-6 h-6" style={{ color: muted }} />
                   </div>
@@ -355,7 +358,7 @@ function StorePage() {
                 <div
                   className="rounded-2xl overflow-hidden"
                   style={{
-                    background: "#ffffff",
+                    background: surface,
                     boxShadow: `${hairline}, 0 8px 30px rgb(0 0 0 / 0.04)`,
                   }}
                 >
@@ -389,7 +392,7 @@ function StorePage() {
                           key={item.id}
                           style={
                             i < items.length - 1
-                              ? { boxShadow: "inset 0 -1px 0 rgba(0,0,0,0.07)" }
+                              ? { boxShadow: "inset 0 -1px 0 var(--mk-border)" }
                               : undefined
                           }
                         >
@@ -409,7 +412,7 @@ function StorePage() {
                                 >
                                   <ImageIcon
                                     className="w-4 h-4"
-                                    style={{ color: "rgba(0,0,0,0.3)" }}
+                                    style={{ color: faint }}
                                   />
                                 </div>
                               )}
@@ -471,7 +474,7 @@ function StorePage() {
                 <p>Columns must be in this order:</p>
                 <code
                   className="block font-mono text-xs px-3 py-2 rounded-lg"
-                  style={{ background: "#ffffff", color: ink, boxShadow: hairline }}
+                  style={{ background: surface, color: ink, boxShadow: hairline }}
                 >
                   name, price, stock
                 </code>
@@ -515,7 +518,7 @@ function StorePage() {
       {/* Footer */}
       <footer
         className="w-full py-16 border-t mt-auto"
-        style={{ background: "#ffffff", borderColor: "rgba(0,0,0,0.1)" }}
+        style={{ background: surface, borderColor: "var(--mk-border)" }}
       >
         <div className="flex flex-col md:flex-row justify-between items-center px-6 md:px-12 lg:px-16 max-w-6xl mx-auto gap-8">
           <div
@@ -560,7 +563,7 @@ function StatCard({
     <div
       className="rounded-2xl p-7"
       style={{
-        background: "#ffffff",
+        background: surface,
         boxShadow: `${hairline}, 0 8px 30px rgb(0 0 0 / 0.04)`,
       }}
     >
@@ -684,7 +687,7 @@ function AddItemDialog({
     >
       <DialogContent
         className="sm:max-w-md"
-        style={{ background: "#ffffff", color: ink, fontFamily: body }}
+        style={{ background: surface, color: ink, fontFamily: body }}
       >
         <DialogTitle
           className="text-xl font-bold"
@@ -703,7 +706,7 @@ function AddItemDialog({
             className="w-full h-32 rounded-xl flex flex-col items-center justify-center cursor-pointer transition-colors overflow-hidden"
             style={{
               background: creamCard,
-              boxShadow: "inset 0 0 0 1px rgba(0,0,0,0.12)",
+              boxShadow: "inset 0 0 0 1px var(--mk-border)",
             }}
           >
             {imagePreview ? (

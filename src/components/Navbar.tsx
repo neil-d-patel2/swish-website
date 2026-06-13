@@ -1,13 +1,16 @@
 import { useAuthActions } from "@convex-dev/auth/react";
 import { useConvexAuth } from "convex/react";
 import { Link } from "@tanstack/react-router";
+import { Moon, Sun } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { useSupabaseAuth } from "@/hooks/use-supabase-auth";
+import { useTheme } from "@/components/theme-provider";
 
 export function Navbar({ variant = "dark" }: { variant?: "light" | "dark" }) {
   const { signIn, signOut } = useAuthActions();
   const { isAuthenticated } = useConvexAuth();
   const { session: supabaseSession } = useSupabaseAuth();
+  const { theme, toggleTheme } = useTheme();
 
   const isLight = variant === "light";
 
@@ -80,6 +83,19 @@ export function Navbar({ variant = "dark" }: { variant?: "light" | "dark" }) {
 
         {/* Right actions */}
         <div className="flex items-center gap-3">
+          <button
+            className={`flex items-center justify-center rounded-lg transition-colors cursor-pointer ${whiteBtn}`}
+            style={{ width: 36, height: 36 }}
+            onClick={toggleTheme}
+            title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+            aria-label="Toggle dark mode"
+          >
+            {theme === "dark" ? (
+              <Sun className="w-4 h-4" />
+            ) : (
+              <Moon className="w-4 h-4" />
+            )}
+          </button>
           {supabaseSession ? (
             <button
               className={`flex items-center gap-2 px-4 rounded-lg text-sm font-medium transition-colors cursor-pointer ${whiteBtn}`}

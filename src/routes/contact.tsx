@@ -10,14 +10,16 @@ export const Route = createFileRoute("/contact")({
 });
 
 // Cream + black design system (shared with pricing/stores)
-const cream = "#F6F1E7";
-const creamCard = "#FBF8F1";
-const creamDeep = "#EFE7D6";
-const ink = "#000000";
-const muted = "rgba(0,0,0,0.6)";
+const cream = "var(--mk-cream)";
+const creamCard = "var(--mk-cream-card)";
+const creamDeep = "var(--mk-cream-deep)";
+const ink = "var(--mk-ink)";
+const muted = "var(--mk-muted)";
+const surface = "var(--mk-surface)";
+const onAccent = "var(--mk-on-accent)";
 const heading = "var(--font-heading)";
 const body = "var(--font-body)";
-const hairline = "inset 0 0 0 1px rgba(0,0,0,0.1)";
+const hairline = "var(--mk-hairline)";
 
 const SUBJECTS = [
   "Platform Inquiry",
@@ -70,7 +72,7 @@ function ContactPage() {
   return (
     <div
       className="min-h-screen flex flex-col"
-      style={{ background: "#E5E7E9", color: ink, fontFamily: body }}
+      style={{ background: "var(--mk-bg)", color: ink, fontFamily: body }}
     >
       <div className="px-6 md:px-12 lg:px-16">
         <Navbar variant="light" />
@@ -101,7 +103,7 @@ function ContactPage() {
           <div
             className="lg:col-span-7 rounded-xl p-8 md:p-12 relative overflow-hidden"
             style={{
-              background: "#ffffff",
+              background: surface,
               boxShadow: `${hairline}, 0 8px 30px rgb(0 0 0 / 0.04)`,
             }}
           >
@@ -198,7 +200,7 @@ function ContactPage() {
                 type="submit"
                 disabled={state === "loading"}
                 className="w-full md:w-auto px-8 py-3 rounded-full font-medium shadow-sm hover:shadow-md transition-shadow active:scale-95 duration-200 mt-4 disabled:opacity-80 cursor-pointer"
-                style={{ fontFamily: body, color: "#ffffff", background: ink }}
+                style={{ fontFamily: body, color: onAccent, background: ink }}
               >
                 {state === "loading"
                   ? "Sending..."
@@ -220,7 +222,7 @@ function ContactPage() {
             {/* Direct Lines */}
             <div
               className="rounded-xl p-8"
-              style={{ background: "#ffffff", boxShadow: hairline }}
+              style={{ background: surface, boxShadow: hairline }}
             >
               <h3
                 className="text-xl font-bold mb-6"
@@ -300,7 +302,7 @@ function ContactPage() {
                 <div className="flex items-start gap-4">
                   <div
                     className="w-10 h-10 rounded-full flex items-center justify-center shrink-0 shadow-sm"
-                    style={{ background: "#ffffff" }}
+                    style={{ background: surface }}
                   >
                     <MapPin className="w-5 h-5" style={{ color: ink }} />
                   </div>
@@ -331,7 +333,7 @@ function ContactPage() {
       {/* Footer */}
       <footer
         className="w-full py-16 border-t mt-auto"
-        style={{ background: "#ffffff", borderColor: "rgba(0,0,0,0.1)" }}
+        style={{ background: surface, borderColor: "var(--mk-border)" }}
       >
         <div className="flex flex-col md:flex-row justify-between items-center px-6 md:px-12 lg:px-16 max-w-6xl mx-auto gap-8">
           <div

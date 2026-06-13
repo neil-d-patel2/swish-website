@@ -9,14 +9,16 @@ export const Route = createFileRoute("/stores")({
 });
 
 // Cream + black design system (shared with pricing/contact)
-const cream = "#F6F1E7";
-const creamCard = "#FBF8F1";
-const creamDeep = "#EFE7D6";
-const ink = "#000000";
-const muted = "rgba(0,0,0,0.6)";
+const cream = "var(--mk-cream)";
+const creamCard = "var(--mk-cream-card)";
+const creamDeep = "var(--mk-cream-deep)";
+const ink = "var(--mk-ink)";
+const muted = "var(--mk-muted)";
+const surface = "var(--mk-surface)";
+const faint = "var(--mk-faint)";
 const heading = "var(--font-heading)";
 const body = "var(--font-body)";
-const hairline = "inset 0 0 0 1px rgba(0,0,0,0.1)";
+const hairline = "var(--mk-hairline)";
 
 type Store = {
   id: string;
@@ -62,7 +64,7 @@ function StoresPage() {
   return (
     <div
       className="min-h-screen flex flex-col"
-      style={{ background: "#E5E7E9", color: ink, fontFamily: body }}
+      style={{ background: "var(--mk-bg)", color: ink, fontFamily: body }}
     >
       <div className="px-6 md:px-12 lg:px-16">
         <Navbar variant="light" />
@@ -91,7 +93,7 @@ function StoresPage() {
               <div className="flex items-center justify-center py-24">
                 <div
                   className="w-5 h-5 rounded-full border-2 animate-spin"
-                  style={{ borderColor: "rgba(0,0,0,0.15)", borderTopColor: ink }}
+                  style={{ borderColor: "var(--mk-tint-strong)", borderTopColor: ink }}
                 />
               </div>
             ) : stores.length === 0 ? (
@@ -108,7 +110,7 @@ function StoresPage() {
                     onClick={() => setSelected(store)}
                     className="group text-left rounded-2xl p-7 flex flex-col transition-all duration-300 hover:-translate-y-1 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-black"
                     style={{
-                      background: "#ffffff",
+                      background: surface,
                       boxShadow: `${hairline}, 0 8px 30px rgb(0 0 0 / 0.04)`,
                     }}
                   >
@@ -152,7 +154,7 @@ function StoresPage() {
       {/* Footer */}
       <footer
         className="w-full py-16 border-t mt-auto"
-        style={{ background: "#ffffff", borderColor: "rgba(0,0,0,0.1)" }}
+        style={{ background: surface, borderColor: "var(--mk-border)" }}
       >
         <div className="flex flex-col md:flex-row justify-between items-center px-6 md:px-12 lg:px-16 max-w-6xl mx-auto gap-8">
           <div
@@ -234,7 +236,7 @@ function StoreDetail({ store, onBack }: { store: Store; onBack: () => void }) {
         <div className="flex items-center justify-center py-24">
           <div
             className="w-5 h-5 rounded-full border-2 animate-spin"
-            style={{ borderColor: "rgba(0,0,0,0.15)", borderTopColor: ink }}
+            style={{ borderColor: "var(--mk-tint-strong)", borderTopColor: ink }}
           />
         </div>
       ) : items.length === 0 ? (
@@ -250,7 +252,7 @@ function StoreDetail({ store, onBack }: { store: Store; onBack: () => void }) {
               key={item.id}
               className="rounded-2xl overflow-hidden flex flex-col"
               style={{
-                background: "#ffffff",
+                background: surface,
                 boxShadow: `${hairline}, 0 8px 30px rgb(0 0 0 / 0.04)`,
               }}
             >
@@ -266,7 +268,7 @@ function StoreDetail({ store, onBack }: { store: Store; onBack: () => void }) {
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                  <ImageIcon className="w-8 h-8" style={{ color: "rgba(0,0,0,0.2)" }} />
+                  <ImageIcon className="w-8 h-8" style={{ color: faint }} />
                 )}
               </div>
 
@@ -331,7 +333,7 @@ function EmptyState({
     >
       <div
         className="w-14 h-14 rounded-2xl flex items-center justify-center mb-5"
-        style={{ background: "#ffffff", boxShadow: hairline }}
+        style={{ background: surface, boxShadow: hairline }}
       >
         {icon}
       </div>

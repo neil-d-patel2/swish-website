@@ -12,6 +12,43 @@
   --color-text: #192837;
   --color-accent: #7342e2;
   --color-login-bg: #f2f2ee;
+
+  /* Marketing palette (pricing/stores/store/waitlist/contact/dashboard).
+     Light values mirror the original hardcoded design system. */
+  --mk-bg: #e5e7e9;
+  --mk-cream: #f6f1e7;
+  --mk-cream-card: #fbf8f1;
+  --mk-cream-deep: #efe7d6;
+  --mk-toggle: #eae3d4;
+  --mk-surface: #ffffff;
+  --mk-ink: #000000;
+  --mk-muted: rgba(0, 0, 0, 0.6);
+  --mk-faint: rgba(0, 0, 0, 0.45);
+  --mk-hairline: inset 0 0 0 1px rgba(0, 0, 0, 0.1);
+  --mk-border: rgba(0, 0, 0, 0.1);
+  --mk-accent: #000000;
+  --mk-on-accent: #ffffff;
+  --mk-tint: rgba(0, 0, 0, 0.06);
+  --mk-tint-strong: rgba(0, 0, 0, 0.14);
+}
+
+/* Marketing palette — dark overrides. Applied when <html> has .dark */
+.dark {
+  --mk-bg: #0e0f13;
+  --mk-cream: #1d1f25;
+  --mk-cream-card: #1a1c21;
+  --mk-cream-deep: #24262d;
+  --mk-toggle: #24262d;
+  --mk-surface: #17181d;
+  --mk-ink: #f3f3f4;
+  --mk-muted: rgba(255, 255, 255, 0.6);
+  --mk-faint: rgba(255, 255, 255, 0.42);
+  --mk-hairline: inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+  --mk-border: rgba(255, 255, 255, 0.12);
+  --mk-accent: #f3f3f4;
+  --mk-on-accent: #0e0f13;
+  --mk-tint: rgba(255, 255, 255, 0.08);
+  --mk-tint-strong: rgba(255, 255, 255, 0.16);
 }
 
 :root {

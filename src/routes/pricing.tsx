@@ -8,16 +8,18 @@ export const Route = createFileRoute("/pricing")({
 });
 
 // Cream + black design system (shared with contact/stores)
-const cream = "#F6F1E7";
-const creamCard = "#FBF8F1";
-const creamDeep = "#EFE7D6";
-const toggleBg = "#EAE3D4";
-const ink = "#000000";
-const muted = "rgba(0,0,0,0.6)";
-const faint = "rgba(0,0,0,0.45)";
+const cream = "var(--mk-cream)";
+const creamCard = "var(--mk-cream-card)";
+const creamDeep = "var(--mk-cream-deep)";
+const toggleBg = "var(--mk-toggle)";
+const ink = "var(--mk-ink)";
+const muted = "var(--mk-muted)";
+const faint = "var(--mk-faint)";
+const surface = "var(--mk-surface)";
+const onAccent = "var(--mk-on-accent)";
 const heading = "var(--font-heading)";
 const body = "var(--font-body)";
-const hairline = "inset 0 0 0 1px rgba(0,0,0,0.1)";
+const hairline = "var(--mk-hairline)";
 
 type Billing = "monthly" | "annual";
 
@@ -140,7 +142,7 @@ function PricingPage() {
   return (
     <div
       className="min-h-screen flex flex-col"
-      style={{ background: "#E5E7E9", color: ink, fontFamily: body }}
+      style={{ background: "var(--mk-bg)", color: ink, fontFamily: body }}
     >
       <div className="px-6 md:px-12 lg:px-16">
         <Navbar variant="light" />
@@ -186,7 +188,7 @@ function PricingPage() {
                   className="px-5 py-2 rounded-full text-sm font-medium capitalize transition-all duration-200 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-black"
                   style={{
                     fontFamily: body,
-                    color: active ? "#ffffff" : muted,
+                    color: active ? onAccent : muted,
                     background: active ? ink : "transparent",
                     boxShadow: active ? "0 1px 3px rgb(0 0 0 / 0.2)" : "none",
                   }}
@@ -201,7 +203,7 @@ function PricingPage() {
             style={{
               fontFamily: body,
               color: ink,
-              background: "rgba(0,0,0,0.06)",
+              background: "var(--mk-tint)",
             }}
           >
             Save 20%
@@ -222,9 +224,9 @@ function PricingPage() {
                     : "hover:-translate-y-1"
                 }`}
                 style={{
-                  background: "#ffffff",
+                  background: surface,
                   boxShadow: isPro
-                    ? "0 0 0 2px #000000, 0 20px 40px -12px rgb(0 0 0 / 0.25)"
+                    ? "0 0 0 2px var(--mk-ink), 0 20px 40px -12px rgb(0 0 0 / 0.25)"
                     : `${hairline}, 0 8px 30px rgb(0 0 0 / 0.05)`,
                 }}
               >
@@ -233,7 +235,7 @@ function PricingPage() {
                     className="absolute -top-3 left-1/2 -translate-x-1/2 inline-flex items-center gap-1.5 text-xs font-semibold px-3.5 py-1.5 rounded-full whitespace-nowrap"
                     style={{
                       fontFamily: body,
-                      color: "#ffffff",
+                      color: onAccent,
                       background: ink,
                     }}
                   >
@@ -265,7 +267,7 @@ function PricingPage() {
                   {price.strike && (
                     <span
                       className="text-lg line-through tabular-nums"
-                      style={{ color: "rgba(0,0,0,0.35)" }}
+                      style={{ color: faint }}
                     >
                       {price.strike}
                     </span>
@@ -286,12 +288,12 @@ function PricingPage() {
                     <li
                       key={f.text}
                       className="flex items-start gap-3 text-sm"
-                      style={{ color: f.included ? ink : "rgba(0,0,0,0.35)" }}
+                      style={{ color: f.included ? ink : faint }}
                     >
                       {f.included ? (
                         <span
                           className="mt-0.5 w-5 h-5 rounded-full flex items-center justify-center shrink-0"
-                          style={{ background: "rgba(0,0,0,0.08)" }}
+                          style={{ background: "var(--mk-tint)" }}
                         >
                           <Check
                             className="w-3.5 h-3.5"
@@ -302,7 +304,7 @@ function PricingPage() {
                         <span className="mt-0.5 w-5 h-5 flex items-center justify-center shrink-0">
                           <Minus
                             className="w-3.5 h-3.5"
-                            style={{ color: "rgba(0,0,0,0.25)" }}
+                            style={{ color: faint }}
                           />
                         </span>
                       )}
@@ -315,12 +317,12 @@ function PricingPage() {
                   className="w-full py-3.5 rounded-full font-semibold transition-all duration-200 cursor-pointer active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2"
                   style={
                     isPro
-                      ? { fontFamily: body, color: "#ffffff", background: ink }
+                      ? { fontFamily: body, color: onAccent, background: ink }
                       : {
                           fontFamily: body,
                           color: ink,
-                          background: "#ffffff",
-                          boxShadow: "inset 0 0 0 1.5px #000000",
+                          background: surface,
+                          boxShadow: "inset 0 0 0 1.5px var(--mk-ink)",
                         }
                   }
                 >
@@ -346,7 +348,7 @@ function PricingPage() {
           <div
             className="rounded-2xl overflow-hidden"
             style={{
-              background: "#ffffff",
+              background: surface,
               boxShadow: `${hairline}, 0 8px 30px rgb(0 0 0 / 0.04)`,
             }}
           >
@@ -366,7 +368,7 @@ function PricingPage() {
                         className="py-4 px-6 text-center text-sm font-bold"
                         style={{
                           fontFamily: heading,
-                          color: t.highlighted ? ink : "rgba(0,0,0,0.7)",
+                          color: t.highlighted ? ink : muted,
                         }}
                       >
                         {t.name}
@@ -379,8 +381,8 @@ function PricingPage() {
                     <tr
                       key={row.feature}
                       style={{
-                        borderTop: "1px solid rgba(0,0,0,0.08)",
-                        background: i % 2 ? creamCard : "#ffffff",
+                        borderTop: "1px solid var(--mk-border)",
+                        background: i % 2 ? creamCard : surface,
                       }}
                     >
                       <td
@@ -400,7 +402,7 @@ function PricingPage() {
                             ) : (
                               <Minus
                                 className="w-5 h-5 mx-auto"
-                                style={{ color: "rgba(0,0,0,0.25)" }}
+                                style={{ color: faint }}
                               />
                             )
                           ) : (
@@ -438,13 +440,13 @@ function PricingPage() {
         >
           <h2
             className="text-3xl md:text-4xl font-bold mb-4"
-            style={{ fontFamily: heading, color: "#ffffff" }}
+            style={{ fontFamily: heading, color: onAccent }}
           >
             Ready to put your growth on autopilot?
           </h2>
           <p
             className="text-base mb-8 max-w-xl mx-auto"
-            style={{ color: "rgba(255,255,255,0.8)" }}
+            style={{ color: "color-mix(in srgb, var(--mk-on-accent) 78%, transparent)" }}
           >
             Start your 14-day free trial today. No credit card required.
           </p>
@@ -460,7 +462,7 @@ function PricingPage() {
       {/* Footer */}
       <footer
         className="w-full py-16 border-t mt-16"
-        style={{ background: "#ffffff", borderColor: "rgba(0,0,0,0.1)" }}
+        style={{ background: surface, borderColor: "var(--mk-border)" }}
       >
         <div className="flex flex-col md:flex-row justify-between items-center px-6 md:px-12 lg:px-16 max-w-6xl mx-auto gap-8">
           <div
@@ -497,7 +499,7 @@ function FaqItem({ question, answer }: { question: string; answer: string }) {
   return (
     <div
       className="rounded-xl overflow-hidden"
-      style={{ background: "#ffffff", boxShadow: hairline }}
+      style={{ background: surface, boxShadow: hairline }}
     >
       <button
         onClick={() => setOpen((v) => !v)}

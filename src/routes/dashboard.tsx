@@ -11,13 +11,15 @@ export const Route = createFileRoute("/dashboard")({
 });
 
 // Cream + black design system (shared with pricing/contact/stores)
-const cream = "#F6F1E7";
-const creamCard = "#FBF8F1";
-const ink = "#000000";
-const muted = "rgba(0,0,0,0.6)";
+const cream = "var(--mk-cream)";
+const creamCard = "var(--mk-cream-card)";
+const ink = "var(--mk-ink)";
+const muted = "var(--mk-muted)";
+const surface = "var(--mk-surface)";
+const onAccent = "var(--mk-on-accent)";
 const heading = "var(--font-heading)";
 const body = "var(--font-body)";
-const hairline = "inset 0 0 0 1px rgba(0,0,0,0.1)";
+const hairline = "var(--mk-hairline)";
 
 const ease = [0.16, 1, 0.3, 1] as const;
 
@@ -84,7 +86,7 @@ function DashboardPage() {
           <div className="flex flex-col items-center justify-center py-32 gap-4">
             <div
               className="w-5 h-5 rounded-full border-2 animate-spin"
-              style={{ borderColor: "rgba(0,0,0,0.15)", borderTopColor: ink }}
+              style={{ borderColor: "var(--mk-tint-strong)", borderTopColor: ink }}
             />
             <p className="text-sm" style={{ color: muted }}>
               Loading your store…
@@ -129,7 +131,7 @@ function DashboardPage() {
                 transition={{ duration: 0.5, ease, delay: 0.08 }}
                 className="lg:col-span-7 rounded-xl p-8 md:p-12 relative overflow-hidden"
                 style={{
-                  background: "#ffffff",
+                  background: surface,
                   boxShadow: `${hairline}, 0 8px 30px rgb(0 0 0 / 0.04)`,
                 }}
               >
@@ -197,7 +199,7 @@ function DashboardPage() {
                     type="submit"
                     disabled={creating || !storeName.trim()}
                     className="group inline-flex items-center justify-center gap-2 w-full md:w-auto px-8 py-3 rounded-full font-medium shadow-sm hover:shadow-md transition-all active:scale-95 duration-200 mt-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100 cursor-pointer"
-                    style={{ fontFamily: body, color: "#ffffff", background: ink }}
+                    style={{ fontFamily: body, color: onAccent, background: ink }}
                   >
                     {creating ? (
                       "Creating your store…"
@@ -219,7 +221,7 @@ function DashboardPage() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5, ease, delay: 0.16 }}
                   className="rounded-xl p-8"
-                  style={{ background: "#ffffff", boxShadow: hairline }}
+                  style={{ background: surface, boxShadow: hairline }}
                 >
                   <h3
                     className="text-xl font-bold mb-6"
@@ -256,7 +258,7 @@ function DashboardPage() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5, ease, delay: 0.24 }}
                   className="rounded-xl p-8 flex-grow relative overflow-hidden"
-                  style={{ background: ink, color: "#ffffff" }}
+                  style={{ background: ink, color: onAccent }}
                 >
                   <div
                     className="absolute -top-16 -right-16 w-48 h-48 rounded-full blur-3xl opacity-20"
@@ -273,7 +275,7 @@ function DashboardPage() {
                     </h3>
                     <p
                       className="text-sm leading-relaxed"
-                      style={{ color: "rgba(255,255,255,0.7)" }}
+                      style={{ color: "color-mix(in srgb, var(--mk-on-accent) 70%, transparent)" }}
                     >
                       Setup takes less than 30 seconds. No credit card required —
                       just a name to get your storefront on Swish.
@@ -289,7 +291,7 @@ function DashboardPage() {
       {/* Footer */}
       <footer
         className="w-full py-16 border-t mt-auto"
-        style={{ background: "#ffffff", borderColor: "rgba(0,0,0,0.1)" }}
+        style={{ background: surface, borderColor: "var(--mk-border)" }}
       >
         <div className="flex flex-col md:flex-row justify-between items-center px-6 md:px-12 lg:px-16 max-w-6xl mx-auto gap-8">
           <div
@@ -340,7 +342,7 @@ function Step({
       {!last && (
         <span
           className="absolute left-5 top-11 bottom-[-1.5rem] w-px"
-          style={{ background: "rgba(0,0,0,0.1)" }}
+          style={{ background: "var(--mk-border)" }}
           aria-hidden
         />
       )}

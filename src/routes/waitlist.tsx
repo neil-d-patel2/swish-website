@@ -10,18 +10,20 @@ export const Route = createFileRoute("/waitlist")({
 });
 
 // Cream + black design system (shared with pricing/contact)
-const creamCard = "#FBF8F1";
-const ink = "#000000";
-const muted = "rgba(0,0,0,0.6)";
+const creamCard = "var(--mk-cream-card)";
+const ink = "var(--mk-ink)";
+const muted = "var(--mk-muted)";
+const surface = "var(--mk-surface)";
+const onAccent = "var(--mk-on-accent)";
 const heading = "var(--font-heading)";
 const body = "var(--font-body)";
-const hairline = "inset 0 0 0 1px rgba(0,0,0,0.1)";
+const hairline = "var(--mk-hairline)";
 
 function WaitlistPage() {
   return (
     <div
       className="min-h-screen flex flex-col"
-      style={{ background: "#E5E7E9", color: ink, fontFamily: body }}
+      style={{ background: "var(--mk-bg)", color: ink, fontFamily: body }}
     >
       <div className="px-6 md:px-12 lg:px-16">
         <Navbar variant="light" />
@@ -31,7 +33,7 @@ function WaitlistPage() {
         <div
           className="w-full max-w-xl rounded-2xl px-8 py-12 md:px-12 text-center"
           style={{
-            background: "#ffffff",
+            background: surface,
             boxShadow: `${hairline}, 0 8px 30px rgb(0 0 0 / 0.05)`,
           }}
         >
@@ -62,7 +64,7 @@ function WaitlistPage() {
       {/* Footer */}
       <footer
         className="w-full py-16 border-t mt-auto"
-        style={{ background: "#ffffff", borderColor: "rgba(0,0,0,0.1)" }}
+        style={{ background: surface, borderColor: "var(--mk-border)" }}
       >
         <div className="flex flex-col md:flex-row justify-between items-center px-6 md:px-12 lg:px-16 max-w-6xl mx-auto gap-8">
           <div
@@ -135,7 +137,7 @@ function WaitlistForm() {
           className="w-6 h-6 rounded-full flex items-center justify-center shrink-0"
           style={{ background: ink }}
         >
-          <Check className="w-4 h-4" style={{ color: "#ffffff" }} />
+          <Check className="w-4 h-4" style={{ color: onAccent }} />
         </span>
         <span className="text-sm" style={{ color: ink }}>
           {MESSAGE.success}
@@ -165,7 +167,7 @@ function WaitlistForm() {
           type="submit"
           disabled={state === "loading"}
           className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full font-medium shrink-0 transition-transform active:scale-95 disabled:opacity-70 cursor-pointer"
-          style={{ fontFamily: body, color: "#ffffff", background: ink }}
+          style={{ fontFamily: body, color: onAccent, background: ink }}
         >
           {state === "loading" ? (
             "Joining..."
