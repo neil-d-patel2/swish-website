@@ -18,6 +18,7 @@ function Column({ title, status, issues }: ColumnProps) {
     done: "border-l-green-500",
   };
 
+  
   return (
     <div
       ref={setNodeRef}
