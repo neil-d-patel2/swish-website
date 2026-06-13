@@ -10,6 +10,7 @@
 
 import type * as auth from "../auth.js";
 import type * as cleanup from "../cleanup.js";
+import type * as contactEmail from "../contactEmail.js";
 import type * as crons from "../crons.js";
 import type * as http from "../http.js";
 import type * as issues from "../issues.js";
@@ -29,6 +30,7 @@ import type {
 declare const fullApi: ApiFromModules<{
   auth: typeof auth;
   cleanup: typeof cleanup;
+  contactEmail: typeof contactEmail;
   crons: typeof crons;
   http: typeof http;
   issues: typeof issues;
