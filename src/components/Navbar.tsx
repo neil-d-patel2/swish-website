@@ -26,6 +26,9 @@ export function Navbar({ variant = "dark" }: { variant?: "light" | "dark" }) {
     ? "bg-white text-black border border-black/10 hover:bg-gray-50"
     : "bg-white text-black hover:bg-gray-100";
 
+  // Highlight the tab for the route the user is currently on.
+  const activeProps = { style: { color: "#2073FD" } };
+
   const signInWithGoogle = () =>
     supabase.auth.signInWithOAuth({
       provider: "google",
@@ -57,24 +60,29 @@ export function Navbar({ variant = "dark" }: { variant?: "light" | "dark" }) {
 
         {/* Center links */}
         <div className="hidden md:flex items-center gap-8">
-          <Link to="/" className={linkClass}>
+          <Link
+            to="/"
+            className={linkClass}
+            activeProps={activeProps}
+            activeOptions={{ exact: true }}
+          >
             Home
           </Link>
          {supabaseSession && (
-          <Link to="/dashboard" className={linkClass}>
+          <Link to="/dashboard" className={linkClass} activeProps={activeProps}>
             Dashboard
           </Link>
           )}
-          <Link to="/stores" className={linkClass}>
+          <Link to="/stores" className={linkClass} activeProps={activeProps}>
             Stores
           </Link>
-          <Link to="/pricing" className={linkClass}>
+          <Link to="/pricing" className={linkClass} activeProps={activeProps}>
             Pricing
           </Link>
-          <Link to="/waitlist" className={linkClass}>
+          <Link to="/waitlist" className={linkClass} activeProps={activeProps}>
             Waitlist
           </Link>
-          <Link to="/contact" className={linkClass}>
+          <Link to="/contact" className={linkClass} activeProps={activeProps}>
             Contact
           </Link>
         </div>
