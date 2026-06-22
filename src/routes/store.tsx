@@ -192,7 +192,7 @@ function StorePage() {
     return (
       <div
         className="min-h-dvh flex items-center justify-center"
-        style={{ background: cream }}
+        style={{ background: "var(--mk-bg)" }}
       >
         <div
           className="w-5 h-5 rounded-full border-2 animate-spin"
@@ -207,7 +207,7 @@ function StorePage() {
   return (
     <div
       className="min-h-screen flex flex-col"
-      style={{ background: cream, color: ink, fontFamily: body }}
+      style={{ background: "var(--mk-bg)", color: ink, fontFamily: body }}
     >
       <div className="px-6 md:px-12 lg:px-16">
         <Navbar variant="light" />
