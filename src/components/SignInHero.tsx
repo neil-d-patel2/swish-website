@@ -260,6 +260,8 @@ export function SignInHero() {
               key={link.to}
               to={link.to}
               className="transition-opacity hover:opacity-60"
+              activeProps={{ style: { color: "#2073FD" } }}
+              activeOptions={link.to === "/" ? { exact: true } : undefined}
             >
               {link.label}
             </Link>
@@ -313,6 +315,8 @@ export function SignInHero() {
             to={link.to}
             onClick={() => setMenuOpen(false)}
             className="text-[32px] font-medium text-black"
+            activeProps={{ style: { color: "#2073FD" } }}
+            activeOptions={link.to === "/" ? { exact: true } : undefined}
           >
             {link.label}
           </Link>
