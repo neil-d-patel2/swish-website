@@ -59,7 +59,7 @@ export function SiteFooter() {
             <Link to="/" className="inline-flex items-center gap-2.5 group">
               <span
                 className="text-2xl tracking-tight"
-                style={{ fontFamily: heading, color: ink }}
+                style={{ fontFamily: heading, color: "#2073FD" }}
               >
                 Swish
               </span>

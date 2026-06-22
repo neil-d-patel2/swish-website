@@ -159,7 +159,7 @@ function StoresPage() {
         <div className="flex flex-col md:flex-row justify-between items-center px-6 md:px-12 lg:px-16 max-w-6xl mx-auto gap-8">
           <div
             className="text-2xl font-bold tracking-tight"
-            style={{ fontFamily: heading, color: ink }}
+            style={{ fontFamily: heading, color: "#2073FD" }}
           >
             Swish
           </div>

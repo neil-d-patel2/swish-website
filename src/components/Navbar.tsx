@@ -51,8 +51,8 @@ export function Navbar({ variant = "dark" }: { variant?: "light" | "dark" }) {
           }
           style={
             isLight
-              ? { color: "#000000", fontFamily: "var(--font-heading)" }
-              : undefined
+              ? { color: "#2073FD", fontFamily: "var(--font-heading)" }
+              : { color: "#2073FD" }
           }
         >
           Swish

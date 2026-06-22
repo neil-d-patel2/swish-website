@@ -241,7 +241,7 @@ export function SignInHero() {
         <Link to="/" className="flex items-center gap-3">
           <span
             className="text-[21px] tracking-tight text-black sm:text-[26px]"
-            style={{ fontFamily: HEADING }}
+            style={{ fontFamily: HEADING, color: "#2073FD" }}
           >
             Swish(R)
           </span>

@@ -48,7 +48,7 @@ export function SiteNav({
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
       className="fixed top-5 left-6 text-lg font-bold tracking-tight"
-      style={{ zIndex: 30 }}
+      style={{ zIndex: 30, color: "#2073FD" }}
     >
       Swish
     </motion.span>
