@@ -14,12 +14,12 @@
 
   /* Marketing palette (pricing/stores/store/waitlist/contact/dashboard).
      Light values mirror the original hardcoded design system. */
-  --mk-bg: #bcbcbc;
-  --mk-cream: #bcbcbc;
-  --mk-cream-card: #bcbcbc;
-  --mk-cream-deep: #bcbcbc;
+  --mk-bg: #ffffff;
+  --mk-cream: #ffffff;
+  --mk-cream-card: #ffffff;
+  --mk-cream-deep: #ffffff;
   --mk-toggle: #eae3d4;
-  --mk-surface: #bcbcbc;
+  --mk-surface: #ffffff;
   --mk-ink: #000000;
   --mk-muted: rgba(0, 0, 0, 0.6);
   --mk-faint: rgba(0, 0, 0, 0.45);
@@ -50,8 +50,17 @@
   --mk-tint-strong: rgba(255, 255, 255, 0.16);
 }
 
+/* Light mode: section headers render in brand blue. Uses !important to win
+   over the inline `color: ink` set on heading elements across the pages. */
+html:not(.dark) h1,
+html:not(.dark) h2,
+html:not(.dark) h3,
+html:not(.dark) h4 {
+  color: #2073fd !important;
+}
+
 :root {
-  --background: #bcbcbc;
+  --background: #ffffff;
   --foreground: oklch(0 0 0);
   --card: #e0e0e0;
   --card-foreground: oklch(0.145 0 0);
