@@ -14,12 +14,12 @@
 
   /* Marketing palette (pricing/stores/store/waitlist/contact/dashboard).
      Light values mirror the original hardcoded design system. */
-  --mk-bg: #c5bebe;
-  --mk-cream: #f6f1e7;
-  --mk-cream-card: #fbf8f1;
-  --mk-cream-deep: #efe7d6;
+  --mk-bg: #bcbcbc;
+  --mk-cream: #bcbcbc;
+  --mk-cream-card: #bcbcbc;
+  --mk-cream-deep: #bcbcbc;
   --mk-toggle: #eae3d4;
-  --mk-surface: #e0e0e0;
+  --mk-surface: #bcbcbc;
   --mk-ink: #000000;
   --mk-muted: rgba(0, 0, 0, 0.6);
   --mk-faint: rgba(0, 0, 0, 0.45);
@@ -51,7 +51,7 @@
 }
 
 :root {
-  --background: #c5bebe;
+  --background: #bcbcbc;
   --foreground: oklch(0 0 0);
   --card: #e0e0e0;
   --card-foreground: oklch(0.145 0 0);
