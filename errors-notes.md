@@ -107,3 +107,23 @@ Then `npm run build` (`tsc -b && vite build`) passed.
 The first two "errors" were the type-checker seeing generated files that hadn't been regenerated after adding source files — running each generator brought them in sync. The third was a real type hole from Supabase's untyped client; an explicit cast restored the element type so the `STATUS_RANK` index is valid. **Lesson:** after adding a Convex function or a route file, regenerate (`convex codegen`, and let vite write the route tree) before trusting `tsc` errors about "does not exist."
 
 ---
+
+## Error 5: `/approvals` (and any deep link) shows "not found" on the deployed site
+
+**Date:** 2026-06-24
+
+**Error:**
+Direct-loading a non-root route on the live GitHub Pages site (typing `/approvals`, or clicking the `/approvals` link in the approval email) showed a "not found" page. In-app SPA navigation to the same routes worked fine.
+
+**What went wrong:**
+The app deploys to **GitHub Pages** via `.github/workflows/deploy.yml` (the committed `vercel.json` is a red herring — it's never read). GitHub Pages has no SPA fallback: a request for `/approvals` finds no such file and serves a 404. The repo tried to work around this with `public/404.html`, a rafgraph-style "encode path into `?p=` and redirect" script — but that copy was configured for a **project page** (`.slice(0, 2)`, i.e. keep a `/repo/` segment) while the site is served at **root** (`vite base: "/"`, no committed CNAME). On a root deployment that slicing mangles the path (`/approvals` → redirect base `/approvals`, `p=s`), so the redirect never restores the real route.
+
+**Fix:**
+Switched to the canonical root-SPA approach: make `404.html` a byte-for-byte copy of the built `index.html`.
+1. `package.json` build: `tsc -b && vite build && cp dist/index.html dist/404.html`.
+2. Deleted `public/404.html` (the broken redirect) and removed the paired `?p=` restore `<script>` from `index.html`.
+
+**Why it worked:**
+For a root deployment (`base: "/"`), GitHub Pages serves `dist/404.html` for any unknown path. Because it's an exact copy of `index.html`, the app bundle loads (asset URLs are absolute from `/`), TanStack Router reads `window.location.pathname` (`/approvals`) and renders that route directly — no query-string round-trip. The post-build `cp` keeps `404.html` in sync with each build's hashed asset names. **Note:** Pages still returns HTTP 404 status for these URLs, but the body is the app and renders correctly — fine for an authed app.
+
+---

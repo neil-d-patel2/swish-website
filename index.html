@@ -2,22 +2,6 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <script>
-      // Restore path encoded by 404.html for GitHub Pages SPA routing
-      (function () {
-        var p = new URLSearchParams(window.location.search).get("p");
-        if (p) {
-          var q = new URLSearchParams(window.location.search).get("q");
-          window.history.replaceState(
-            null,
-            null,
-            window.location.pathname +
-              p +
-              (q ? "?" + decodeURIComponent(q) : ""),
-          );
-        }
-      })();
-    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Swish</title>
     <link

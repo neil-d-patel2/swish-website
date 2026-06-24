@@ -99,6 +99,12 @@ Dark mode is session-only (resets on reload) and covers every page **except the 
 
 - **Light-mode background rules (do not regress):** the page canvas `--mk-bg` is pure white `#ffffff`. Card/box surfaces (`--mk-surface`, `--mk-cream`/`-card`/`-deep`) are `#f5f5f5` so boxes stand out against the white page. **Page footers must use `background: "var(--mk-bg)"` (white) — not `surface`** — so the bottom of every page matches the page background. `--mk-muted` and `--mk-faint` are pure black `#000000` in light mode for body-text contrast. Keep these invariants when editing marketing pages.
 
+## Deployment
+
+Deploys to **GitHub Pages** via `.github/workflows/deploy.yml` on push to `starter` (build: `npx convex deploy --cmd 'pnpm run build'`, which also pushes Convex). The committed `vercel.json` is **not used** — ignore it. Served at **root** (`vite base: "/"`).
+
+- **SPA deep links:** GitHub Pages has no SPA fallback, so the build copies `dist/index.html` → `dist/404.html` (`cp` appended to the `build` script). Pages serves that 404.html for unknown paths; being a copy of index.html, the app boots and TanStack Router renders the route. **Don't** reintroduce a `public/404.html` "?p=" redirect — it was misconfigured for a project page and broke direct loads of routes like `/approvals`. Keep the `cp dist/index.html dist/404.html` step.
+
 ## Auth (two separate systems)
 
 This codebase has **two unrelated auth stacks** — don't confuse them:
