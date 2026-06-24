@@ -15,11 +15,11 @@
   /* Marketing palette (pricing/stores/store/waitlist/contact/dashboard).
      Light values mirror the original hardcoded design system. */
   --mk-bg: #ffffff;
-  --mk-cream: #ffffff;
-  --mk-cream-card: #ffffff;
-  --mk-cream-deep: #ffffff;
+  --mk-cream: #f5f5f5;
+  --mk-cream-card: #f5f5f5;
+  --mk-cream-deep: #f5f5f5;
   --mk-toggle: #eae3d4;
-  --mk-surface: #ffffff;
+  --mk-surface: #f5f5f5;
   --mk-ink: #000000;
   --mk-muted: #000000;
   --mk-faint: #000000;
