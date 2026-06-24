@@ -21,8 +21,8 @@
   --mk-toggle: #eae3d4;
   --mk-surface: #ffffff;
   --mk-ink: #000000;
-  --mk-muted: rgba(0, 0, 0, 0.6);
-  --mk-faint: rgba(0, 0, 0, 0.45);
+  --mk-muted: #000000;
+  --mk-faint: #000000;
   --mk-hairline: inset 0 0 0 1px rgba(0, 0, 0, 0.1);
   --mk-border: rgba(0, 0, 0, 0.1);
   --mk-accent: #000000;
