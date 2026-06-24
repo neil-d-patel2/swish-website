@@ -436,23 +436,23 @@ function PricingPage() {
         {/* Final CTA band */}
         <section
           className="rounded-2xl px-8 py-14 text-center relative overflow-hidden"
-          style={{ background: ink }}
+          style={{ background: cream, boxShadow: hairline }}
         >
           <h2
             className="text-3xl md:text-4xl font-bold mb-4"
-            style={{ fontFamily: heading, color: onAccent }}
+            style={{ fontFamily: heading, color: ink }}
           >
             Ready to put your growth on autopilot?
           </h2>
           <p
             className="text-base mb-8 max-w-xl mx-auto"
-            style={{ color: "color-mix(in srgb, var(--mk-on-accent) 78%, transparent)" }}
+            style={{ color: muted }}
           >
             Start your 14-day free trial today. No credit card required.
           </p>
           <button
-            className="px-8 py-3.5 rounded-full font-semibold transition-transform duration-200 cursor-pointer active:scale-[0.98] hover:shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
-            style={{ fontFamily: body, color: ink, background: cream }}
+            className="px-8 py-3.5 rounded-full font-semibold transition-transform duration-200 cursor-pointer active:scale-[0.98] hover:shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-black"
+            style={{ fontFamily: body, color: onAccent, background: ink }}
           >
             Get Started Free
           </button>
