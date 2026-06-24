@@ -177,7 +177,7 @@ html:not(.dark) h4 {
   body {
     @apply bg-background text-foreground;
     font-family: "Source Serif 4", Georgia, "Times New Roman", serif;
-    font-weight: 350;
+    font-weight: 450;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
