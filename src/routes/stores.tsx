@@ -154,7 +154,7 @@ function StoresPage() {
       {/* Footer */}
       <footer
         className="w-full py-16 border-t mt-auto"
-        style={{ background: surface, borderColor: "var(--mk-border)" }}
+        style={{ background: "var(--mk-bg)", borderColor: "var(--mk-border)" }}
       >
         <div className="flex flex-col md:flex-row justify-between items-center px-6 md:px-12 lg:px-16 max-w-6xl mx-auto gap-8">
           <div
