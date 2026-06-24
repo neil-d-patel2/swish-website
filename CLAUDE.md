@@ -98,3 +98,20 @@ Dark mode is session-only (resets on reload) and covers every page **except the 
 - **Marketing pages** (`pricing`, `stores`, `store`, `waitlist`, `contact`, `dashboard`) used hardcoded cream/black constants. These now point at a `--mk-*` CSS-variable palette defined in `index.css` (`:root` = light, `.dark` = dark overrides). Key vars: `--mk-bg` (page canvas), `--mk-surface` (cards, was `#ffffff`), `--mk-cream`/`-card`/`-deep`, `--mk-ink` (text), `--mk-muted`/`-faint`, `--mk-hairline`, `--mk-border`, `--mk-accent` + `--mk-on-accent` (inverted blocks: primary buttons, CTA bands — accent goes light/on-accent goes dark in dark mode), `--mk-tint`/`-tint-strong`. Inline semantic status colors (red `#ba1a1a`, green, amber) were intentionally left as literals.
 
 - **Light-mode background rules (do not regress):** the page canvas `--mk-bg` is pure white `#ffffff`. Card/box surfaces (`--mk-surface`, `--mk-cream`/`-card`/`-deep`) are `#f5f5f5` so boxes stand out against the white page. **Page footers must use `background: "var(--mk-bg)"` (white) — not `surface`** — so the bottom of every page matches the page background. `--mk-muted` and `--mk-faint` are pure black `#000000` in light mode for body-text contrast. Keep these invariants when editing marketing pages.
+
+## Auth (two separate systems)
+
+This codebase has **two unrelated auth stacks** — don't confuse them:
+
+- **Supabase Auth (Google OAuth)** is the real end-user sign-in (home hero `SignInHero.tsx` → `supabase.auth.signInWithOAuth({ provider: "google" })`). Store data lives in **Supabase Postgres** (`stores`, `items`) with RLS; migrations in `supabase/migrations/`. The `dashboard`/`store` routes use `useSupabaseAuth()` and the `supabase` client.
+- **Convex Auth (GitHub)** is a separate internal stack (`convex/auth.ts`, `sign-in-button.tsx`) used by the shadcn admin/`projects` side. The `/admin` route is a Convex **waitlist** broadcast tool — unrelated to store access.
+
+## Store-access approval gate
+
+New Google users must be **approved by the owner** before they can create/see a store. Flow: sign in → a `pending` request is created + the owner is emailed → owner approves on `/approvals` → user gets access.
+
+- **Enforcement is in Supabase RLS** (`supabase/migrations/006_user_approval.sql`), not just the UI: table `user_approvals(id=auth.users.id, email, status pending|approved|denied, …)`; users can read/insert only their own row (insert forced to `pending`); the owner can read all + update status. The `stores` INSERT policy now requires the owner to be `approved` (or be the admin), so the gate can't be bypassed via the API.
+- **Owner/admin email is hardcoded** as `swishappdev@gmail.com` in **three places that must stay in sync**: `006_user_approval.sql` (RLS), `src/hooks/use-approval.ts` (`ADMIN_EMAIL`), and the Resend recipient in `convex/approvalEmail.ts`. The admin is always treated as approved.
+- **Frontend:** `useApproval()` (`src/hooks/use-approval.ts`) resolves status and, on first sign-in, creates the pending row + calls the `api.approvalEmail.notify` Convex action (reuses Resend) once. `dashboard.tsx` and `store.tsx` render `<PendingApproval/>` when status ≠ approved. Owner-only page is `src/routes/approvals.tsx` (`/approvals`).
+- **Deploy step:** applying migration `006` to Supabase is required for the feature to work (no `supabase/config.toml` is committed — run it via the linked Supabase project / SQL editor). The Convex action deploys with the normal Convex push.
+- **Known limitation:** `approvalEmail.notify` is callable from the client and always emails the fixed owner address, so it's low-risk but not abuse-proof; a DB-trigger/webhook send would be more robust later.

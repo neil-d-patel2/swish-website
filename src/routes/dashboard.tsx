@@ -5,6 +5,8 @@ import { useState, useEffect } from "react";
 import { ArrowRight, Store as StoreIcon, Package, Rocket } from "lucide-react";
 import { motion } from "framer-motion";
 import { Navbar } from "@/components/Navbar";
+import { useApproval } from "@/hooks/use-approval";
+import { PendingApproval } from "@/components/PendingApproval";
 
 export const Route = createFileRoute("/dashboard")({
   component: DashboardPage,
@@ -25,6 +27,7 @@ const ease = [0.16, 1, 0.3, 1] as const;
 
 function DashboardPage() {
   const { session, isLoading } = useSupabaseAuth();
+  const { status: approvalStatus, isLoading: approvalLoading } = useApproval();
   const navigate = useNavigate();
   const [storeLoading, setStoreLoading] = useState(false);
   const [storeName, setStoreName] = useState("");
@@ -68,7 +71,11 @@ function DashboardPage() {
     }
   };
 
-  if (isLoading || !session) return null;
+  if (isLoading || !session || approvalLoading) return null;
+
+  if (approvalStatus && approvalStatus !== "approved") {
+    return <PendingApproval status={approvalStatus} />;
+  }
 
   const emailPrefix = session.user.email?.split("@")[0] ?? "";
 

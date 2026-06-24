@@ -11,6 +11,8 @@ import {
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { useSupabaseAuth } from "@/hooks/use-supabase-auth";
+import { useApproval } from "@/hooks/use-approval";
+import { PendingApproval } from "@/components/PendingApproval";
 import { Navbar } from "@/components/Navbar";
 import {
   Dialog,
@@ -79,6 +81,7 @@ type Item = {
 
 function StorePage() {
   const { session, isLoading } = useSupabaseAuth();
+  const { status: approvalStatus, isLoading: approvalLoading } = useApproval();
   const navigate = useNavigate();
   const [store, setStore] = useState<Store | null>(null);
   const [storeLoading, setStoreLoading] = useState(true);
@@ -188,7 +191,7 @@ function StorePage() {
 
   const totalValue = items.reduce((sum, i) => sum + (i.price ?? 0) * i.stock, 0);
 
-  if (isLoading || storeLoading) {
+  if (isLoading || storeLoading || approvalLoading) {
     return (
       <div
         className="min-h-dvh flex items-center justify-center"
@@ -200,6 +203,10 @@ function StorePage() {
         />
       </div>
     );
+  }
+
+  if (approvalStatus && approvalStatus !== "approved") {
+    return <PendingApproval status={approvalStatus} />;
   }
 
   if (!store) return null;
