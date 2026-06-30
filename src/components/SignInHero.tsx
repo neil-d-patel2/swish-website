@@ -68,6 +68,18 @@ export function SignInHero() {
     else signInWithGoogle();
   };
 
+  const handlePlanTierClick = (tierName: string) => {
+    localStorage.setItem("swish_pending_plan", tierName.toLowerCase());
+    if (session) {
+      void navigate({ to: "/pricing" });
+    } else {
+      void supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: { redirectTo: `${window.location.origin}/pricing` },
+      });
+    }
+  };
+
   const priceLabel = (t: (typeof previewTiers)[number]) => {
     if (t.monthly === null) return "Custom";
     return billing === "annual" ? `$${Math.round(t.monthly * 0.8)}` : `$${t.monthly}`;
@@ -491,7 +503,7 @@ export function SignInHero() {
                 </div>
                 <p style={{ margin: "0 0 18px", fontSize: 13, color: t.dark ? "#a1a1aa" : "#71717a", lineHeight: 1.5 }}>{t.blurb}</p>
                 <button
-                  onClick={t.enterprise ? () => void navigate({ to: "/contact" }) : handleCTA}
+                  onClick={t.enterprise ? () => void navigate({ to: "/contact" }) : () => handlePlanTierClick(t.name)}
                   className="mk-btnp"
                   style={{ width: "100%", padding: 11, borderRadius: 11, textAlign: "center", fontSize: 13.5, fontWeight: 500, background: t.dark ? "#fff" : "transparent", color: t.dark ? INK : INK, boxShadow: t.dark ? "none" : "inset 0 0 0 1px rgba(0,0,0,.14)", cursor: "pointer" }}
                 >

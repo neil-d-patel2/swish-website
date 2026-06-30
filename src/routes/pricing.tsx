@@ -1,7 +1,11 @@
-import { useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { useState, useEffect } from "react";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Navbar } from "@/components/Navbar";
 import { Check, Minus, ChevronDown, Sparkles } from "lucide-react";
+import { useAction } from "convex/react";
+import { api } from "../../convex/_generated/api";
+import { useSupabaseAuth } from "@/hooks/use-supabase-auth";
+import { supabase } from "@/lib/supabase";
 
 export const Route = createFileRoute("/pricing")({
   component: PricingPage,
@@ -138,6 +142,73 @@ function priceFor(tier: Tier, billing: Billing) {
 
 function PricingPage() {
   const [billing, setBilling] = useState<Billing>("monthly");
+  const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null);
+  const [currentPlan, setCurrentPlan] = useState<string | null>(null);
+  const { session } = useSupabaseAuth();
+  const navigate = useNavigate();
+  const createCheckoutSession = useAction(api.stripe.createCheckoutSession);
+
+  const startCheckout = async (plan: "starter" | "pro") => {
+    if (!session) return;
+    // Redirect already-subscribed users to their store instead of checkout
+    const { data: store } = await supabase
+      .from("stores")
+      .select("plan")
+      .eq("owner_id", session.user.id)
+      .maybeSingle();
+    if (store && store.plan !== "free") {
+      void navigate({ to: "/store" });
+      return;
+    }
+    setCheckoutLoading(plan);
+    try {
+      const url = await createCheckoutSession({
+        plan,
+        userId: session.user.id,
+        email: session.user.email ?? "",
+        origin: window.location.origin,
+      });
+      if (url) window.location.href = url;
+    } finally {
+      setCheckoutLoading(null);
+    }
+  };
+
+  // After OAuth redirect back to /pricing, auto-start checkout for the saved plan
+  useEffect(() => {
+    if (!session) return;
+    const pending = localStorage.getItem("swish_pending_plan");
+    if (pending !== "starter" && pending !== "pro") return;
+    localStorage.removeItem("swish_pending_plan");
+    void startCheckout(pending);
+  }, [session]);
+
+  // Load user's active plan to reflect it in the UI
+  useEffect(() => {
+    if (!session) { setCurrentPlan(null); return; }
+    supabase
+      .from("stores")
+      .select("plan")
+      .eq("owner_id", session.user.id)
+      .maybeSingle()
+      .then(({ data }) => setCurrentPlan(data?.plan ?? null));
+  }, [session]);
+
+  const handlePlanClick = async (tier: Tier) => {
+    if (tier.monthly === null) {
+      void navigate({ to: "/contact" });
+      return;
+    }
+    if (!session) {
+      localStorage.setItem("swish_pending_plan", tier.name.toLowerCase());
+      void supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: { redirectTo: `${window.location.origin}/pricing` },
+      });
+      return;
+    }
+    await startCheckout(tier.name.toLowerCase() as "starter" | "pro");
+  };
 
   return (
     <div
@@ -207,6 +278,29 @@ function PricingPage() {
             Save 20%
           </span>
         </div>
+
+        {/* Active plan banner */}
+        {session && currentPlan && currentPlan !== "free" && (
+          <div
+            className="flex items-center justify-between gap-3 rounded-xl px-5 py-4 mb-8"
+            style={{ background: surface, boxShadow: hairline }}
+          >
+            <p className="text-sm" style={{ color: ink }}>
+              You're on the{" "}
+              <strong>
+                {currentPlan.charAt(0).toUpperCase() + currentPlan.slice(1)}
+              </strong>{" "}
+              plan.
+            </p>
+            <button
+              onClick={() => void navigate({ to: "/store" })}
+              className="text-sm font-semibold shrink-0 cursor-pointer"
+              style={{ color: ink }}
+            >
+              Manage →
+            </button>
+          </div>
+        )}
 
         {/* Tier cards */}
         <section className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-28 items-start">
@@ -312,7 +406,14 @@ function PricingPage() {
                 </ul>
 
                 <button
-                  className="w-full py-3.5 rounded-full font-semibold transition-all duration-200 cursor-pointer active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2"
+                  onClick={() => void handlePlanClick(tier)}
+                  disabled={
+                    checkoutLoading !== null ||
+                    (currentPlan !== null &&
+                      currentPlan !== "free" &&
+                      currentPlan === tier.name.toLowerCase())
+                  }
+                  className="w-full py-3.5 rounded-full font-semibold transition-all duration-200 cursor-pointer active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2 disabled:opacity-60 disabled:cursor-not-allowed"
                   style={
                     isPro
                       ? { fontFamily: body, color: onAccent, background: ink }
@@ -324,7 +425,11 @@ function PricingPage() {
                         }
                   }
                 >
-                  {tier.cta}
+                  {currentPlan === tier.name.toLowerCase() && currentPlan !== "free"
+                    ? "Current plan ✓"
+                    : checkoutLoading === tier.name.toLowerCase()
+                      ? "Redirecting…"
+                      : tier.cta}
                 </button>
               </div>
             );

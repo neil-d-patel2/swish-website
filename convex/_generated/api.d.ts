@@ -17,6 +17,8 @@ import type * as http from "../http.js";
 import type * as issues from "../issues.js";
 import type * as projects from "../projects.js";
 import type * as seed from "../seed.js";
+import type * as stripe from "../stripe.js";
+import type * as stripeWebhook from "../stripeWebhook.js";
 import type * as users from "../users.js";
 import type * as waitlist from "../waitlist.js";
 import type * as waitlistBroadcast from "../waitlistBroadcast.js";
@@ -38,6 +40,8 @@ declare const fullApi: ApiFromModules<{
   issues: typeof issues;
   projects: typeof projects;
   seed: typeof seed;
+  stripe: typeof stripe;
+  stripeWebhook: typeof stripeWebhook;
   users: typeof users;
   waitlist: typeof waitlist;
   waitlistBroadcast: typeof waitlistBroadcast;

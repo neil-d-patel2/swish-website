@@ -5,6 +5,7 @@ import { Moon, Sun } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { useSupabaseAuth } from "@/hooks/use-supabase-auth";
 import { useTheme } from "@/components/theme-provider";
+import { ADMIN_EMAIL } from "@/hooks/use-approval";
 
 const BLUE = "#0A66FF";
 
@@ -104,16 +105,16 @@ export function Navbar({ variant: _variant = "light" }: { variant?: "light" | "d
           className="hidden md:flex"
           style={{ gap: 24, fontSize: 14, color: "#3f3f46", fontWeight: 450, display: "flex" }}
         >
-          {NAV_LINKS.map(({ label, to, exact }) => (
+          {NAV_LINKS.map((link) => (
             <Link
-              key={to}
-              to={to}
-              activeOptions={exact ? { exact: true } : undefined}
+              key={link.to}
+              to={link.to}
+              activeOptions={"exact" in link && link.exact ? { exact: true } : undefined}
               activeProps={{ style: { color: BLUE } }}
               className="mk-nlink"
               style={{ color: "#3f3f46" }}
             >
-              {label}
+              {link.label}
             </Link>
           ))}
           {session && (
@@ -124,6 +125,16 @@ export function Navbar({ variant: _variant = "light" }: { variant?: "light" | "d
               style={{ color: "#3f3f46" }}
             >
               Dashboard
+            </Link>
+          )}
+          {session?.user.email?.toLowerCase() === ADMIN_EMAIL && (
+            <Link
+              to="/approvals"
+              activeProps={{ style: { color: BLUE } }}
+              className="mk-nlink"
+              style={{ color: "#3f3f46" }}
+            >
+              Approvals
             </Link>
           )}
         </nav>
