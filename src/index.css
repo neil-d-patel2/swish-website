@@ -6,29 +6,28 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --font-heading: "Source Serif 4", Georgia, "Times New Roman", serif;
-  --font-body: "Source Serif 4", Georgia, "Times New Roman", serif;
+  --font-heading: "Geist Variable", -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-body: "Geist Variable", -apple-system, BlinkMacSystemFont, sans-serif;
   --color-text: #000000;
   --color-accent: #7342e2;
   --color-login-bg: #f2f2ee;
 
-  /* Marketing palette (pricing/stores/store/waitlist/contact/dashboard).
-     Light values mirror the original hardcoded design system. */
+  /* Marketing palette (pricing/stores/store/waitlist/contact/dashboard). */
   --mk-bg: #ffffff;
-  --mk-cream: #f5f5f5;
-  --mk-cream-card: #f5f5f5;
-  --mk-cream-deep: #f5f5f5;
-  --mk-toggle: #eae3d4;
-  --mk-surface: #f5f5f5;
-  --mk-ink: #000000;
-  --mk-muted: #000000;
-  --mk-faint: #000000;
-  --mk-hairline: inset 0 0 0 1px rgba(0, 0, 0, 0.1);
-  --mk-border: rgba(0, 0, 0, 0.1);
-  --mk-accent: #000000;
+  --mk-cream: #f7f7f8;
+  --mk-cream-card: #f4f4f5;
+  --mk-cream-deep: #f4f4f5;
+  --mk-toggle: rgba(0,0,0,.06);
+  --mk-surface: #ffffff;
+  --mk-ink: #0b0b0c;
+  --mk-muted: #52525b;
+  --mk-faint: #71717a;
+  --mk-hairline: 0 0 0 1px rgba(0,0,0,.07);
+  --mk-border: rgba(0,0,0,.07);
+  --mk-accent: #0A66FF;
   --mk-on-accent: #ffffff;
-  --mk-tint: rgba(0, 0, 0, 0.06);
-  --mk-tint-strong: rgba(0, 0, 0, 0.14);
+  --mk-tint: rgba(10,102,255,.1);
+  --mk-tint-strong: rgba(10,102,255,.2);
 }
 
 /* Marketing palette — dark overrides. Applied when <html> has .dark */
@@ -50,14 +49,6 @@
   --mk-tint-strong: rgba(255, 255, 255, 0.16);
 }
 
-/* Light mode: section headers render in brand blue. Uses !important to win
-   over the inline `color: ink` set on heading elements across the pages. */
-html:not(.dark) h1,
-html:not(.dark) h2,
-html:not(.dark) h3,
-html:not(.dark) h4 {
-  color: #2073fd !important;
-}
 
 :root {
   --background: #ffffff;
@@ -229,3 +220,110 @@ html:not(.dark) h4 {
   mask-composite: exclude;
   pointer-events: none;
 }
+
+/* ── New marketing design animations ── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes floaty {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-12px); }
+}
+@keyframes growBar {
+  from { transform: scaleY(.04); }
+  to { transform: scaleY(1); }
+}
+@keyframes pulseDot {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(10,102,255,.55); }
+  70% { box-shadow: 0 0 0 7px rgba(10,102,255,0); }
+}
+@keyframes toastIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes assemble {
+  0% { opacity: 0; transform: scale(.82) translateY(6px); }
+  18% { opacity: 1; transform: scale(1) translateY(0); }
+  82% { opacity: 1; transform: scale(1); }
+  100% { opacity: 0; transform: scale(.82) translateY(6px); }
+}
+@keyframes typeline {
+  0% { width: 0; }
+  55% { width: 100%; }
+  100% { width: 100%; }
+}
+@keyframes barPulse {
+  0% { transform: scaleY(.4); }
+  100% { transform: scaleY(1); }
+}
+@keyframes spinSlow {
+  to { transform: rotate(360deg); }
+}
+@keyframes scrollUp {
+  from { transform: translateY(0); }
+  to { transform: translateY(-50%); }
+}
+@keyframes popBadge {
+  0%, 12% { opacity: 0; transform: translateY(6px) scale(.94); }
+  24%, 68% { opacity: 1; transform: translateY(0) scale(1); }
+  82%, 100% { opacity: 0; transform: translateY(6px) scale(.94); }
+}
+@keyframes stepLight {
+  0%, 9% { background: #fff; color: #0A66FF; box-shadow: 0 0 0 2px rgba(10,102,255,.3); }
+  14%, 19% { background: #0A66FF; color: #fff; box-shadow: 0 0 0 2px rgba(10,102,255,.25), 0 0 16px rgba(10,102,255,.75); }
+  24%, 100% { background: #fff; color: #0A66FF; box-shadow: 0 0 0 2px rgba(10,102,255,.3); }
+}
+@keyframes travel {
+  0% { left: 2%; opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { left: 98%; opacity: 0; }
+}
+@keyframes flipUp {
+  0%, 40% { transform: translateY(0); }
+  50%, 90% { transform: translateY(-50%); }
+  100% { transform: translateY(0); }
+}
+@keyframes sheen {
+  0% { transform: translateX(-120%) skewX(-18deg); }
+  60%, 100% { transform: translateX(320%) skewX(-18deg); }
+}
+@keyframes nodeSeq {
+  0%, 100% { background: rgba(10,102,255,.12); box-shadow: none; }
+  50% { background: #0A66FF; box-shadow: 0 0 14px rgba(10,102,255,.7); }
+}
+@keyframes ringDash {
+  0% { stroke-dashoffset: 163; }
+  55% { stroke-dashoffset: 8; }
+  100% { stroke-dashoffset: 8; }
+}
+
+/* ── Marketing utility classes ── */
+.mk-fcard {
+  border-radius: 22px;
+  background: #fff;
+  box-shadow: 0 0 0 1px rgba(0,0,0,.07), 0 18px 40px -28px rgba(0,0,0,.3);
+  transition: transform .4s cubic-bezier(.16,1,.3,1), box-shadow .4s cubic-bezier(.16,1,.3,1);
+  overflow: hidden;
+}
+.mk-fcard:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 0 0 1px rgba(0,0,0,.09), 0 36px 60px -28px rgba(0,0,0,.4);
+}
+.mk-lift {
+  transition: transform .4s cubic-bezier(.16,1,.3,1), box-shadow .4s cubic-bezier(.16,1,.3,1);
+  cursor: pointer;
+}
+.mk-lift:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 26px 52px -22px rgba(0,0,0,.4);
+}
+.mk-pcard { transition: transform .45s cubic-bezier(.16,1,.3,1); }
+.mk-pcard:hover { transform: translateY(-6px); }
+.mk-btnp { cursor: pointer; transition: transform .15s ease, box-shadow .3s ease, background .2s ease; border: none; }
+.mk-btnp:hover { transform: translateY(-2px); }
+.mk-btnp:active { transform: translateY(0) scale(.98); }
+.mk-ph { background-image: repeating-linear-gradient(45deg, rgba(0,0,0,.05) 0 9px, rgba(0,0,0,.02) 9px 18px); }
+.mk-nlink { text-decoration: none; cursor: pointer; transition: opacity .2s; }
+.mk-nlink:hover { opacity: .6; }

@@ -8,12 +8,15 @@ import {
   ImageIcon,
   Trash2,
   Store as StoreIcon,
+  CreditCard,
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { useSupabaseAuth } from "@/hooks/use-supabase-auth";
 import { useApproval } from "@/hooks/use-approval";
 import { PendingApproval } from "@/components/PendingApproval";
 import { Navbar } from "@/components/Navbar";
+import { useAction } from "convex/react";
+import { api } from "../../convex/_generated/api";
 import {
   Dialog,
   DialogContent,
@@ -65,6 +68,8 @@ type Store = {
   name: string;
   owner_email: string;
   created_at: string;
+  plan: string;
+  stripe_subscription_id: string | null;
 };
 
 type Item = {
@@ -90,6 +95,11 @@ function StorePage() {
   const [csvImporting, setCsvImporting] = useState(false);
   const [csvError, setCsvError] = useState<string | null>(null);
   const csvRef = useRef<HTMLInputElement>(null);
+  const fulfillCheckoutAction = useAction(api.stripe.fulfillCheckout);
+  const cancelSubscriptionAction = useAction(api.stripe.cancelSubscription);
+  const [cancelConfirm, setCancelConfirm] = useState(false);
+  const [canceling, setCanceling] = useState(false);
+  const checkoutFulfilledRef = useRef(false);
 
   useEffect(() => {
     if (isLoading) return;
@@ -119,6 +129,28 @@ function StorePage() {
           .then(({ data: itemData }) => setItems(itemData ?? []));
       });
   }, [session, isLoading]);
+
+  // On checkout success, fulfill the plan immediately via the Stripe session ID.
+  // Runs once after the store first loads (so it doesn't race the initial fetch).
+  useEffect(() => {
+    if (!store || !session || checkoutFulfilledRef.current) return;
+    const params = new URLSearchParams(window.location.search);
+    const sessionId = params.get("session_id");
+    if (params.get("checkout") !== "success" || !sessionId) return;
+    checkoutFulfilledRef.current = true;
+
+    void (async () => {
+      const plan = await fulfillCheckoutAction({ sessionId, userId: session.user.id });
+      if (!plan) return;
+      // Re-fetch so all columns (customer_id, subscription_id) are fresh
+      const { data } = await supabase
+        .from("stores")
+        .select("*")
+        .eq("owner_id", session.user.id)
+        .maybeSingle();
+      if (data) setStore(data as Store);
+    })();
+  }, [store]);
 
   const handleItemAdded = (item: Item) => {
     setItems((prev) => [item, ...prev]);
@@ -189,6 +221,22 @@ function StorePage() {
     setCsvImporting(false);
   };
 
+  const handleCancelPlan = async () => {
+    if (!session) return;
+    setCanceling(true);
+    try {
+      await cancelSubscriptionAction({ userId: session.user.id });
+      setStore((prev) =>
+        prev ? { ...prev, plan: "free", stripe_subscription_id: null } : prev,
+      );
+      setCancelConfirm(false);
+    } catch {
+      // leave confirm open so user can retry
+    } finally {
+      setCanceling(false);
+    }
+  };
+
   const totalValue = items.reduce((sum, i) => sum + (i.price ?? 0) * i.stock, 0);
 
   if (isLoading || storeLoading || approvalLoading) {
@@ -216,9 +264,7 @@ function StorePage() {
       className="min-h-screen flex flex-col"
       style={{ background: "var(--mk-bg)", color: ink, fontFamily: body }}
     >
-      <div className="px-6 md:px-12 lg:px-16">
-        <Navbar variant="light" />
-      </div>
+      <Navbar />
 
       <main className="flex-grow w-full max-w-6xl mx-auto px-6 md:px-12 lg:px-16 py-16">
         {/* Store header */}
@@ -257,7 +303,85 @@ function StorePage() {
               </p>
             </div>
           </div>
+
+          {/* Plan status + actions */}
+          <div className="shrink-0 flex flex-col items-start sm:items-end gap-2">
+            {store.plan === "free" ? (
+              <span
+                className="inline-flex items-center text-xs font-medium px-3 py-1.5 rounded-full"
+                style={{ background: surface, boxShadow: hairline, color: muted }}
+              >
+                Free plan
+              </span>
+            ) : (
+              <>
+                <span
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full"
+                  style={{ background: "var(--mk-tint)", color: ink }}
+                >
+                  {store.plan.charAt(0).toUpperCase() + store.plan.slice(1)} plan
+                </span>
+                {!cancelConfirm ? (
+                  <button
+                    onClick={() => setCancelConfirm(true)}
+                    className="text-xs cursor-pointer transition-colors"
+                    style={{ color: muted }}
+                    onMouseEnter={(e) => (e.currentTarget.style.color = danger)}
+                    onMouseLeave={(e) => (e.currentTarget.style.color = muted)}
+                  >
+                    Cancel plan
+                  </button>
+                ) : (
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-xs" style={{ color: muted }}>
+                      Cancel your subscription?
+                    </span>
+                    <button
+                      onClick={() => void handleCancelPlan()}
+                      disabled={canceling}
+                      className="text-xs font-semibold cursor-pointer disabled:opacity-50"
+                      style={{ color: danger }}
+                    >
+                      {canceling ? "Canceling…" : "Yes, cancel"}
+                    </button>
+                    <button
+                      onClick={() => setCancelConfirm(false)}
+                      className="text-xs cursor-pointer"
+                      style={{ color: muted }}
+                    >
+                      Never mind
+                    </button>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
         </section>
+
+        {/* Free-plan upsell */}
+        {store.plan === "free" && (
+          <div
+            className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 rounded-2xl px-6 py-5 mb-10"
+            style={{ background: "var(--mk-tint)", boxShadow: hairline }}
+          >
+            <div>
+              <p className="text-sm font-semibold mb-0.5" style={{ color: ink }}>
+                Start your 14-day free trial
+              </p>
+              <p className="text-xs" style={{ color: muted }}>
+                Unlock AI automation, advanced analytics, and priority support — no credit card charged until day 15.
+              </p>
+            </div>
+            <button
+              onClick={() => void navigate({ to: "/pricing" })}
+              className={`${inkBtnClass} text-sm !px-5 !py-2.5 shrink-0`}
+              style={inkBtnStyle}
+            >
+              <CreditCard className="w-4 h-4" />
+              Choose a plan
+            </button>
+          </div>
+        )}
 
         {/* Stats */}
         <section className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-14">
@@ -523,34 +647,17 @@ function StorePage() {
       />
 
       {/* Footer */}
-      <footer
-        className="w-full py-16 border-t mt-auto"
-        style={{ background: "var(--mk-bg)", borderColor: "var(--mk-border)" }}
-      >
-        <div className="flex flex-col md:flex-row justify-between items-center px-6 md:px-12 lg:px-16 max-w-6xl mx-auto gap-8">
-          <div
-            className="text-2xl font-bold tracking-tight"
-            style={{ fontFamily: heading, color: "#2073FD" }}
-          >
-            Swish
+      <footer style={{ borderTop: "1px solid rgba(0,0,0,.06)", padding: "48px 28px" }}>
+        <div style={{ maxWidth: 1180, margin: "0 auto", display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "center", gap: 24 }}>
+          <div style={{ display: "flex", alignItems: "center", height: 18, flexShrink: 0 }}>
+            <img src="/your-logo.png" alt="Swish Logo" style={{ height: "100%", width: "auto", display: "block" }} />
           </div>
-          <div className="flex flex-wrap justify-center gap-6">
-            {["Privacy Policy", "Terms of Service", "Security", "Status"].map(
-              (l) => (
-                <a
-                  key={l}
-                  href="#"
-                  className="text-sm transition-opacity hover:opacity-60"
-                  style={{ fontFamily: body, color: muted }}
-                >
-                  {l}
-                </a>
-              ),
-            )}
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 20 }}>
+            {["Privacy Policy", "Terms of Service"].map((l) => (
+              <a key={l} href="#" className="mk-nlink" style={{ fontSize: 13, color: "#71717a" }}>{l}</a>
+            ))}
           </div>
-          <div className="text-sm" style={{ fontFamily: body, color: muted }}>
-            © 2026 Swish Inc. All rights reserved.
-          </div>
+          <div style={{ fontSize: 13, color: "#71717a" }}>© 2026 Swish Inc. All rights reserved.</div>
         </div>
       </footer>
     </div>

@@ -27,9 +27,7 @@ export function PendingApproval({ status }: { status: ApprovalStatus }) {
       className="min-h-screen flex flex-col"
       style={{ background: "var(--mk-bg)", color: ink, fontFamily: body }}
     >
-      <div className="px-6 md:px-12 lg:px-16">
-        <Navbar variant="light" />
-      </div>
+      <Navbar />
 
       <main className="flex-grow w-full max-w-6xl mx-auto px-6 md:px-12 lg:px-16 py-20 flex items-center justify-center">
         <div
