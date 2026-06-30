@@ -216,9 +216,7 @@ function StorePage() {
       className="min-h-screen flex flex-col"
       style={{ background: "var(--mk-bg)", color: ink, fontFamily: body }}
     >
-      <div className="px-6 md:px-12 lg:px-16">
-        <Navbar variant="light" />
-      </div>
+      <Navbar />
 
       <main className="flex-grow w-full max-w-6xl mx-auto px-6 md:px-12 lg:px-16 py-16">
         {/* Store header */}
@@ -523,34 +521,17 @@ function StorePage() {
       />
 
       {/* Footer */}
-      <footer
-        className="w-full py-16 border-t mt-auto"
-        style={{ background: "var(--mk-bg)", borderColor: "var(--mk-border)" }}
-      >
-        <div className="flex flex-col md:flex-row justify-between items-center px-6 md:px-12 lg:px-16 max-w-6xl mx-auto gap-8">
-          <div
-            className="text-2xl font-bold tracking-tight"
-            style={{ fontFamily: heading, color: "#2073FD" }}
-          >
-            Swish
+      <footer style={{ borderTop: "1px solid rgba(0,0,0,.06)", padding: "48px 28px" }}>
+        <div style={{ maxWidth: 1180, margin: "0 auto", display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "center", gap: 24 }}>
+          <div style={{ display: "flex", alignItems: "center", height: 18, flexShrink: 0 }}>
+            <img src="/your-logo.png" alt="Swish Logo" style={{ height: "100%", width: "auto", display: "block" }} />
           </div>
-          <div className="flex flex-wrap justify-center gap-6">
-            {["Privacy Policy", "Terms of Service", "Security", "Status"].map(
-              (l) => (
-                <a
-                  key={l}
-                  href="#"
-                  className="text-sm transition-opacity hover:opacity-60"
-                  style={{ fontFamily: body, color: muted }}
-                >
-                  {l}
-                </a>
-              ),
-            )}
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 20 }}>
+            {["Privacy Policy", "Terms of Service"].map((l) => (
+              <a key={l} href="#" className="mk-nlink" style={{ fontSize: 13, color: "#71717a" }}>{l}</a>
+            ))}
           </div>
-          <div className="text-sm" style={{ fontFamily: body, color: muted }}>
-            © 2026 Swish Inc. All rights reserved.
-          </div>
+          <div style={{ fontSize: 13, color: "#71717a" }}>© 2026 Swish Inc. All rights reserved.</div>
         </div>
       </footer>
     </div>

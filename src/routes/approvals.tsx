@@ -80,9 +80,7 @@ function ApprovalsPage() {
       className="min-h-screen flex flex-col"
       style={{ background: "var(--mk-bg)", color: ink, fontFamily: body }}
     >
-      <div className="px-6 md:px-12 lg:px-16">
-        <Navbar variant="light" />
-      </div>
+      <Navbar />
 
       <main className="flex-grow w-full max-w-3xl mx-auto px-6 md:px-12 lg:px-16 py-16">
         <div className="flex items-center gap-3 mb-2">
