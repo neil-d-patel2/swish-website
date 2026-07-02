@@ -12,4 +12,11 @@ crons.daily(
   internal.cleanup.removeDeletedProjects,
 );
 
+crons.interval(
+  "sync connected POS integrations",
+  { hours: 1 },
+  internal.posSync.syncAllConnected,
+  {},
+);
+
 export default crons;

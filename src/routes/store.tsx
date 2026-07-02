@@ -15,6 +15,8 @@ import { useSupabaseAuth } from "@/hooks/use-supabase-auth";
 import { useApproval } from "@/hooks/use-approval";
 import { PendingApproval } from "@/components/PendingApproval";
 import { Navbar } from "@/components/Navbar";
+import { PosIntegrations } from "@/components/store/PosIntegrations";
+import { RecommendationsPanel } from "@/components/store/RecommendationsPanel";
 import { useAction } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import {
@@ -70,6 +72,7 @@ type Store = {
   created_at: string;
   plan: string;
   stripe_subscription_id: string | null;
+  notify_email: boolean;
 };
 
 type Item = {
@@ -100,6 +103,10 @@ function StorePage() {
   const [cancelConfirm, setCancelConfirm] = useState(false);
   const [canceling, setCanceling] = useState(false);
   const checkoutFulfilledRef = useRef(false);
+  const [sales30d, setSales30d] = useState(0);
+  const [posBanner, setPosBanner] = useState<string | null>(null);
+  const [notifyEmail, setNotifyEmail] = useState(true);
+  const [notifyEmailSaving, setNotifyEmailSaving] = useState(false);
 
   useEffect(() => {
     if (isLoading) return;
@@ -119,6 +126,7 @@ function StorePage() {
           return;
         }
         setStore(data);
+        setNotifyEmail(data.notify_email ?? true);
         setStoreLoading(false);
         // Load items for this store
         supabase
@@ -127,8 +135,46 @@ function StorePage() {
           .eq("store_id", data.id)
           .order("created_at", { ascending: false })
           .then(({ data: itemData }) => setItems(itemData ?? []));
+        // Sum sales from the last 30 days (populated by POS sync)
+        const since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+        supabase
+          .from("sales")
+          .select("total_price")
+          .eq("store_id", data.id)
+          .gte("sold_at", since)
+          .then(({ data: saleData }) => {
+            const total = (saleData ?? []).reduce(
+              (sum, s) => sum + (Number(s.total_price) || 0),
+              0,
+            );
+            setSales30d(total);
+          });
       });
   }, [session, isLoading]);
+
+  // After an OAuth connect redirect (?pos=shopify_connected|square_connected|error)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const pos = params.get("pos");
+    if (!pos) return;
+    setPosBanner(
+      pos === "error"
+        ? "Something went wrong connecting your POS. Please try again."
+        : `${pos === "shopify_connected" ? "Shopify" : "Square"} connected — syncing your catalog now.`,
+    );
+    params.delete("pos");
+    const next = `${window.location.pathname}${params.toString() ? `?${params}` : ""}`;
+    window.history.replaceState({}, "", next);
+  }, []);
+
+  const handleNotifyEmailToggle = async () => {
+    if (!store) return;
+    const next = !notifyEmail;
+    setNotifyEmail(next);
+    setNotifyEmailSaving(true);
+    await supabase.from("stores").update({ notify_email: next }).eq("id", store.id);
+    setNotifyEmailSaving(false);
+  };
 
   // On checkout success, fulfill the plan immediately via the Stripe session ID.
   // Runs once after the store first loads (so it doesn't race the initial fetch).
@@ -257,7 +303,7 @@ function StorePage() {
     return <PendingApproval status={approvalStatus} />;
   }
 
-  if (!store) return null;
+  if (!store || !session) return null;
 
   return (
     <div
@@ -358,6 +404,42 @@ function StorePage() {
           </div>
         </section>
 
+        {posBanner && (
+          <div
+            className="flex items-center justify-between gap-4 rounded-2xl px-5 py-3.5 mb-8 text-sm"
+            style={{ background: "var(--mk-tint)", color: ink, boxShadow: hairline }}
+          >
+            <span>{posBanner}</span>
+            <button
+              onClick={() => setPosBanner(null)}
+              className="text-xs font-medium cursor-pointer shrink-0"
+              style={{ color: muted }}
+            >
+              Dismiss
+            </button>
+          </div>
+        )}
+
+        {/* Email notification preference */}
+        <div className="flex items-center gap-3 mb-10">
+          <button
+            role="switch"
+            aria-checked={notifyEmail}
+            onClick={() => void handleNotifyEmailToggle()}
+            disabled={notifyEmailSaving}
+            className="relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors cursor-pointer disabled:opacity-60"
+            style={{ background: notifyEmail ? ink : "var(--mk-border)" }}
+          >
+            <span
+              className="inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform"
+              style={{ transform: notifyEmail ? "translateX(18px)" : "translateX(3px)" }}
+            />
+          </button>
+          <span className="text-xs" style={{ color: muted }}>
+            Email me when the Swish team sends a recommendation
+          </span>
+        </div>
+
         {/* Free-plan upsell */}
         {store.plan === "free" && (
           <div
@@ -384,7 +466,7 @@ function StorePage() {
         )}
 
         {/* Stats */}
-        <section className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-14">
+        <section className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-14">
           <StatCard
             label="Total Items"
             value={String(items.length)}
@@ -395,7 +477,16 @@ function StorePage() {
             value={`$${totalValue.toFixed(2)}`}
             icon={<DollarSign className="w-4 h-4" style={{ color: faint }} />}
           />
+          <StatCard
+            label="Sales (30d)"
+            value={`$${sales30d.toFixed(2)}`}
+            icon={<DollarSign className="w-4 h-4" style={{ color: faint }} />}
+          />
         </section>
+
+        <PosIntegrations storeId={store.id} ownerId={session.user.id} />
+
+        <RecommendationsPanel storeId={store.id} />
 
         {/* Inventory */}
         <section>
