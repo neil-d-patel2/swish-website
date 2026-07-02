@@ -127,3 +127,48 @@ Switched to the canonical root-SPA approach: make `404.html` a byte-for-byte cop
 For a root deployment (`base: "/"`), GitHub Pages serves `dist/404.html` for any unknown path. Because it's an exact copy of `index.html`, the app bundle loads (asset URLs are absolute from `/`), TanStack Router reads `window.location.pathname` (`/approvals`) and renders that route directly — no query-string round-trip. The post-build `cp` keeps `404.html` in sync with each build's hashed asset names. **Note:** Pages still returns HTTP 404 status for these URLs, but the body is the app and renders correctly — fine for an authed app.
 
 ---
+
+## Error 6: `"use node"` ignored on a helper file with no exported Convex function
+
+**Date:** 2026-07-01
+
+**Error:**
+```
+X [ERROR] Could not resolve "crypto"
+    convex/posOAuthState.ts:4:44:
+      4 │ import { createHmac, timingSafeEqual } from "crypto";
+It looks like you are using Node APIs from a file without the "use node" directive.
+```
+
+**What went wrong:**
+`convex/posOAuthState.ts` was a plain utility module (exported two ordinary functions, no `query`/`mutation`/`action`) that had `"use node"` at the top and imported Node's built-in `crypto` module. Even though `stripe.ts`, `approvalEmail.ts`, etc. all successfully use `"use node"` + Node built-ins, those files all also register at least one Convex `action`. Convex's bundler apparently only honors the `"use node"` directive for files that export a registered Convex function — a file with the directive but zero Convex-function exports still got bundled for the default (isolate) runtime, where the Node `crypto` module doesn't exist. (`convex/supabaseRest.ts` has the identical shape — "use node" + no Convex exports — but never surfaced this because it only calls `fetch()`, which exists in both runtimes, so silently being bundled "wrong" caused no visible error.)
+
+**Fix:**
+Rewrote `posOAuthState.ts` to use the Web Crypto API (`crypto.subtle`, `TextEncoder`/`TextDecoder`, `btoa`/`atob`) instead of Node's `crypto` module, and removed the `"use node"` directive entirely. Web Crypto is available in both Convex runtimes, so it no longer matters which one the file gets bundled into.
+
+**Why it worked:**
+The fix sidesteps the actual bug class (directive not reliably respected on non-function files) rather than working around it — by only using APIs that exist in every Convex runtime, the file is correct regardless of which bundle it ends up in. **Lesson:** don't add `"use node"` to a helper file unless it also exports a Convex function; if it needs a Node-only API, either move that logic into a file that does export an action, or find a Web-standard equivalent (Web Crypto instead of `node:crypto`, `fetch` instead of `node:http`, etc.).
+
+---
+
+## Error 7: `httpAction` defined inside a `"use node"` file
+
+**Date:** 2026-07-01
+
+**Error:**
+```
+✖ Error fetching POST .../api/deploy2/start_push 400 Bad Request: InvalidModules:
+`shopifyCallback` defined in `posShopify.js` is a HttpAction function.
+Only actions can be defined in Node.js.
+```
+
+**What went wrong:**
+`convex/posShopify.ts` (and `posSquare.ts`) had `"use node"` at the top (needed for their OAuth/Shopify/Square API calls) and also exported an `httpAction` (the OAuth callback route handler) from the same file. Convex requires `httpAction`s to run in the default isolate runtime — they can't live in a Node.js-runtime file, even alongside plain `action`s that can.
+
+**Fix:**
+Followed the pattern already used by `convex/stripeWebhook.ts` vs `convex/stripe.ts`: moved the OAuth exchange logic into an `internalAction` (stays in the `"use node"` file, callable via `ctx.runAction`), and created a new file `convex/posHttp.ts` (no `"use node"`) that exports just the two `httpAction` callback handlers, which call `ctx.runAction(internal.posShopify.exchangeCodeAndConnect, …)` / the Square equivalent.
+
+**Why it worked:**
+Splitting by runtime requirement (Node-only logic in one file, the HTTP-route glue in another) matches Convex's constraint that a single file's runtime is all-or-nothing, while `ctx.runAction` lets the isolate-runtime `httpAction` still trigger the Node-runtime work. **Lesson:** any new POS/webhook-style provider needing both external API calls (Node) and an `httpAction` entry point needs *two* files from the start, not one — check `stripe.ts`/`stripeWebhook.ts` as the template before writing a new integration.
+
+---

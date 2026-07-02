@@ -1,10 +1,12 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState, useCallback } from "react";
-import { Check, X, ShieldCheck } from "lucide-react";
+import { Check, X, ShieldCheck, Send } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { useSupabaseAuth } from "@/hooks/use-supabase-auth";
 import { ADMIN_EMAIL, type ApprovalStatus } from "@/hooks/use-approval";
 import { Navbar } from "@/components/Navbar";
+import { useAction } from "convex/react";
+import { api } from "../../convex/_generated/api";
 
 export const Route = createFileRoute("/approvals")({
   component: ApprovalsPage,
@@ -152,7 +154,247 @@ function ApprovalsPage() {
             ))}
           </ul>
         )}
+
+        <SendNotificationSection />
       </main>
+    </div>
+  );
+}
+
+type StoreOption = { id: string; name: string; owner_email: string };
+
+const NOTIFICATION_TYPES: { value: string; label: string }[] = [
+  { value: "recommendation", label: "Recommendation" },
+  { value: "high_intent_item", label: "High-intent item" },
+  { value: "high_intent_customer", label: "High-intent customer" },
+  { value: "stocking_idea", label: "Stocking idea" },
+  { value: "marketing", label: "Marketing idea" },
+  { value: "general", label: "General update" },
+];
+
+function SendNotificationSection() {
+  const send = useAction(api.storeNotifications.send);
+  const [stores, setStores] = useState<StoreOption[]>([]);
+  const [storeId, setStoreId] = useState("");
+  const [type, setType] = useState(NOTIFICATION_TYPES[0].value);
+  const [title, setTitle] = useState("");
+  const [body, setBody] = useState("");
+  const [ctaLabel, setCtaLabel] = useState("");
+  const [ctaUrl, setCtaUrl] = useState("");
+  const [sendEmail, setSendEmail] = useState(true);
+  const [status, setStatus] = useState<"idle" | "sending" | "done" | "error">(
+    "idle",
+  );
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  useEffect(() => {
+    void supabase
+      .from("stores")
+      .select("id, name, owner_email")
+      .order("name", { ascending: true })
+      .then(({ data }) => setStores((data ?? []) as StoreOption[]));
+  }, []);
+
+  const handleSend = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!storeId || !title.trim() || !body.trim()) return;
+    setStatus("sending");
+    setErrorMsg(null);
+    try {
+      await send({
+        storeId,
+        type: type as
+          | "recommendation"
+          | "high_intent_item"
+          | "high_intent_customer"
+          | "stocking_idea"
+          | "marketing"
+          | "general",
+        title: title.trim(),
+        body: body.trim(),
+        ctaLabel: ctaLabel.trim() || undefined,
+        ctaUrl: ctaUrl.trim() || undefined,
+        sendEmail,
+      });
+      setStatus("done");
+      setTitle("");
+      setBody("");
+      setCtaLabel("");
+      setCtaUrl("");
+    } catch (err) {
+      setErrorMsg(err instanceof Error ? err.message : "Failed to send.");
+      setStatus("error");
+    }
+  };
+
+  return (
+    <div
+      className="mt-16 pt-10"
+      style={{ borderTop: "1px solid rgba(0,0,0,.06)" }}
+    >
+      <div className="flex items-center gap-3 mb-2">
+        <Send className="h-5 w-5" style={{ color: ink }} />
+        <h2
+          className="text-2xl font-bold tracking-tight"
+          style={{ fontFamily: heading, color: ink }}
+        >
+          Send a notification
+        </h2>
+      </div>
+      <p className="text-sm mb-8" style={{ color: muted }}>
+        Push a recommendation or update to a store's dashboard, optionally with
+        an email.
+      </p>
+
+      <form onSubmit={(e) => void handleSend(e)} className="space-y-4 max-w-xl">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label
+              className="text-sm font-medium mb-1.5 block"
+              style={{ color: muted }}
+            >
+              Store
+            </label>
+            <select
+              value={storeId}
+              onChange={(e) => setStoreId(e.target.value)}
+              required
+              className="w-full px-3 py-2.5 rounded-lg text-sm outline-none"
+              style={{ background: surface, color: ink, boxShadow: hairline }}
+            >
+              <option value="">Select a store…</option>
+              {stores.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.name} ({s.owner_email})
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label
+              className="text-sm font-medium mb-1.5 block"
+              style={{ color: muted }}
+            >
+              Type
+            </label>
+            <select
+              value={type}
+              onChange={(e) => setType(e.target.value)}
+              className="w-full px-3 py-2.5 rounded-lg text-sm outline-none"
+              style={{ background: surface, color: ink, boxShadow: hairline }}
+            >
+              {NOTIFICATION_TYPES.map((t) => (
+                <option key={t.value} value={t.value}>
+                  {t.label}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label
+            className="text-sm font-medium mb-1.5 block"
+            style={{ color: muted }}
+          >
+            Title
+          </label>
+          <input
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="e.g. Restock suggestion: Air Force 1"
+            required
+            className="w-full px-3 py-2.5 rounded-lg text-sm outline-none"
+            style={{ background: surface, color: ink, boxShadow: hairline }}
+          />
+        </div>
+
+        <div>
+          <label
+            className="text-sm font-medium mb-1.5 block"
+            style={{ color: muted }}
+          >
+            Message
+          </label>
+          <textarea
+            value={body}
+            onChange={(e) => setBody(e.target.value)}
+            required
+            rows={5}
+            className="w-full px-3 py-2.5 rounded-lg text-sm outline-none resize-y"
+            style={{ background: surface, color: ink, boxShadow: hairline }}
+          />
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label
+              className="text-sm font-medium mb-1.5 block"
+              style={{ color: muted }}
+            >
+              CTA label (optional)
+            </label>
+            <input
+              value={ctaLabel}
+              onChange={(e) => setCtaLabel(e.target.value)}
+              placeholder="e.g. View item"
+              className="w-full px-3 py-2.5 rounded-lg text-sm outline-none"
+              style={{ background: surface, color: ink, boxShadow: hairline }}
+            />
+          </div>
+          <div>
+            <label
+              className="text-sm font-medium mb-1.5 block"
+              style={{ color: muted }}
+            >
+              CTA URL (optional)
+            </label>
+            <input
+              value={ctaUrl}
+              onChange={(e) => setCtaUrl(e.target.value)}
+              placeholder="https://…"
+              className="w-full px-3 py-2.5 rounded-lg text-sm outline-none"
+              style={{ background: surface, color: ink, boxShadow: hairline }}
+            />
+          </div>
+        </div>
+
+        <label
+          className="flex items-center gap-2 text-sm"
+          style={{ color: muted }}
+        >
+          <input
+            type="checkbox"
+            checked={sendEmail}
+            onChange={(e) => setSendEmail(e.target.checked)}
+          />
+          Also email the store owner (they can opt out from their dashboard)
+        </label>
+
+        <div className="flex items-center gap-3 pt-1">
+          <button
+            type="submit"
+            disabled={
+              status === "sending" || !storeId || !title.trim() || !body.trim()
+            }
+            className="inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold cursor-pointer disabled:opacity-50"
+            style={{ color: onAccent, background: ink }}
+          >
+            <Send className="w-4 h-4" />
+            {status === "sending" ? "Sending…" : "Send notification"}
+          </button>
+          {status === "done" && (
+            <p className="text-sm" style={{ color: "#15803d" }}>
+              Sent.
+            </p>
+          )}
+          {status === "error" && (
+            <p className="text-sm" style={{ color: "#ba1a1a" }}>
+              {errorMsg ?? "Failed to send."}
+            </p>
+          )}
+        </div>
+      </form>
     </div>
   );
 }

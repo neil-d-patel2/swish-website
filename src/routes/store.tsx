@@ -1,20 +1,31 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import {
   Upload,
   Plus,
   Package,
-  DollarSign,
   ImageIcon,
   Trash2,
-  Store as StoreIcon,
   CreditCard,
+  RefreshCw,
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { useSupabaseAuth } from "@/hooks/use-supabase-auth";
 import { useApproval } from "@/hooks/use-approval";
 import { PendingApproval } from "@/components/PendingApproval";
 import { Navbar } from "@/components/Navbar";
+import { PosIntegrations } from "@/components/store/PosIntegrations";
+import { RecommendationsPanel } from "@/components/store/RecommendationsPanel";
+import { CustomerIntentTab } from "@/components/store/CustomerIntentTab";
+import {
+  glass,
+  glassCardStyle,
+  glassCardSStyle,
+  pillBtnClass,
+  inkBtnStyle,
+  outlineBtnStyle,
+  fieldStyle,
+} from "@/components/store/glass-theme";
 import { useAction } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import {
@@ -28,40 +39,15 @@ export const Route = createFileRoute("/store")({
   component: StorePage,
 });
 
-// Cream + black design system (shared with pricing/contact/stores)
-const cream = "var(--mk-cream)";
-const creamCard = "var(--mk-cream-card)";
-const creamDeep = "var(--mk-cream-deep)";
-const ink = "var(--mk-ink)";
-const muted = "var(--mk-muted)";
-const surface = "var(--mk-surface)";
-const onAccent = "var(--mk-on-accent)";
-const faint = "var(--mk-faint)";
-const heading = "var(--font-heading)";
-const body = "var(--font-body)";
-const hairline = "var(--mk-hairline)";
-const danger = "#ba1a1a";
+type Tab = "overview" | "intent" | "inventory" | "insights" | "settings";
 
-const inkBtnClass =
-  "inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-full font-medium shadow-sm hover:shadow-md transition-all active:scale-95 duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100";
-const inkBtnStyle = { background: ink, color: onAccent, fontFamily: body } as const;
-const outlineBtnClass =
-  "inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-full font-medium transition-all active:scale-95 duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100";
-const outlineBtnStyle = {
-  background: surface,
-  color: ink,
-  fontFamily: body,
-  boxShadow: hairline,
-} as const;
-
-const fieldClass =
-  "w-full rounded-lg px-4 py-3 outline-none transition-shadow focus:ring-1 focus:ring-black disabled:opacity-60";
-const fieldStyle = {
-  background: creamCard,
-  color: ink,
-  fontFamily: body,
-  boxShadow: hairline,
-} as const;
+const TABS: { key: Tab; label: string }[] = [
+  { key: "overview", label: "Overview" },
+  { key: "intent", label: "Customer Intent" },
+  { key: "inventory", label: "Inventory" },
+  { key: "insights", label: "Insights" },
+  { key: "settings", label: "Settings" },
+];
 
 type Store = {
   id: string;
@@ -70,6 +56,7 @@ type Store = {
   created_at: string;
   plan: string;
   stripe_subscription_id: string | null;
+  notify_email: boolean;
 };
 
 type Item = {
@@ -83,6 +70,33 @@ type Item = {
   image_url: string | null;
   created_at: string;
 };
+
+type PosProvider = "shopify" | "square";
+type PosConn = {
+  provider: PosProvider;
+  status: "connected" | "disconnected" | "error";
+  external_account: string | null;
+};
+
+const PROVIDER_LABEL: Record<PosProvider, string> = {
+  shopify: "Shopify",
+  square: "Square",
+};
+
+function initials(name: string) {
+  const parts = name.trim().split(/\s+/);
+  return (
+    (parts[0]?.[0] ?? "") + (parts[1]?.[0] ?? parts[0]?.[1] ?? "")
+  ).toUpperCase();
+}
+
+function itemStatus(stock: number) {
+  if (stock <= 0)
+    return { label: "Out", color: glass.danger, bg: glass.dangerTint };
+  if (stock <= 5)
+    return { label: "Low", color: glass.warn, bg: glass.warnTint };
+  return { label: "In stock", color: glass.good, bg: glass.goodTint };
+}
 
 function StorePage() {
   const { session, isLoading } = useSupabaseAuth();
@@ -100,6 +114,45 @@ function StorePage() {
   const [cancelConfirm, setCancelConfirm] = useState(false);
   const [canceling, setCanceling] = useState(false);
   const checkoutFulfilledRef = useRef(false);
+  const [sales30d, setSales30d] = useState(0);
+  const [posBanner, setPosBanner] = useState<string | null>(null);
+  const [notifyEmail, setNotifyEmail] = useState(true);
+  const [notifyEmailSaving, setNotifyEmailSaving] = useState(false);
+  const [tab, setTab] = useState<Tab>("overview");
+  const [posConnections, setPosConnections] = useState<PosConn[]>([]);
+  const [posQuickSyncing, setPosQuickSyncing] = useState(false);
+  const shopifySyncNow = useAction(api.posShopify.syncNow);
+  const squareSyncNow = useAction(api.posSquare.syncNow);
+
+  const loadPosConnections = useCallback(async (storeId: string) => {
+    const { data } = await supabase
+      .from("pos_connections")
+      .select("provider,status,external_account")
+      .eq("store_id", storeId);
+    setPosConnections((data ?? []) as PosConn[]);
+  }, []);
+
+  const handleQuickSync = async () => {
+    if (!store || !session) return;
+    setPosQuickSyncing(true);
+    try {
+      await Promise.all(
+        posConnections
+          .filter((c) => c.status === "connected")
+          .map((c) =>
+            c.provider === "shopify"
+              ? shopifySyncNow({ storeId: store.id, ownerId: session.user.id })
+              : squareSyncNow({ storeId: store.id, ownerId: session.user.id }),
+          ),
+      );
+    } catch {
+      // Per-provider errors surface on the Inventory tab's POS cards; this
+      // header shortcut is best-effort.
+    } finally {
+      await loadPosConnections(store.id);
+      setPosQuickSyncing(false);
+    }
+  };
 
   useEffect(() => {
     if (isLoading) return;
@@ -119,7 +172,9 @@ function StorePage() {
           return;
         }
         setStore(data);
+        setNotifyEmail(data.notify_email ?? true);
         setStoreLoading(false);
+        void loadPosConnections(data.id);
         // Load items for this store
         supabase
           .from("items")
@@ -127,8 +182,51 @@ function StorePage() {
           .eq("store_id", data.id)
           .order("created_at", { ascending: false })
           .then(({ data: itemData }) => setItems(itemData ?? []));
+        // Sum sales from the last 30 days (populated by POS sync)
+        const since = new Date(
+          Date.now() - 30 * 24 * 60 * 60 * 1000,
+        ).toISOString();
+        supabase
+          .from("sales")
+          .select("total_price")
+          .eq("store_id", data.id)
+          .gte("sold_at", since)
+          .then(({ data: saleData }) => {
+            const total = (saleData ?? []).reduce(
+              (sum, s) => sum + (Number(s.total_price) || 0),
+              0,
+            );
+            setSales30d(total);
+          });
       });
   }, [session, isLoading]);
+
+  // After an OAuth connect redirect (?pos=shopify_connected|square_connected|error)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const pos = params.get("pos");
+    if (!pos) return;
+    setPosBanner(
+      pos === "error"
+        ? "Something went wrong connecting your POS. Please try again."
+        : `${pos === "shopify_connected" ? "Shopify" : "Square"} connected — syncing your catalog now.`,
+    );
+    params.delete("pos");
+    const next = `${window.location.pathname}${params.toString() ? `?${params}` : ""}`;
+    window.history.replaceState({}, "", next);
+  }, []);
+
+  const handleNotifyEmailToggle = async () => {
+    if (!store) return;
+    const next = !notifyEmail;
+    setNotifyEmail(next);
+    setNotifyEmailSaving(true);
+    await supabase
+      .from("stores")
+      .update({ notify_email: next })
+      .eq("id", store.id);
+    setNotifyEmailSaving(false);
+  };
 
   // On checkout success, fulfill the plan immediately via the Stripe session ID.
   // Runs once after the store first loads (so it doesn't race the initial fetch).
@@ -140,7 +238,10 @@ function StorePage() {
     checkoutFulfilledRef.current = true;
 
     void (async () => {
-      const plan = await fulfillCheckoutAction({ sessionId, userId: session.user.id });
+      const plan = await fulfillCheckoutAction({
+        sessionId,
+        userId: session.user.id,
+      });
       if (!plan) return;
       // Re-fetch so all columns (customer_id, subscription_id) are fresh
       const { data } = await supabase
@@ -237,17 +338,21 @@ function StorePage() {
     }
   };
 
-  const totalValue = items.reduce((sum, i) => sum + (i.price ?? 0) * i.stock, 0);
+  const totalValue = items.reduce(
+    (sum, i) => sum + (i.price ?? 0) * i.stock,
+    0,
+  );
+  const lowStockCount = items.filter((i) => i.stock > 0 && i.stock <= 5).length;
 
   if (isLoading || storeLoading || approvalLoading) {
     return (
       <div
         className="min-h-dvh flex items-center justify-center"
-        style={{ background: "var(--mk-bg)" }}
+        style={{ background: glass.frameBg }}
       >
         <div
           className="w-5 h-5 rounded-full border-2 animate-spin"
-          style={{ borderColor: "var(--mk-tint-strong)", borderTopColor: ink }}
+          style={{ borderColor: "rgba(0,0,0,.12)", borderTopColor: glass.ink }}
         />
       </div>
     );
@@ -257,376 +362,548 @@ function StorePage() {
     return <PendingApproval status={approvalStatus} />;
   }
 
-  if (!store) return null;
+  if (!store || !session) return null;
 
   return (
     <div
-      className="min-h-screen flex flex-col"
-      style={{ background: "var(--mk-bg)", color: ink, fontFamily: body }}
+      className="min-h-screen"
+      style={{
+        background: glass.frameBg,
+        color: glass.ink,
+        fontFamily: "Geist, system-ui, sans-serif",
+      }}
     >
       <Navbar />
-
-      <main className="flex-grow w-full max-w-6xl mx-auto px-6 md:px-12 lg:px-16 py-16">
-        {/* Store header */}
-        <section className="mb-12 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
-          <div className="flex items-center gap-5 min-w-0">
+      <main className="w-full max-w-6xl mx-auto px-6 md:px-10 py-8">
+        {/* Header */}
+        <div className="flex items-center justify-between gap-4 flex-wrap">
+          <div className="flex items-center gap-3 min-w-0">
             <div
-              className="w-16 h-16 rounded-2xl flex items-center justify-center shrink-0"
-              style={{ background: creamDeep, boxShadow: hairline }}
+              className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0 text-sm font-semibold"
+              style={{ background: glass.ink, color: "#fff" }}
             >
-              <StoreIcon className="w-7 h-7" style={{ color: ink }} />
+              {initials(store.name)}
             </div>
             <div className="min-w-0">
-              <div className="flex items-center gap-3 flex-wrap">
-                <h1
-                  className="text-4xl md:text-5xl font-bold tracking-tight truncate"
-                  style={{ fontFamily: heading, color: ink }}
+              <div className="flex items-center gap-2 flex-wrap">
+                <span
+                  className="text-xl font-semibold tracking-tight truncate"
+                  style={{ color: glass.ink }}
                 >
                   {store.name}
-                </h1>
-                <span
-                  className="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-full shrink-0"
-                  style={{
-                    background: "rgba(22,163,74,0.1)",
-                    color: "#15803d",
-                  }}
-                >
-                  <span
-                    className="w-1.5 h-1.5 rounded-full animate-pulse"
-                    style={{ background: "#16a34a" }}
-                  />
-                  Online
                 </span>
+                <Badge color={glass.good} bg={glass.goodTint} dot>
+                  Online
+                </Badge>
+                <Badge color={glass.muted} bg="rgba(0,0,0,.05)">
+                  {store.plan === "free"
+                    ? "Free plan"
+                    : `${store.plan.charAt(0).toUpperCase()}${store.plan.slice(1)} plan`}
+                </Badge>
+                {posConnections
+                  .filter((c) => c.status !== "disconnected")
+                  .map((c) => (
+                    <Badge
+                      key={c.provider}
+                      color={c.status === "error" ? glass.danger : glass.accent}
+                      bg={
+                        c.status === "error"
+                          ? glass.dangerTint
+                          : glass.accentTint
+                      }
+                    >
+                      POS: {PROVIDER_LABEL[c.provider]}
+                      {c.status === "error" ? " sync error" : " synced"}
+                    </Badge>
+                  ))}
+                {posConnections.some((c) => c.status === "connected") && (
+                  <button
+                    onClick={() => void handleQuickSync()}
+                    disabled={posQuickSyncing}
+                    aria-label="Sync POS now"
+                    title="Sync POS now"
+                    className="inline-flex items-center justify-center w-6 h-6 rounded-full cursor-pointer disabled:opacity-50 shrink-0"
+                    style={{
+                      background: "rgba(0,0,0,.05)",
+                      color: glass.muted,
+                    }}
+                  >
+                    <RefreshCw
+                      className={`w-3 h-3 ${posQuickSyncing ? "animate-spin" : ""}`}
+                    />
+                  </button>
+                )}
               </div>
-              <p className="text-sm mt-1.5 truncate" style={{ color: muted }}>
+              <p
+                className="text-xs mt-0.5 truncate"
+                style={{ color: glass.muted }}
+              >
                 {store.owner_email}
               </p>
             </div>
           </div>
-
-          {/* Plan status + actions */}
-          <div className="shrink-0 flex flex-col items-start sm:items-end gap-2">
-            {store.plan === "free" ? (
-              <span
-                className="inline-flex items-center text-xs font-medium px-3 py-1.5 rounded-full"
-                style={{ background: surface, boxShadow: hairline, color: muted }}
-              >
-                Free plan
-              </span>
-            ) : (
-              <>
-                <span
-                  className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full"
-                  style={{ background: "var(--mk-tint)", color: ink }}
-                >
-                  {store.plan.charAt(0).toUpperCase() + store.plan.slice(1)} plan
-                </span>
-                {!cancelConfirm ? (
-                  <button
-                    onClick={() => setCancelConfirm(true)}
-                    className="text-xs cursor-pointer transition-colors"
-                    style={{ color: muted }}
-                    onMouseEnter={(e) => (e.currentTarget.style.color = danger)}
-                    onMouseLeave={(e) => (e.currentTarget.style.color = muted)}
-                  >
-                    Cancel plan
-                  </button>
-                ) : (
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-xs" style={{ color: muted }}>
-                      Cancel your subscription?
-                    </span>
-                    <button
-                      onClick={() => void handleCancelPlan()}
-                      disabled={canceling}
-                      className="text-xs font-semibold cursor-pointer disabled:opacity-50"
-                      style={{ color: danger }}
-                    >
-                      {canceling ? "Canceling…" : "Yes, cancel"}
-                    </button>
-                    <button
-                      onClick={() => setCancelConfirm(false)}
-                      className="text-xs cursor-pointer"
-                      style={{ color: muted }}
-                    >
-                      Never mind
-                    </button>
-                  </div>
-                )}
-              </>
-            )}
-          </div>
-        </section>
-
-        {/* Free-plan upsell */}
-        {store.plan === "free" && (
-          <div
-            className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 rounded-2xl px-6 py-5 mb-10"
-            style={{ background: "var(--mk-tint)", boxShadow: hairline }}
+          <button
+            className={`${pillBtnClass} px-4 py-2 text-sm`}
+            style={inkBtnStyle}
+            onClick={() => setDialogOpen(true)}
           >
-            <div>
-              <p className="text-sm font-semibold mb-0.5" style={{ color: ink }}>
-                Start your 14-day free trial
-              </p>
-              <p className="text-xs" style={{ color: muted }}>
-                Unlock AI automation, advanced analytics, and priority support — no credit card charged until day 15.
-              </p>
-            </div>
+            <Plus className="w-4 h-4" />
+            Add item
+          </button>
+        </div>
+
+        {/* Tabs */}
+        <div className="flex gap-1.5 mt-5 overflow-x-auto pb-1">
+          {TABS.map((t) => (
             <button
-              onClick={() => void navigate({ to: "/pricing" })}
-              className={`${inkBtnClass} text-sm !px-5 !py-2.5 shrink-0`}
-              style={inkBtnStyle}
+              key={t.key}
+              onClick={() => setTab(t.key)}
+              className={`${pillBtnClass} px-4 py-2 text-sm whitespace-nowrap`}
+              style={
+                tab === t.key
+                  ? { background: glass.ink, color: "#fff" }
+                  : { background: "transparent", color: glass.muted }
+              }
             >
-              <CreditCard className="w-4 h-4" />
-              Choose a plan
+              {t.label}
+            </button>
+          ))}
+        </div>
+        <div
+          style={{
+            height: 1,
+            background: glass.border,
+            marginTop: 12,
+            marginBottom: 22,
+          }}
+        />
+
+        {posBanner && (
+          <div
+            className="flex items-center justify-between gap-4 rounded-2xl px-5 py-3.5 mb-6 text-sm"
+            style={{ ...glassCardSStyle, color: glass.ink }}
+          >
+            <span>{posBanner}</span>
+            <button
+              onClick={() => setPosBanner(null)}
+              className="text-xs font-medium cursor-pointer shrink-0"
+              style={{ color: glass.muted }}
+            >
+              Dismiss
             </button>
           </div>
         )}
 
-        {/* Stats */}
-        <section className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-14">
-          <StatCard
-            label="Total Items"
-            value={String(items.length)}
-            icon={<Package className="w-4 h-4" style={{ color: faint }} />}
-          />
-          <StatCard
-            label="Total Value"
-            value={`$${totalValue.toFixed(2)}`}
-            icon={<DollarSign className="w-4 h-4" style={{ color: faint }} />}
-          />
-        </section>
-
-        {/* Inventory */}
-        <section>
-          <div className="flex items-center justify-between mb-6 gap-4">
-            <h2
-              className="text-2xl font-bold tracking-tight"
-              style={{ fontFamily: heading, color: ink }}
-            >
-              Inventory
-            </h2>
-            {items.length > 0 && (
-              <div className="flex gap-3">
-                <button
-                  className={`${outlineBtnClass} text-sm !px-4 !py-2`}
-                  style={outlineBtnStyle}
-                  onClick={() => csvRef.current?.click()}
-                  disabled={csvImporting}
+        {tab === "overview" && (
+          <div>
+            <div className="grid grid-cols-1 lg:grid-cols-[1.5fr_1fr] gap-4 mb-4">
+              <div style={{ ...glassCardStyle, padding: "20px 22px" }}>
+                <span
+                  className="text-[11px] uppercase tracking-wider font-medium"
+                  style={{ color: glass.muted }}
                 >
-                  <Upload className="w-4 h-4" />
-                  {csvImporting ? "Importing…" : "Import CSV"}
-                </button>
-                <button
-                  className={`${inkBtnClass} text-sm !px-4 !py-2`}
-                  style={inkBtnStyle}
-                  onClick={() => setDialogOpen(true)}
-                >
-                  <Plus className="w-4 h-4" />
-                  Add item
-                </button>
-              </div>
-            )}
-          </div>
-
-          {csvError && (
-            <p
-              className="text-sm rounded-lg px-4 py-3 mb-4"
-              style={{
-                color: danger,
-                background: "rgba(186,26,26,0.08)",
-                boxShadow: "inset 0 0 0 1px rgba(186,26,26,0.2)",
-              }}
-            >
-              {csvError}
-            </p>
-          )}
-
-          <div className="flex flex-col lg:flex-row gap-6 items-start">
-            <div className="flex-1 min-w-0 w-full">
-              {items.length === 0 ? (
+                  Sales · last 30 days
+                </span>
                 <div
-                  className="rounded-2xl px-8 py-20 flex flex-col items-center text-center"
-                  style={{ background: creamCard, boxShadow: hairline }}
+                  className="text-3xl font-bold tabular-nums mt-2"
+                  style={{ color: glass.ink }}
                 >
-                  <div
-                    className="w-14 h-14 rounded-2xl flex items-center justify-center mb-5"
-                    style={{ background: surface, boxShadow: hairline }}
-                  >
-                    <Package className="w-6 h-6" style={{ color: muted }} />
-                  </div>
-                  <h3
-                    className="text-xl font-bold mb-2"
-                    style={{ fontFamily: heading, color: ink }}
-                  >
-                    No items yet
-                  </h3>
-                  <p className="text-sm max-w-xs mb-8" style={{ color: muted }}>
-                    Add items individually or import a CSV with your full
-                    inventory at once.
-                  </p>
-                  <div className="flex flex-col sm:flex-row items-center gap-3">
-                    <button
-                      className={outlineBtnClass}
-                      style={outlineBtnStyle}
-                      onClick={() => csvRef.current?.click()}
-                      disabled={csvImporting}
-                    >
-                      <Upload className="w-4 h-4" />
-                      {csvImporting ? "Importing…" : "Import CSV"}
-                    </button>
-                    <button
-                      className={inkBtnClass}
-                      style={inkBtnStyle}
-                      onClick={() => setDialogOpen(true)}
-                    >
-                      <Plus className="w-4 h-4" />
-                      Add item
-                    </button>
-                  </div>
+                  ${sales30d.toFixed(2)}
                 </div>
-              ) : (
-                <div
-                  className="rounded-2xl overflow-hidden"
-                  style={{
-                    background: surface,
-                    boxShadow: `${hairline}, 0 8px 30px rgb(0 0 0 / 0.04)`,
-                  }}
+              </div>
+              <div className="flex flex-col gap-3">
+                <MiniStat label="Total items" value={String(items.length)} />
+                <MiniStat
+                  label="Inventory value"
+                  value={`$${totalValue.toFixed(2)}`}
+                />
+                <MiniStat
+                  label="Low stock"
+                  value={lowStockCount > 0 ? `${lowStockCount} items` : "None"}
+                  warn={lowStockCount > 0}
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <TeaserCard
+                title="Customer intent"
+                body="See wishlist activity, high-intent shoppers, and live signals for your store."
+                cta="Open intent →"
+                onClick={() => setTab("intent")}
+              />
+              <TeaserCard
+                title="Swish insights"
+                body="Recommendations and updates from the Swish team."
+                cta="View all →"
+                onClick={() => setTab("insights")}
+              />
+            </div>
+          </div>
+        )}
+
+        {tab === "intent" && (
+          <CustomerIntentTab storeId={store.id} ownerId={session.user.id} />
+        )}
+
+        {tab === "inventory" && (
+          <div>
+            <div className="flex items-center justify-between mb-5 gap-4 flex-wrap">
+              <div>
+                <span
+                  className="text-lg font-bold"
+                  style={{ color: glass.ink }}
                 >
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr style={{ background: creamDeep }}>
-                        <th
-                          className="text-left px-5 py-3.5 font-medium text-xs uppercase tracking-widest"
-                          style={{ color: muted }}
-                        >
-                          Item
-                        </th>
-                        <th
-                          className="text-right px-5 py-3.5 font-medium text-xs uppercase tracking-widest"
-                          style={{ color: muted }}
-                        >
-                          Price
-                        </th>
-                        <th
-                          className="text-right px-5 py-3.5 font-medium text-xs uppercase tracking-widest"
-                          style={{ color: muted }}
-                        >
-                          Stock
-                        </th>
-                        <th className="px-5 py-3.5" />
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {items.map((item, i) => (
-                        <tr
-                          key={item.id}
-                          style={
-                            i < items.length - 1
-                              ? { boxShadow: "inset 0 -1px 0 var(--mk-border)" }
-                              : undefined
-                          }
-                        >
-                          <td className="px-5 py-3.5">
-                            <div className="flex items-center gap-3">
-                              {item.image_url ? (
-                                <img
-                                  src={item.image_url}
-                                  alt={item.name}
-                                  className="w-10 h-10 rounded-lg object-cover"
-                                  style={{ boxShadow: hairline }}
-                                />
-                              ) : (
-                                <div
-                                  className="w-10 h-10 rounded-lg flex items-center justify-center"
-                                  style={{ background: cream, boxShadow: hairline }}
-                                >
-                                  <ImageIcon
-                                    className="w-4 h-4"
-                                    style={{ color: faint }}
-                                  />
-                                </div>
-                              )}
-                              <span className="font-medium" style={{ color: ink }}>
-                                {item.name}
-                              </span>
-                            </div>
-                          </td>
-                          <td
-                            className="px-5 py-3.5 text-right tabular-nums font-medium"
-                            style={{ color: ink }}
-                          >
-                            {item.price != null
-                              ? `$${item.price.toFixed(2)}`
-                              : "—"}
-                          </td>
-                          <td
-                            className="px-5 py-3.5 text-right tabular-nums"
-                            style={{ color: item.stock <= 0 ? danger : muted }}
-                          >
-                            {item.stock <= 0 ? "Out" : item.stock}
-                          </td>
-                          <td className="px-5 py-3.5 text-right">
-                            <button
-                              onClick={() => handleDeleteItem(item.id)}
-                              aria-label={`Delete ${item.name}`}
-                              className="inline-flex items-center justify-center rounded-md p-1.5 transition-colors cursor-pointer hover:bg-black/[0.04]"
-                              style={{ color: muted }}
-                              onMouseEnter={(e) =>
-                                (e.currentTarget.style.color = danger)
-                              }
-                              onMouseLeave={(e) =>
-                                (e.currentTarget.style.color = muted)
-                              }
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                  Inventory
+                </span>
+                <span className="text-xs ml-2.5" style={{ color: glass.muted }}>
+                  {items.length} items · ${totalValue.toFixed(2)} value
+                </span>
+              </div>
+              {items.length > 0 && (
+                <div className="flex gap-2.5">
+                  <button
+                    className={`${pillBtnClass} px-3.5 py-2 text-xs`}
+                    style={outlineBtnStyle}
+                    onClick={() => csvRef.current?.click()}
+                    disabled={csvImporting}
+                  >
+                    <Upload className="w-3.5 h-3.5" />
+                    {csvImporting ? "Importing…" : "Import CSV"}
+                  </button>
+                  <button
+                    className={`${pillBtnClass} px-3.5 py-2 text-xs`}
+                    style={inkBtnStyle}
+                    onClick={() => setDialogOpen(true)}
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    Add item
+                  </button>
                 </div>
               )}
             </div>
 
-            {/* CSV tips */}
-            <aside
-              className="w-full lg:w-72 shrink-0 rounded-2xl p-6"
-              style={{ background: creamCard, boxShadow: hairline }}
-            >
-              <h3
-                className="text-base font-bold mb-4"
-                style={{ fontFamily: heading, color: ink }}
+            {csvError && (
+              <p
+                className="text-sm rounded-lg px-4 py-3 mb-4"
+                style={{ color: glass.danger, background: glass.dangerTint }}
               >
-                CSV tips
-              </h3>
-              <div className="space-y-3 text-sm" style={{ color: muted }}>
-                <p>Columns must be in this order:</p>
-                <code
-                  className="block font-mono text-xs px-3 py-2 rounded-lg"
-                  style={{ background: surface, color: ink, boxShadow: hairline }}
+                {csvError}
+              </p>
+            )}
+
+            {items.length === 0 ? (
+              <div
+                style={{ ...glassCardStyle, padding: "60px 32px" }}
+                className="flex flex-col items-center text-center"
+              >
+                <Package
+                  className="w-6 h-6 mb-4"
+                  style={{ color: glass.muted }}
+                />
+                <h3
+                  className="text-lg font-bold mb-1.5"
+                  style={{ color: glass.ink }}
                 >
-                  name, price, stock
-                </code>
-                <p>The first row is treated as a header and skipped.</p>
-                <div
-                  className="flex gap-2 rounded-lg px-3 py-2.5"
-                  style={{
-                    background: "rgba(154,103,0,0.08)",
-                    color: "#9a6700",
-                    boxShadow: "inset 0 0 0 1px rgba(154,103,0,0.2)",
-                  }}
+                  No items yet
+                </h3>
+                <p
+                  className="text-sm max-w-xs mb-6"
+                  style={{ color: glass.muted }}
                 >
-                  <p>
-                    Omit the <code className="font-mono">$</code> — use plain
-                    numbers only (e.g. <code className="font-mono">9.99</code>).
-                  </p>
+                  Add items individually, import a CSV, or connect a POS below.
+                </p>
+                <div className="flex items-center gap-3">
+                  <button
+                    className={`${pillBtnClass} px-4 py-2.5 text-sm`}
+                    style={outlineBtnStyle}
+                    onClick={() => csvRef.current?.click()}
+                    disabled={csvImporting}
+                  >
+                    <Upload className="w-4 h-4" />
+                    {csvImporting ? "Importing…" : "Import CSV"}
+                  </button>
+                  <button
+                    className={`${pillBtnClass} px-4 py-2.5 text-sm`}
+                    style={inkBtnStyle}
+                    onClick={() => setDialogOpen(true)}
+                  >
+                    <Plus className="w-4 h-4" />
+                    Add item
+                  </button>
                 </div>
               </div>
-            </aside>
+            ) : (
+              <div
+                style={{ ...glassCardStyle, padding: 0, overflow: "hidden" }}
+              >
+                <div
+                  className="grid px-4 py-2.5 text-[10.5px] uppercase tracking-wider font-semibold"
+                  style={{
+                    gridTemplateColumns: "1fr 90px 80px 100px 36px",
+                    color: glass.muted,
+                    background: "rgba(0,0,0,.03)",
+                  }}
+                >
+                  <span>Item</span>
+                  <span className="text-right">Price</span>
+                  <span className="text-right">Stock</span>
+                  <span className="text-right">Status</span>
+                  <span />
+                </div>
+                {items.map((item, i) => {
+                  const status = itemStatus(item.stock);
+                  return (
+                    <div
+                      key={item.id}
+                      className="grid items-center px-4 py-2.5"
+                      style={{
+                        gridTemplateColumns: "1fr 90px 80px 100px 36px",
+                        borderTop:
+                          i > 0 ? `1px solid ${glass.border}` : undefined,
+                      }}
+                    >
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        {item.image_url ? (
+                          <img
+                            src={item.image_url}
+                            alt={item.name}
+                            className="w-8 h-8 rounded-lg object-cover shrink-0"
+                          />
+                        ) : (
+                          <div
+                            className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 text-[10px] font-semibold"
+                            style={{
+                              background: glass.accentTint,
+                              color: glass.accent,
+                            }}
+                          >
+                            {initials(item.name)}
+                          </div>
+                        )}
+                        <span
+                          className="text-xs font-medium truncate"
+                          style={{ color: glass.ink }}
+                        >
+                          {item.name}
+                        </span>
+                      </div>
+                      <div
+                        className="text-right text-xs font-medium tabular-nums"
+                        style={{ color: glass.ink }}
+                      >
+                        {item.price != null ? `$${item.price.toFixed(2)}` : "—"}
+                      </div>
+                      <div
+                        className="text-right text-xs tabular-nums"
+                        style={{ color: status.color }}
+                      >
+                        {item.stock}
+                      </div>
+                      <div className="text-right">
+                        <span
+                          className="text-[11px] font-semibold px-2.5 py-1 rounded-full"
+                          style={{ background: status.bg, color: status.color }}
+                        >
+                          {status.label}
+                        </span>
+                      </div>
+                      <div className="text-right">
+                        <button
+                          onClick={() => handleDeleteItem(item.id)}
+                          aria-label={`Delete ${item.name}`}
+                          className="inline-flex items-center justify-center rounded-md p-1 cursor-pointer"
+                          style={{ color: glass.faint }}
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+            <div className="mt-6">
+              <PosIntegrations storeId={store.id} ownerId={session.user.id} />
+            </div>
           </div>
-        </section>
+        )}
+
+        {tab === "insights" && <RecommendationsPanel storeId={store.id} />}
+
+        {tab === "settings" && (
+          <div className="max-w-2xl flex flex-col gap-4">
+            <div style={{ ...glassCardStyle, padding: "22px 24px" }}>
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <div
+                    className="text-sm font-semibold"
+                    style={{ color: glass.ink }}
+                  >
+                    Plan &amp; billing
+                  </div>
+                  <div
+                    className="text-xs mt-0.5"
+                    style={{ color: glass.muted }}
+                  >
+                    You're on the{" "}
+                    <span
+                      className="font-semibold"
+                      style={{ color: glass.ink }}
+                    >
+                      {store.plan === "free"
+                        ? "Free"
+                        : `${store.plan.charAt(0).toUpperCase()}${store.plan.slice(1)}`}{" "}
+                      plan
+                    </span>
+                  </div>
+                </div>
+                {store.plan !== "free" && (
+                  <>
+                    {!cancelConfirm ? (
+                      <button
+                        onClick={() => setCancelConfirm(true)}
+                        className="text-xs cursor-pointer"
+                        style={{ color: glass.muted }}
+                      >
+                        Cancel plan
+                      </button>
+                    ) : (
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <button
+                          onClick={() => void handleCancelPlan()}
+                          disabled={canceling}
+                          className="text-xs font-semibold cursor-pointer disabled:opacity-50"
+                          style={{ color: glass.danger }}
+                        >
+                          {canceling ? "Canceling…" : "Yes, cancel"}
+                        </button>
+                        <button
+                          onClick={() => setCancelConfirm(false)}
+                          className="text-xs cursor-pointer"
+                          style={{ color: glass.muted }}
+                        >
+                          Never mind
+                        </button>
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+              {store.plan === "free" && (
+                <div
+                  className="rounded-2xl px-5 py-4 flex items-center justify-between gap-4 flex-wrap"
+                  style={{ background: glass.accentTint }}
+                >
+                  <div>
+                    <div
+                      className="text-sm font-semibold mb-0.5"
+                      style={{ color: glass.ink }}
+                    >
+                      Start your 14-day free trial
+                    </div>
+                    <div className="text-xs" style={{ color: "#52525b" }}>
+                      Unlock AI automation, advanced analytics, and priority
+                      support — no credit card charged until day 15.
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => void navigate({ to: "/pricing" })}
+                    className={`${pillBtnClass} px-4 py-2.5 text-sm shrink-0`}
+                    style={inkBtnStyle}
+                  >
+                    <CreditCard className="w-4 h-4" />
+                    Choose a plan
+                  </button>
+                </div>
+              )}
+            </div>
+
+            <div style={{ ...glassCardStyle, padding: "22px 24px" }}>
+              <div
+                className="text-sm font-semibold mb-4"
+                style={{ color: glass.ink }}
+              >
+                Notifications
+              </div>
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <div
+                    className="text-sm font-medium"
+                    style={{ color: glass.ink }}
+                  >
+                    Recommendation emails
+                  </div>
+                  <div
+                    className="text-xs mt-0.5"
+                    style={{ color: glass.muted }}
+                  >
+                    Email me when the Swish team sends a recommendation.
+                  </div>
+                </div>
+                <button
+                  role="switch"
+                  aria-checked={notifyEmail}
+                  onClick={() => void handleNotifyEmailToggle()}
+                  disabled={notifyEmailSaving}
+                  className="relative inline-flex h-5.5 w-10 shrink-0 items-center rounded-full transition-colors cursor-pointer disabled:opacity-60"
+                  style={{
+                    background: notifyEmail ? glass.ink : "rgba(0,0,0,.18)",
+                  }}
+                >
+                  <span
+                    className="inline-block h-4 w-4 transform rounded-full bg-white transition-transform"
+                    style={{
+                      transform: notifyEmail
+                        ? "translateX(20px)"
+                        : "translateX(3px)",
+                    }}
+                  />
+                </button>
+              </div>
+            </div>
+
+            <div style={{ ...glassCardStyle, padding: "22px 24px" }}>
+              <div
+                className="text-sm font-semibold mb-4"
+                style={{ color: glass.ink }}
+              >
+                Store
+              </div>
+              <div className="flex flex-col gap-3.5">
+                <div>
+                  <div
+                    className="text-xs mb-1.5"
+                    style={{ color: glass.muted }}
+                  >
+                    Store name
+                  </div>
+                  <div
+                    className="rounded-lg px-3.5 py-2.5 text-sm"
+                    style={{ ...fieldStyle }}
+                  >
+                    {store.name}
+                  </div>
+                </div>
+                <div>
+                  <div
+                    className="text-xs mb-1.5"
+                    style={{ color: glass.muted }}
+                  >
+                    Owner email
+                  </div>
+                  <div
+                    className="rounded-lg px-3.5 py-2.5 text-sm"
+                    style={{ ...fieldStyle }}
+                  >
+                    {store.owner_email}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </main>
 
       <input
@@ -645,56 +922,100 @@ function StorePage() {
         storeName={store.name}
         onAdded={handleItemAdded}
       />
-
-      {/* Footer */}
-      <footer style={{ borderTop: "1px solid rgba(0,0,0,.06)", padding: "48px 28px" }}>
-        <div style={{ maxWidth: 1180, margin: "0 auto", display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "center", gap: 24 }}>
-          <div style={{ display: "flex", alignItems: "center", height: 18, flexShrink: 0 }}>
-            <img src="/your-logo.png" alt="Swish Logo" style={{ height: "100%", width: "auto", display: "block" }} />
-          </div>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 20 }}>
-            {["Privacy Policy", "Terms of Service"].map((l) => (
-              <a key={l} href="#" className="mk-nlink" style={{ fontSize: 13, color: "#71717a" }}>{l}</a>
-            ))}
-          </div>
-          <div style={{ fontSize: 13, color: "#71717a" }}>© 2026 Swish Inc. All rights reserved.</div>
-        </div>
-      </footer>
     </div>
   );
 }
 
-function StatCard({
+function Badge({
+  children,
+  color,
+  bg,
+  dot,
+}: {
+  children: React.ReactNode;
+  color: string;
+  bg: string;
+  dot?: boolean;
+}) {
+  return (
+    <span
+      className="inline-flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1 rounded-full shrink-0"
+      style={{ background: bg, color }}
+    >
+      {dot && (
+        <span
+          className="w-1.5 h-1.5 rounded-full"
+          style={{ background: color }}
+        />
+      )}
+      {children}
+    </span>
+  );
+}
+
+function MiniStat({
   label,
   value,
-  icon,
+  warn,
 }: {
   label: string;
   value: string;
-  icon: React.ReactNode;
+  warn?: boolean;
 }) {
   return (
     <div
-      className="rounded-2xl p-7"
-      style={{
-        background: surface,
-        boxShadow: `${hairline}, 0 8px 30px rgb(0 0 0 / 0.04)`,
-      }}
+      style={{ ...glassCardSStyle, padding: "13px 16px" }}
+      className="flex items-center justify-between"
     >
-      <div className="flex items-center justify-between mb-6">
+      <span className="text-xs" style={{ color: "#52525b" }}>
+        {label}
+      </span>
+      {warn ? (
         <span
-          className="text-xs uppercase tracking-widest font-medium"
-          style={{ color: muted }}
+          className="text-xs font-semibold px-2.5 py-1 rounded-full"
+          style={{ background: glass.warnTint, color: glass.warn }}
         >
-          {label}
+          {value}
         </span>
-        {icon}
+      ) : (
+        <span
+          className="text-base font-bold tabular-nums"
+          style={{ color: glass.ink }}
+        >
+          {value}
+        </span>
+      )}
+    </div>
+  );
+}
+
+function TeaserCard({
+  title,
+  body,
+  cta,
+  onClick,
+}: {
+  title: string;
+  body: string;
+  cta: string;
+  onClick: () => void;
+}) {
+  return (
+    <div style={{ ...glassCardStyle, padding: "20px 22px" }}>
+      <div className="flex items-center justify-between mb-2">
+        <span className="text-sm font-semibold" style={{ color: glass.ink }}>
+          {title}
+        </span>
+        <button
+          onClick={onClick}
+          className="text-xs font-medium cursor-pointer"
+          style={{ color: glass.accent }}
+        >
+          {cta}
+        </button>
       </div>
-      <p
-        className="text-4xl font-bold tabular-nums"
-        style={{ fontFamily: heading, color: ink }}
-      >
-        {value}
+      <p className="text-xs leading-relaxed" style={{ color: glass.muted }}>
+        {body}
       </p>
     </div>
   );
@@ -801,15 +1122,16 @@ function AddItemDialog({
     >
       <DialogContent
         className="sm:max-w-md"
-        style={{ background: surface, color: ink, fontFamily: body }}
+        style={{
+          background: "#fff",
+          color: glass.ink,
+          fontFamily: "Geist, system-ui, sans-serif",
+        }}
       >
-        <DialogTitle
-          className="text-xl font-bold"
-          style={{ fontFamily: heading, color: ink }}
-        >
+        <DialogTitle className="text-xl font-bold" style={{ color: glass.ink }}>
           Add item
         </DialogTitle>
-        <DialogDescription style={{ color: muted }}>
+        <DialogDescription style={{ color: glass.muted }}>
           Add a product to your store's live catalog.
         </DialogDescription>
 
@@ -817,10 +1139,10 @@ function AddItemDialog({
           {/* Image picker */}
           <div
             onClick={() => fileRef.current?.click()}
-            className="w-full h-32 rounded-xl flex flex-col items-center justify-center cursor-pointer transition-colors overflow-hidden"
+            className="w-full h-32 rounded-xl flex flex-col items-center justify-center cursor-pointer overflow-hidden"
             style={{
-              background: creamCard,
-              boxShadow: "inset 0 0 0 1px var(--mk-border)",
+              background: "rgba(0,0,0,.03)",
+              boxShadow: "inset 0 0 0 1px rgba(0,0,0,.08)",
             }}
           >
             {imagePreview ? (
@@ -833,9 +1155,9 @@ function AddItemDialog({
               <>
                 <ImageIcon
                   className="w-6 h-6 mb-1.5"
-                  style={{ color: muted }}
+                  style={{ color: glass.muted }}
                 />
-                <p className="text-xs" style={{ color: muted }}>
+                <p className="text-xs" style={{ color: glass.muted }}>
                   Click to add image (optional)
                 </p>
               </>
@@ -852,9 +1174,9 @@ function AddItemDialog({
           <div className="space-y-1.5">
             <label
               className="text-sm font-medium"
-              style={{ color: muted }}
+              style={{ color: glass.muted }}
             >
-              Name <span style={{ color: danger }}>*</span>
+              Name <span style={{ color: glass.danger }}>*</span>
             </label>
             <input
               placeholder="e.g. Air Force 1"
@@ -862,7 +1184,7 @@ function AddItemDialog({
               onChange={(e) => setName(e.target.value)}
               disabled={saving}
               required
-              className={fieldClass}
+              className="w-full rounded-lg px-4 py-3 outline-none transition-shadow focus:ring-1 focus:ring-black disabled:opacity-60"
               style={fieldStyle}
             />
           </div>
@@ -871,7 +1193,7 @@ function AddItemDialog({
             <div className="space-y-1.5">
               <label
                 className="text-sm font-medium"
-                style={{ color: muted }}
+                style={{ color: glass.muted }}
               >
                 Price
               </label>
@@ -883,14 +1205,14 @@ function AddItemDialog({
                 value={price}
                 onChange={(e) => setPrice(e.target.value)}
                 disabled={saving}
-                className={fieldClass}
+                className="w-full rounded-lg px-4 py-3 outline-none transition-shadow focus:ring-1 focus:ring-black disabled:opacity-60"
                 style={fieldStyle}
               />
             </div>
             <div className="space-y-1.5">
               <label
                 className="text-sm font-medium"
-                style={{ color: muted }}
+                style={{ color: glass.muted }}
               >
                 Stock
               </label>
@@ -901,14 +1223,14 @@ function AddItemDialog({
                 value={stock}
                 onChange={(e) => setStock(e.target.value)}
                 disabled={saving}
-                className={fieldClass}
+                className="w-full rounded-lg px-4 py-3 outline-none transition-shadow focus:ring-1 focus:ring-black disabled:opacity-60"
                 style={fieldStyle}
               />
             </div>
           </div>
 
           {error && (
-            <p className="text-sm" style={{ color: danger }}>
+            <p className="text-sm" style={{ color: glass.danger }}>
               {error}
             </p>
           )}
@@ -921,7 +1243,7 @@ function AddItemDialog({
                 onOpenChange(false);
               }}
               disabled={saving}
-              className={`${outlineBtnClass} !px-5 !py-2.5 text-sm`}
+              className={`${pillBtnClass} !px-5 !py-2.5 text-sm`}
               style={outlineBtnStyle}
             >
               Cancel
@@ -929,7 +1251,7 @@ function AddItemDialog({
             <button
               type="submit"
               disabled={saving || !name.trim()}
-              className={`${inkBtnClass} !px-5 !py-2.5 text-sm`}
+              className={`${pillBtnClass} !px-5 !py-2.5 text-sm`}
               style={inkBtnStyle}
             >
               {saving ? "Adding…" : "Add item"}
