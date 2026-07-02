@@ -40,9 +40,7 @@ export async function supabasePatch(
     body: JSON.stringify(body),
   });
   if (!res.ok) {
-    throw new Error(
-      `Supabase PATCH failed: ${res.status} ${await res.text()}`,
-    );
+    throw new Error(`Supabase PATCH failed: ${res.status} ${await res.text()}`);
   }
 }
 

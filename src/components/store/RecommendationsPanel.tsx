@@ -1,14 +1,19 @@
 import { useEffect, useState, useCallback } from "react";
-import { Lightbulb, TrendingUp, Users, Package, Megaphone, Sparkles } from "lucide-react";
+import {
+  Lightbulb,
+  TrendingUp,
+  Users,
+  Package,
+  Megaphone,
+  Sparkles,
+} from "lucide-react";
 import { supabase } from "@/lib/supabase";
+import { glass, glassCardStyle, glassCardSStyle } from "./glass-theme";
 
-const ink = "var(--mk-ink)";
-const muted = "var(--mk-muted)";
-const surface = "var(--mk-surface)";
-const heading = "var(--font-heading)";
-const body = "var(--font-body)";
-const hairline = "var(--mk-hairline)";
-const creamCard = "var(--mk-cream-card)";
+const ink = glass.ink;
+const muted = glass.muted;
+const heading = "Geist, system-ui, sans-serif";
+const body = "Geist, system-ui, sans-serif";
 
 type NotificationType =
   | "recommendation"
@@ -29,7 +34,10 @@ type StoreNotification = {
   created_at: string;
 };
 
-const TYPE_META: Record<NotificationType, { label: string; icon: typeof Lightbulb }> = {
+const TYPE_META: Record<
+  NotificationType,
+  { label: string; icon: typeof Lightbulb }
+> = {
   recommendation: { label: "Recommendation", icon: Lightbulb },
   high_intent_item: { label: "High-intent item", icon: Package },
   high_intent_customer: { label: "High-intent customer", icon: Users },
@@ -59,7 +67,9 @@ export function RecommendationsPanel({ storeId }: { storeId: string }) {
 
   const markRead = async (id: string) => {
     setItems((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, read_at: new Date().toISOString() } : n)),
+      prev.map((n) =>
+        n.id === id ? { ...n, read_at: new Date().toISOString() } : n,
+      ),
     );
     await supabase
       .from("store_notifications")
@@ -81,7 +91,7 @@ export function RecommendationsPanel({ storeId }: { storeId: string }) {
         {unreadCount > 0 && (
           <span
             className="text-xs font-medium px-3 py-1.5 rounded-full"
-            style={{ background: "var(--mk-tint)", color: ink }}
+            style={{ background: glass.accentTint, color: glass.accent }}
           >
             {unreadCount} new
           </span>
@@ -92,13 +102,13 @@ export function RecommendationsPanel({ storeId }: { storeId: string }) {
         <div className="flex justify-center py-10">
           <div
             className="w-5 h-5 rounded-full border-2 animate-spin"
-            style={{ borderColor: "var(--mk-tint-strong)", borderTopColor: ink }}
+            style={{ borderColor: "rgba(0,0,0,.12)", borderTopColor: ink }}
           />
         </div>
       ) : items.length === 0 ? (
         <div
-          className="rounded-2xl px-8 py-14 flex flex-col items-center text-center"
-          style={{ background: creamCard, boxShadow: hairline }}
+          className="flex flex-col items-center text-center"
+          style={{ ...glassCardSStyle, padding: "48px 32px" }}
         >
           <Lightbulb className="w-6 h-6 mb-3" style={{ color: muted }} />
           <p className="text-sm max-w-sm" style={{ color: muted }}>
@@ -114,15 +124,21 @@ export function RecommendationsPanel({ storeId }: { storeId: string }) {
             return (
               <li
                 key={n.id}
-                className="rounded-2xl p-5 flex items-start gap-4"
+                className="flex items-start gap-4"
                 style={{
-                  background: surface,
-                  boxShadow: n.read_at ? hairline : `${hairline}, inset 0 0 0 1px var(--mk-tint-strong)`,
+                  ...glassCardStyle,
+                  padding: 20,
+                  boxShadow: n.read_at
+                    ? glassCardStyle.boxShadow
+                    : `${glassCardStyle.boxShadow}, 0 0 0 1.5px ${glass.accent}`,
                 }}
               >
                 <div
                   className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0"
-                  style={{ background: creamCard, boxShadow: hairline }}
+                  style={{
+                    background: "rgba(255,255,255,.5)",
+                    boxShadow: "inset 0 0 0 1px rgba(0,0,0,.06)",
+                  }}
                 >
                   <Icon className="w-4 h-4" style={{ color: ink }} />
                 </div>
@@ -138,10 +154,16 @@ export function RecommendationsPanel({ storeId }: { storeId: string }) {
                       · {new Date(n.created_at).toLocaleDateString()}
                     </span>
                   </div>
-                  <p className="font-semibold mb-1" style={{ color: ink, fontFamily: body }}>
+                  <p
+                    className="font-semibold mb-1"
+                    style={{ color: ink, fontFamily: body }}
+                  >
                     {n.title}
                   </p>
-                  <p className="text-sm mb-2 whitespace-pre-wrap" style={{ color: muted }}>
+                  <p
+                    className="text-sm mb-2 whitespace-pre-wrap"
+                    style={{ color: muted }}
+                  >
                     {n.body}
                   </p>
                   <div className="flex items-center gap-4 flex-wrap">

@@ -137,7 +137,10 @@ export async function syncSquareStore(
           );
         }
       } catch (err) {
-        console.error(`Square inventory fetch failed for store ${storeId}`, err);
+        console.error(
+          `Square inventory fetch failed for store ${storeId}`,
+          err,
+        );
       }
     }
 
@@ -209,7 +212,9 @@ export async function syncSquareStore(
           external_line_item_id: li.uid,
           item_name: li.name,
           quantity: parseInt(li.quantity, 10),
-          unit_price: li.base_price_money ? li.base_price_money.amount / 100 : null,
+          unit_price: li.base_price_money
+            ? li.base_price_money.amount / 100
+            : null,
           total_price: li.base_price_money
             ? (li.base_price_money.amount / 100) * parseInt(li.quantity, 10)
             : null,

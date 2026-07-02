@@ -13,6 +13,7 @@ import type * as auth from "../auth.js";
 import type * as cleanup from "../cleanup.js";
 import type * as contactEmail from "../contactEmail.js";
 import type * as crons from "../crons.js";
+import type * as customerIntent from "../customerIntent.js";
 import type * as http from "../http.js";
 import type * as issues from "../issues.js";
 import type * as posHttp from "../posHttp.js";
@@ -43,6 +44,7 @@ declare const fullApi: ApiFromModules<{
   cleanup: typeof cleanup;
   contactEmail: typeof contactEmail;
   crons: typeof crons;
+  customerIntent: typeof customerIntent;
   http: typeof http;
   issues: typeof issues;
   posHttp: typeof posHttp;

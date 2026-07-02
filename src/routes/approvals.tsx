@@ -182,7 +182,9 @@ function SendNotificationSection() {
   const [ctaLabel, setCtaLabel] = useState("");
   const [ctaUrl, setCtaUrl] = useState("");
   const [sendEmail, setSendEmail] = useState(true);
-  const [status, setStatus] = useState<"idle" | "sending" | "done" | "error">("idle");
+  const [status, setStatus] = useState<"idle" | "sending" | "done" | "error">(
+    "idle",
+  );
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   useEffect(() => {
@@ -226,7 +228,10 @@ function SendNotificationSection() {
   };
 
   return (
-    <div className="mt-16 pt-10" style={{ borderTop: "1px solid rgba(0,0,0,.06)" }}>
+    <div
+      className="mt-16 pt-10"
+      style={{ borderTop: "1px solid rgba(0,0,0,.06)" }}
+    >
       <div className="flex items-center gap-3 mb-2">
         <Send className="h-5 w-5" style={{ color: ink }} />
         <h2
@@ -237,13 +242,17 @@ function SendNotificationSection() {
         </h2>
       </div>
       <p className="text-sm mb-8" style={{ color: muted }}>
-        Push a recommendation or update to a store's dashboard, optionally with an email.
+        Push a recommendation or update to a store's dashboard, optionally with
+        an email.
       </p>
 
       <form onSubmit={(e) => void handleSend(e)} className="space-y-4 max-w-xl">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="text-sm font-medium mb-1.5 block" style={{ color: muted }}>
+            <label
+              className="text-sm font-medium mb-1.5 block"
+              style={{ color: muted }}
+            >
               Store
             </label>
             <select
@@ -262,7 +271,10 @@ function SendNotificationSection() {
             </select>
           </div>
           <div>
-            <label className="text-sm font-medium mb-1.5 block" style={{ color: muted }}>
+            <label
+              className="text-sm font-medium mb-1.5 block"
+              style={{ color: muted }}
+            >
               Type
             </label>
             <select
@@ -281,7 +293,10 @@ function SendNotificationSection() {
         </div>
 
         <div>
-          <label className="text-sm font-medium mb-1.5 block" style={{ color: muted }}>
+          <label
+            className="text-sm font-medium mb-1.5 block"
+            style={{ color: muted }}
+          >
             Title
           </label>
           <input
@@ -295,7 +310,10 @@ function SendNotificationSection() {
         </div>
 
         <div>
-          <label className="text-sm font-medium mb-1.5 block" style={{ color: muted }}>
+          <label
+            className="text-sm font-medium mb-1.5 block"
+            style={{ color: muted }}
+          >
             Message
           </label>
           <textarea
@@ -310,7 +328,10 @@ function SendNotificationSection() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="text-sm font-medium mb-1.5 block" style={{ color: muted }}>
+            <label
+              className="text-sm font-medium mb-1.5 block"
+              style={{ color: muted }}
+            >
               CTA label (optional)
             </label>
             <input
@@ -322,7 +343,10 @@ function SendNotificationSection() {
             />
           </div>
           <div>
-            <label className="text-sm font-medium mb-1.5 block" style={{ color: muted }}>
+            <label
+              className="text-sm font-medium mb-1.5 block"
+              style={{ color: muted }}
+            >
               CTA URL (optional)
             </label>
             <input
@@ -335,7 +359,10 @@ function SendNotificationSection() {
           </div>
         </div>
 
-        <label className="flex items-center gap-2 text-sm" style={{ color: muted }}>
+        <label
+          className="flex items-center gap-2 text-sm"
+          style={{ color: muted }}
+        >
           <input
             type="checkbox"
             checked={sendEmail}
@@ -347,7 +374,9 @@ function SendNotificationSection() {
         <div className="flex items-center gap-3 pt-1">
           <button
             type="submit"
-            disabled={status === "sending" || !storeId || !title.trim() || !body.trim()}
+            disabled={
+              status === "sending" || !storeId || !title.trim() || !body.trim()
+            }
             className="inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold cursor-pointer disabled:opacity-50"
             style={{ color: onAccent, background: ink }}
           >

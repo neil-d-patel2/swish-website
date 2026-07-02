@@ -41,6 +41,9 @@ jobs:
           CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+          VITE_SHOPIFY_CLIENT_ID: ${{ secrets.VITE_SHOPIFY_CLIENT_ID }}
+          VITE_SQUARE_CLIENT_ID: ${{ secrets.VITE_SQUARE_CLIENT_ID }}
+          VITE_SQUARE_ENV: ${{ secrets.VITE_SQUARE_ENV }}
 
       - name: Upload GitHub Pages artifact
         uses: actions/upload-pages-artifact@v3

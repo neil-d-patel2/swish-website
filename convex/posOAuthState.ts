@@ -18,10 +18,10 @@ function toBase64Url(bytes: ArrayBuffer): string {
 }
 
 function fromBase64Url(s: string): Uint8Array {
-  const padded = s.replace(/-/g, "+").replace(/_/g, "/").padEnd(
-    s.length + ((4 - (s.length % 4)) % 4),
-    "=",
-  );
+  const padded = s
+    .replace(/-/g, "+")
+    .replace(/_/g, "/")
+    .padEnd(s.length + ((4 - (s.length % 4)) % 4), "=");
   const bin = atob(padded);
   return Uint8Array.from(bin, (c) => c.charCodeAt(0));
 }
