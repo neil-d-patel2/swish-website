@@ -45,6 +45,7 @@ jobs:
           VITE_SQUARE_CLIENT_ID: ${{ secrets.VITE_SQUARE_CLIENT_ID }}
           VITE_SQUARE_ENV: ${{ secrets.VITE_SQUARE_ENV }}
 
+
       - name: Upload GitHub Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
