@@ -9,6 +9,7 @@ lerna-debug.log*
 
 node_modules
 dist
+hard_coded_data
 dist-ssr
 *.local
 .tanstack

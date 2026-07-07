@@ -98,6 +98,56 @@ function itemStatus(stock: number) {
   return { label: "In stock", color: glass.good, bg: glass.goodTint };
 }
 
+// Splits one CSV line, honoring double-quoted fields (POS exports often
+// quote product names containing commas).
+function parseCsvLine(line: string): string[] {
+  const out: string[] = [];
+  let cur = "";
+  let inQuotes = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (inQuotes) {
+      if (ch === '"') {
+        if (line[i + 1] === '"') {
+          cur += '"';
+          i++;
+        } else {
+          inQuotes = false;
+        }
+      } else {
+        cur += ch;
+      }
+    } else if (ch === '"') {
+      inQuotes = true;
+    } else if (ch === ",") {
+      out.push(cur.trim());
+      cur = "";
+    } else {
+      cur += ch;
+    }
+  }
+  out.push(cur.trim());
+  return out;
+}
+
+const CSV_FIELD_HINTS = {
+  name: ["name", "title", "product", "item", "description"],
+  price: ["price", "amount", "cost", "retail"],
+  stock: ["stock", "qty", "quantity", "inventory", "on hand", "count"],
+};
+
+function guessCsvColumn(headers: string[], hints: string[]) {
+  return headers.findIndex((h) =>
+    hints.some((hint) => h.toLowerCase().includes(hint)),
+  );
+}
+
+type CsvPending = {
+  fileName: string;
+  headers: string[];
+  rows: string[][];
+};
+
 function StorePage() {
   const { session, isLoading } = useSupabaseAuth();
   const { status: approvalStatus, isLoading: approvalLoading } = useApproval();
@@ -106,8 +156,8 @@ function StorePage() {
   const [storeLoading, setStoreLoading] = useState(true);
   const [items, setItems] = useState<Item[]>([]);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [csvImporting, setCsvImporting] = useState(false);
   const [csvError, setCsvError] = useState<string | null>(null);
+  const [csvPending, setCsvPending] = useState<CsvPending | null>(null);
   const csvRef = useRef<HTMLInputElement>(null);
   const fulfillCheckoutAction = useAction(api.stripe.fulfillCheckout);
   const cancelSubscriptionAction = useAction(api.stripe.cancelSubscription);
@@ -269,57 +319,21 @@ function StorePage() {
     if (!file || !store) return;
 
     setCsvError(null);
-    setCsvImporting(true);
 
     const text = await file.text();
     const lines = text.split(/\r?\n/).filter((l) => l.trim());
-    // Skip header row
-    const rows = lines.slice(1);
 
-    if (rows.length === 0) {
+    if (lines.length < 2) {
       setCsvError("CSV has no data rows.");
-      setCsvImporting(false);
       return;
     }
 
-    const inserts = rows
-      .map((row) => {
-        const cols = row.split(",");
-        const name = cols[0]?.trim() ?? "";
-        const price = cols[1] ? parseFloat(cols[1].trim()) : null;
-        const stock = cols[2] ? parseInt(cols[2].trim(), 10) : 0;
-        return {
-          store_id: store.id,
-          store_email: store.owner_email,
-          store_name: store.name,
-          name,
-          price: isNaN(price as number) ? null : price,
-          stock: isNaN(stock) ? 0 : stock,
-          image_url: null,
-        };
-      })
-      .filter((r) => r.name);
-
-    if (inserts.length === 0) {
-      setCsvError(
-        "No valid rows found. Make sure columns are: name, price, stock.",
-      );
-      setCsvImporting(false);
-      return;
-    }
-
-    const { data, error } = await supabase
-      .from("items")
-      .insert(inserts)
-      .select();
-
-    if (error) {
-      setCsvError(error.message);
-    } else if (data) {
-      setItems((prev) => [...(data as Item[]), ...prev]);
-    }
-
-    setCsvImporting(false);
+    // Open the column-mapping dialog; the insert happens there.
+    setCsvPending({
+      fileName: file.name,
+      headers: parseCsvLine(lines[0]),
+      rows: lines.slice(1).map(parseCsvLine),
+    });
   };
 
   const handleCancelPlan = async () => {
@@ -566,10 +580,9 @@ function StorePage() {
                     className={`${pillBtnClass} px-3.5 py-2 text-xs`}
                     style={outlineBtnStyle}
                     onClick={() => csvRef.current?.click()}
-                    disabled={csvImporting}
                   >
                     <Upload className="w-3.5 h-3.5" />
-                    {csvImporting ? "Importing…" : "Import CSV"}
+                    Import CSV
                   </button>
                   <button
                     className={`${pillBtnClass} px-3.5 py-2 text-xs`}
@@ -618,10 +631,9 @@ function StorePage() {
                     className={`${pillBtnClass} px-4 py-2.5 text-sm`}
                     style={outlineBtnStyle}
                     onClick={() => csvRef.current?.click()}
-                    disabled={csvImporting}
                   >
                     <Upload className="w-4 h-4" />
-                    {csvImporting ? "Importing…" : "Import CSV"}
+                    Import CSV
                   </button>
                   <button
                     className={`${pillBtnClass} px-4 py-2.5 text-sm`}
@@ -922,6 +934,18 @@ function StorePage() {
         storeName={store.name}
         onAdded={handleItemAdded}
       />
+
+      <CsvMappingDialog
+        pending={csvPending}
+        onClose={() => setCsvPending(null)}
+        storeId={store.id}
+        storeEmail={store.owner_email}
+        storeName={store.name}
+        onImported={(newItems) => {
+          setItems((prev) => [...newItems, ...prev]);
+          setCsvPending(null);
+        }}
+      />
     </div>
   );
 }
@@ -1018,6 +1042,227 @@ function TeaserCard({
         {body}
       </p>
     </div>
+  );
+}
+
+function CsvMappingDialog({
+  pending,
+  onClose,
+  storeId,
+  storeEmail,
+  storeName,
+  onImported,
+}: {
+  pending: CsvPending | null;
+  onClose: () => void;
+  storeId: string;
+  storeEmail: string;
+  storeName: string;
+  onImported: (items: Item[]) => void;
+}) {
+  const [nameCol, setNameCol] = useState(0);
+  const [priceCol, setPriceCol] = useState(-1);
+  const [stockCol, setStockCol] = useState(-1);
+  const [importing, setImporting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Auto-guess the mapping from the header row each time a file is chosen.
+  useEffect(() => {
+    if (!pending) return;
+    const nameGuess = guessCsvColumn(pending.headers, CSV_FIELD_HINTS.name);
+    setNameCol(nameGuess >= 0 ? nameGuess : 0);
+    setPriceCol(guessCsvColumn(pending.headers, CSV_FIELD_HINTS.price));
+    setStockCol(guessCsvColumn(pending.headers, CSV_FIELD_HINTS.stock));
+    setError(null);
+  }, [pending]);
+
+  if (!pending) return null;
+
+  const mapRow = (cols: string[]) => {
+    const name = cols[nameCol] ?? "";
+    const priceRaw =
+      priceCol >= 0 ? (cols[priceCol] ?? "").replace(/[$,\s]/g, "") : "";
+    const stockRaw =
+      stockCol >= 0 ? (cols[stockCol] ?? "").replace(/[,\s]/g, "") : "";
+    const price = priceRaw ? parseFloat(priceRaw) : null;
+    const stock = stockRaw ? parseInt(stockRaw, 10) : 0;
+    return {
+      name,
+      price: price !== null && isNaN(price) ? null : price,
+      stock: isNaN(stock) ? 0 : stock,
+    };
+  };
+
+  const validRows = pending.rows.filter((cols) => (cols[nameCol] ?? "").trim());
+
+  const handleImport = async () => {
+    setImporting(true);
+    setError(null);
+
+    const inserts = validRows.map((cols) => ({
+      store_id: storeId,
+      store_email: storeEmail,
+      store_name: storeName,
+      ...mapRow(cols),
+      image_url: null,
+    }));
+
+    const { data, error: insertError } = await supabase
+      .from("items")
+      .insert(inserts)
+      .select();
+
+    setImporting(false);
+    if (insertError) {
+      setError(insertError.message);
+    } else if (data) {
+      onImported(data as Item[]);
+    }
+  };
+
+  const colSelect = (
+    value: number,
+    onChange: (v: number) => void,
+    optional: boolean,
+  ) => (
+    <select
+      value={value}
+      onChange={(e) => onChange(parseInt(e.target.value, 10))}
+      disabled={importing}
+      className="w-full rounded-lg px-3.5 py-2.5 text-sm outline-none focus:ring-1 focus:ring-black disabled:opacity-60"
+      style={fieldStyle}
+    >
+      {optional && <option value={-1}>Not in file</option>}
+      {pending.headers.map((h, i) => (
+        <option key={i} value={i}>
+          {h || `Column ${i + 1}`}
+        </option>
+      ))}
+    </select>
+  );
+
+  return (
+    <Dialog open onOpenChange={(v) => !v && !importing && onClose()}>
+      <DialogContent
+        className="sm:max-w-md"
+        style={{
+          background: "#fff",
+          color: glass.ink,
+          fontFamily: "Geist, system-ui, sans-serif",
+        }}
+      >
+        <DialogTitle className="text-xl font-bold" style={{ color: glass.ink }}>
+          Import CSV
+        </DialogTitle>
+        <DialogDescription style={{ color: glass.muted }}>
+          {pending.fileName} — match your file's columns so items import
+          correctly, whatever order your POS exports them in.
+        </DialogDescription>
+
+        <div className="space-y-4 pt-2">
+          <div className="space-y-1.5">
+            <label
+              className="text-sm font-medium"
+              style={{ color: glass.muted }}
+            >
+              Item name <span style={{ color: glass.danger }}>*</span>
+            </label>
+            {colSelect(nameCol, setNameCol, false)}
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <label
+                className="text-sm font-medium"
+                style={{ color: glass.muted }}
+              >
+                Price
+              </label>
+              {colSelect(priceCol, setPriceCol, true)}
+            </div>
+            <div className="space-y-1.5">
+              <label
+                className="text-sm font-medium"
+                style={{ color: glass.muted }}
+              >
+                Stock
+              </label>
+              {colSelect(stockCol, setStockCol, true)}
+            </div>
+          </div>
+
+          <div>
+            <div
+              className="text-[10.5px] uppercase tracking-wider font-semibold mb-1.5"
+              style={{ color: glass.muted }}
+            >
+              Preview
+            </div>
+            <div
+              className="rounded-lg overflow-hidden text-sm"
+              style={{ boxShadow: "inset 0 0 0 1px rgba(0,0,0,.08)" }}
+            >
+              {validRows.length === 0 ? (
+                <p className="px-3.5 py-2.5" style={{ color: glass.muted }}>
+                  No rows have a value in the selected name column.
+                </p>
+              ) : (
+                validRows.slice(0, 3).map((cols, i) => {
+                  const row = mapRow(cols);
+                  return (
+                    <div
+                      key={i}
+                      className="grid px-3.5 py-2"
+                      style={{
+                        gridTemplateColumns: "1fr 80px 60px",
+                        background: i % 2 ? "rgba(0,0,0,.03)" : undefined,
+                      }}
+                    >
+                      <span className="truncate">{row.name}</span>
+                      <span className="text-right tabular-nums">
+                        {row.price != null ? `$${row.price.toFixed(2)}` : "—"}
+                      </span>
+                      <span className="text-right tabular-nums">
+                        {row.stock}
+                      </span>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          </div>
+
+          {error && (
+            <p className="text-sm" style={{ color: glass.danger }}>
+              {error}
+            </p>
+          )}
+
+          <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pt-2">
+            <button
+              type="button"
+              onClick={onClose}
+              disabled={importing}
+              className={`${pillBtnClass} !px-5 !py-2.5 text-sm`}
+              style={outlineBtnStyle}
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={handleImport}
+              disabled={importing || validRows.length === 0}
+              className={`${pillBtnClass} !px-5 !py-2.5 text-sm`}
+              style={inkBtnStyle}
+            >
+              {importing
+                ? "Importing…"
+                : `Import ${validRows.length} item${validRows.length === 1 ? "" : "s"}`}
+            </button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }
 

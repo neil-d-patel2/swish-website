@@ -172,3 +172,17 @@ Followed the pattern already used by `convex/stripeWebhook.ts` vs `convex/stripe
 Splitting by runtime requirement (Node-only logic in one file, the HTTP-route glue in another) matches Convex's constraint that a single file's runtime is all-or-nothing, while `ctx.runAction` lets the isolate-runtime `httpAction` still trigger the Node-runtime work. **Lesson:** any new POS/webhook-style provider needing both external API calls (Node) and an `httpAction` entry point needs *two* files from the start, not one — check `stripe.ts`/`stripeWebhook.ts` as the template before writing a new integration.
 
 ---
+
+## 2026-07-07 — `npx tsc` in Claude Code shell returns nvm usage text instead of running tsc
+
+**Error:**
+Running `npx tsc --noEmit` printed `compdef:153: _comps: assignment to invalid subscript range` followed by the full nvm help/usage output — tsc never ran.
+
+**Root cause:**
+The non-interactive zsh shell loads the user profile where nvm isn't fully initialized, so `npx` resolution falls through to nvm's shim, which prints its usage text instead of executing the package binary.
+
+**Fix:**
+Invoke local binaries directly: `./node_modules/.bin/tsc --noEmit` and `./node_modules/.bin/vite build`. Both work fine.
+
+**Why it worked:**
+Bypassing `npx` avoids the broken nvm shim entirely; the project's devDependencies are already installed so the binaries exist in `node_modules/.bin`. **Lesson:** in this environment, prefer `./node_modules/.bin/<tool>` over `npx <tool>` for local verification commands.
