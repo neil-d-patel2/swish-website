@@ -6,7 +6,16 @@ import { createRouter, RouterProvider } from "@tanstack/react-router";
 import { routeTree } from "./routeTree.gen";
 import "./index.css";
 
-const convex = new ConvexReactClient(import.meta.env.VITE_CONVEX_URL as string);
+// Same guard as src/lib/supabase.ts: a missing url must not throw during
+// module init and take down every route with it.
+const convexUrl =
+  (import.meta.env.VITE_CONVEX_URL as string) || "https://placeholder.convex.cloud";
+
+if (!import.meta.env.VITE_CONVEX_URL) {
+  console.warn("[convex] VITE_CONVEX_URL is not set — Convex actions will not work.");
+}
+
+const convex = new ConvexReactClient(convexUrl);
 
 const router = createRouter({ routeTree });
 

@@ -206,3 +206,30 @@ Run `npx vite build` (or start the dev server) once to regenerate `src/routeTree
 
 **Why it worked:**
 The path union is derived from the filesystem by the Vite plugin, not by `tsc`. Regenerating the route tree first makes `"/privacy"` a member of `FileRoutesByPath`, and the same run also updates the three other exported route-path unions used by `<Link to>`. **Lesson:** after adding any file under `src/routes/`, regenerate the route tree (`vite build` / `vite dev`) before typechecking — a first-build failure of this shape is a stale `routeTree.gen.ts`, not a real type error. Commit the regenerated `routeTree.gen.ts` along with the new route.
+
+---
+
+## 2026-08-17 — Privacy policy (and every other page) renders blank: `supabaseUrl is required`
+
+**Error:**
+```
+Uncaught Error: supabaseUrl is required.
+    at validateSupabaseUrl (@supabase_supabase-js.js:20359:26)
+    at new SupabaseClient (@supabase_supabase-js.js:20588:21)
+    at createClient (@supabase_supabase-js.js:20801:10)
+    at src/lib/supabase.ts:4:25
+```
+Symptom reported as "the privacy policy doesn't show" — clicking the footer link appeared to do nothing. In fact the entire app was a white screen on every route.
+
+**Root cause:**
+There was no `.env` file in the working tree (`.env` is gitignored; it was removed from the repo in `5f0edb8`). `src/lib/supabase.ts` called `createClient(url, key)` at **module scope**, and `@supabase/supabase-js` throws on an empty url. `src/main.tsx` had the same shape with `new ConvexReactClient(import.meta.env.VITE_CONVEX_URL)`.
+
+Because `routeTree.gen.ts` imports every route eagerly, and `dashboard.tsx`/`store.tsx` import `src/lib/supabase.ts`, that module lands in the initial bundle. A throw during its evaluation happens *before* `createRoot().render()`, so React never mounts and **all** routes go blank — including `/privacy`, which imports neither Supabase nor Convex. The privacy route itself was never broken: with env vars supplied, the footer link navigates to `/privacy` and all 14 sections render correctly.
+
+**Fix:**
+Guard both clients so a missing env var degrades instead of throwing at import time — fall back to a non-functional placeholder url/key and `console.warn` once:
+- `src/lib/supabase.ts` → `|| 'http://localhost:54321'` / `|| 'missing-anon-key'`
+- `src/main.tsx` → `|| 'https://placeholder.convex.cloud'`
+
+**Why it worked:**
+`createClient` only validates the *shape* of the url; it makes no network call at construction. Giving it a syntactically valid placeholder lets module init complete, so React mounts and the router renders. Failures then surface at the point of use (a login or query rejects) instead of taking down the whole bundle. **Lesson:** never let a top-level module throw on missing configuration when that module is in the initial bundle — one unconfigured backend will blank every page, including static ones with no dependency on it. Prefer a lazy/guarded client, and check the browser console for a module-init exception before assuming a specific page or route is at fault.
