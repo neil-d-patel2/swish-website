@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useSupabaseAuth } from "@/hooks/use-supabase-auth";
 import { supabase } from "@/lib/supabase";
 import { useState, useEffect } from "react";
@@ -300,9 +300,8 @@ function DashboardPage() {
             <img src="/your-logo.png" alt="Swish Logo" style={{ height: "100%", width: "auto", display: "block" }} />
           </div>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 20 }}>
-            {["Privacy Policy", "Terms of Service"].map((l) => (
-              <a key={l} href="#" className="mk-nlink" style={{ fontSize: 13, color: "#71717a" }}>{l}</a>
-            ))}
+            <Link to="/privacy" className="mk-nlink" style={{ fontSize: 13, color: "#71717a" }}>Privacy Policy</Link>
+            <a href="#" className="mk-nlink" style={{ fontSize: 13, color: "#71717a" }}>Terms of Service</a>
           </div>
           <div style={{ fontSize: 13, color: "#71717a" }}>© 2026 Swish Inc. All rights reserved.</div>
         </div>
