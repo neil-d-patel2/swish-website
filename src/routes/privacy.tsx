@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Navbar } from "@/components/Navbar";
+import policyMarkdown from "../../swish-privacy-policy.md?raw";
 
 export const Route = createFileRoute("/privacy")({
   component: PrivacyPage,
@@ -180,6 +181,21 @@ function PrivacyPage() {
             </span>
           </div>
         </header>
+
+        <details className="mt-10" style={{ borderTop: `1px solid ${border}` }}>
+          <summary
+            className="cursor-pointer py-5 text-sm font-semibold"
+            style={{ color: ink }}
+          >
+            Read the full policy source
+          </summary>
+          <pre
+            className="overflow-x-auto whitespace-pre-wrap pb-6 text-sm leading-[1.7]"
+            style={{ color: muted, fontFamily: body }}
+          >
+            {policyMarkdown}
+          </pre>
+        </details>
 
         <Section title="About This Policy">
           <P>

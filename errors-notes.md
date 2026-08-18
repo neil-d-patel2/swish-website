@@ -2,6 +2,24 @@
 
 A running log of errors encountered in this project, their root causes, and why each fix worked.
 
+## Error 8: Privacy policy patch request rejected by editing tool
+
+**Date:** 2026-08-18
+
+**Error:**
+```
+ERROR: Your input to the tool was invalid (must have required property 'explanation')
+```
+
+**What went wrong:**
+The first `apply_patch` request omitted the tool's required `explanation` field, so the patch was rejected before any file was changed.
+
+**Fix:**
+Retry the same patch with the required explanation included.
+
+**Why it worked:**
+Providing every required field lets the editing tool validate and apply the patch.
+
 ---
 
 ## Error 1: Node.js version too old for pnpm
