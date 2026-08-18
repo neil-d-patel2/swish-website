@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { Navbar } from "@/components/Navbar";
 import policyMarkdown from "../../swish-privacy-policy.md?raw";
 
@@ -1021,22 +1021,6 @@ function PrivacyPage() {
               alt="Swish Logo"
               style={{ height: "100%", width: "auto", display: "block" }}
             />
-          </div>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 20 }}>
-            <Link
-              to="/privacy"
-              className="mk-nlink"
-              style={{ fontSize: 13, color: "#71717a" }}
-            >
-              Privacy Policy
-            </Link>
-            <a
-              href="#"
-              className="mk-nlink"
-              style={{ fontSize: 13, color: "#71717a" }}
-            >
-              Terms of Service
-            </a>
           </div>
           <div style={{ fontSize: 13, color: "#71717a" }}>
             © 2026 Swish Inc. All rights reserved.

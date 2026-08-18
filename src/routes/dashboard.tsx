@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useSupabaseAuth } from "@/hooks/use-supabase-auth";
 import { supabase } from "@/lib/supabase";
 import { useState, useEffect } from "react";
@@ -298,10 +298,6 @@ function DashboardPage() {
         <div style={{ maxWidth: 1180, margin: "0 auto", display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "center", gap: 24 }}>
           <div style={{ display: "flex", alignItems: "center", height: 18, flexShrink: 0 }}>
             <img src="/your-logo.png" alt="Swish Logo" style={{ height: "100%", width: "auto", display: "block" }} />
-          </div>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 20 }}>
-            <Link to="/privacy" className="mk-nlink" style={{ fontSize: 13, color: "#71717a" }}>Privacy Policy</Link>
-            <a href="#" className="mk-nlink" style={{ fontSize: 13, color: "#71717a" }}>Terms of Service</a>
           </div>
           <div style={{ fontSize: 13, color: "#71717a" }}>© 2026 Swish Inc. All rights reserved.</div>
         </div>
